@@ -481,14 +481,14 @@ class Sprint3WorkspaceAndCollaborationTests(TestCase):
 
     def test_workspace_full_page_load_query_count(self):
         """
-        Verify that a full HTTP GET request to the workspace executes in <= 9 total queries
-        including session, auth, and the bounded 4-query workspace prefetch batch.
+        Verify that a full HTTP GET request to the workspace executes in <= 10 total queries
+        including session, auth, the bounded 4-query workspace prefetch batch, and diagnostic attachments.
         """
         self.client.login(email='attending.physician@clinic.org', password='StrongPassword123!')
         url = reverse('cases:workspace', kwargs={'case_id': self.case.id})
 
         # Request cycle total queries
-        with self.assertNumQueries(9):
+        with self.assertNumQueries(10):
             res = self.client.get(url)
             self.assertEqual(res.status_code, 200)
 

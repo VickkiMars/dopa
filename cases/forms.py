@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from accounts.models import User, Role
-from .models import Case, CaseTeam
+from .models import Case, CaseTeam, CaseAttachment, AttachmentCategory
 
 
 class CaseCreateForm(forms.ModelForm):
@@ -148,4 +148,72 @@ class DecisionRecordForm(forms.ModelForm):
         if not stmt or not stmt.strip():
             stmt = DEFAULT_GOVERNANCE_STATEMENT
         return stmt
+
+
+ALLOWED_MIME_TYPES = {
+    'image/jpeg': ['.jpg', '.jpeg'],
+    'image/png': ['.png'],
+    'image/webp': ['.webp'],
+    'application/pdf': ['.pdf']
+}
+MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
+
+
+class CaseAttachmentUploadForm(forms.ModelForm):
+    title = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'e.g. 20-Minute Routine EEG Rhythm Strip or Chest CT Slice',
+            'required': 'required'
+        }),
+        help_text="Clinical description of the diagnostic media or study."
+    )
+    category = forms.ChoiceField(
+        choices=AttachmentCategory.choices,
+        widget=forms.Select(attrs={
+            'class': 'form-input'
+        }),
+        help_text="Clinical diagnostic category."
+    )
+    file = forms.FileField(
+        widget=forms.FileInput(attrs={
+            'class': 'form-input',
+            'accept': '.jpg,.jpeg,.png,.webp,.pdf'
+        }),
+        help_text="Approved formats: JPEG, PNG, WebP, PDF. Max size: 10 MB."
+    )
+
+    class Meta:
+        model = CaseAttachment
+        fields = ['title', 'category', 'file']
+
+    def clean_file(self):
+        uploaded_file = self.cleaned_data.get('file')
+        if not uploaded_file:
+            raise ValidationError("A diagnostic file is required.")
+
+        # Check size
+        if uploaded_file.size > MAX_FILE_SIZE_BYTES:
+            raise ValidationError(
+                f"File size exceeds maximum limit of 10 MB ({uploaded_file.size / (1024*1024):.1f} MB uploaded)."
+            )
+
+        # Check extension
+        import os
+        ext = os.path.splitext(uploaded_file.name)[1].lower()
+        valid_extensions = [e for exts in ALLOWED_MIME_TYPES.values() for e in exts]
+        if ext not in valid_extensions:
+            raise ValidationError(
+                f"File format '{ext}' is not permitted. Only standard diagnostic formats (.jpg, .jpeg, .png, .webp, .pdf) are allowed."
+            )
+
+        # Check content type if provided
+        content_type = getattr(uploaded_file, 'content_type', '').lower()
+        if content_type and content_type not in ALLOWED_MIME_TYPES:
+            raise ValidationError(
+                f"MIME type '{content_type}' is not an approved medical document format."
+            )
+
+        return uploaded_file
 

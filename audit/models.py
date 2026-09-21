@@ -15,6 +15,8 @@ class AuditAction(models.TextChoices):
     DISCUSSION_POSTED = 'DISCUSSION_POSTED', 'Discussion Posted'
     RANK_UPDATED = 'RANK_UPDATED', 'Rank Updated'
     DECISION_RECORDED = 'DECISION_RECORDED', 'Decision Recorded'
+    ATTACHMENT_UPLOADED = 'ATTACHMENT_UPLOADED', 'Attachment Uploaded'
+    ATTACHMENT_ACCESSED = 'ATTACHMENT_ACCESSED', 'Attachment Accessed'
     ACCESS_DENIED = 'ACCESS_DENIED', 'Access Denied'
 
 

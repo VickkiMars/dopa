@@ -227,3 +227,57 @@ class Decision(models.Model):
     def __str__(self):
         return f"Decision: {self.final_diagnosis} on Case: {self.case.title} by Dr. {self.decider.full_name}"
 
+
+class AttachmentCategory(models.TextChoices):
+    CLINICAL_PHOTO = 'CLINICAL_PHOTO', 'Clinical Photo (Dermatology, Wound, Eye)'
+    RADIOLOGY = 'RADIOLOGY', 'Imaging (X-Ray, CT, MRI, Ultrasound)'
+    WAVEFORM = 'WAVEFORM', 'Electrophysiology (ECG, EEG Tracing)'
+    LAB_PDF = 'LAB_PDF', 'Laboratory / Pathology PDF Report'
+    OTHER = 'OTHER', 'Other Diagnostic Media'
+
+
+class CaseAttachment(models.Model):
+    """
+    Diagnostic media attachment linked to a clinical case (FR2b, NFR9).
+    Stores verified clinical images, waveforms, and PDF reports with strict access gating.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    case = models.ForeignKey(
+        Case,
+        on_delete=models.CASCADE,
+        related_name='attachments'
+    )
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='uploaded_attachments'
+    )
+    category = models.CharField(
+        max_length=30,
+        choices=AttachmentCategory.choices,
+        default=AttachmentCategory.OTHER
+    )
+    title = models.CharField(
+        max_length=200,
+        help_text="Clinical description of the diagnostic media or study"
+    )
+    file = models.FileField(
+        upload_to='case_attachments/%Y/%m/',
+        help_text="Sanitized diagnostic file (JPEG, PNG, WebP, PDF)"
+    )
+    mime_type = models.CharField(
+        max_length=100,
+        help_text="Verified MIME content-type"
+    )
+    file_size_bytes = models.PositiveIntegerField(
+        help_text="File size in bytes"
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'cases_attachment'
+        ordering = ['uploaded_at']
+
+    def __str__(self):
+        return f"{self.get_category_display()}: {self.title} ({self.case.title})"
+

@@ -98,6 +98,27 @@
         </div>
 
         <div class="clinical-section">
+            <div class="section-heading">Diagnostic Media & Attachments ({{ attachments|length }})</div>
+            {% if attachments %}
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                    {% for att in attachments %}
+                        <div style="display: flex; align-items: center; justify-content: space-between; background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem 0.75rem;">
+                            <div>
+                                <strong style="font-size: 0.8125rem;">{{ att.title }}</strong>
+                                <span style="font-size: 0.75rem; color: var(--color-text-muted);">({{ att.get_category_display }} &bull; {{ att.file_size_bytes|filesizeformat }})</span>
+                            </div>
+                            <a href="{% url 'cases:attachment_download' case_id=case.id attachment_id=att.id %}" target="_blank" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                View Study &rarr;
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="font-size: 0.8125rem; color: var(--color-text-muted);">No diagnostic media attached to this case.</p>
+            {% endif %}
+        </div>
+
+        <div class="clinical-section">
             <div class="section-heading">Admitted Specialists</div>
             {% if team_members %}
                 <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">

@@ -7,13 +7,13 @@ from django.contrib import messages
 from django.db.models import Q
 from django.db import transaction
 from django.core.cache import cache
-from django.http import HttpResponseBadRequest, HttpResponseForbidden
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, FileResponse
 
 from audit.services import log_event
 from audit.models import AuditLog, AuditAction, AuditStatus
 from accounts.models import Role
-from .models import Case, CaseTeam, CaseStatus, Notification, DiagnosisRanking, Decision
-from .forms import CaseCreateForm, TeamAdmitForm, RankingReorderForm, DecisionRecordForm
+from .models import Case, CaseTeam, CaseStatus, Notification, DiagnosisRanking, Decision, CaseAttachment, AttachmentCategory
+from .forms import CaseCreateForm, TeamAdmitForm, RankingReorderForm, DecisionRecordForm, CaseAttachmentUploadForm
 from .decorators import role_required, case_owner_required, case_access_required
 
 
@@ -184,11 +184,13 @@ class CaseDetailView(LoginRequiredMixin, View):
     def get(self, request, case_id):
         case = request.case
         team_members = case.team_memberships.select_related('specialist').all()
+        attachments = case.attachments.select_related('uploaded_by').all()
         return render(request, self.template_name, {
             'case': case,
             'is_case_owner': request.is_case_owner,
             'is_team_member': request.is_team_member,
-            'team_members': team_members
+            'team_members': team_members,
+            'attachments': attachments
         })
 
 
@@ -328,6 +330,9 @@ def get_workspace_context(case, user):
             'idempotency_token': uuid.uuid4(),
             'final_diagnosis': default_diag
         }),
+        'attachments': list(case.attachments.select_related('uploaded_by').order_by('uploaded_at')),
+        'attachment_form': CaseAttachmentUploadForm(),
+        'can_upload_attachments': (user.is_authenticated and is_owner and case.status not in [CaseStatus.DECIDED, CaseStatus.CLOSED]),
     }
 
 
@@ -510,5 +515,91 @@ class AuditTrailView(LoginRequiredMixin, View):
             'is_case_owner': request.is_case_owner,
             'is_team_member': request.is_team_member,
         })
+
+
+@method_decorator(case_owner_required, name='dispatch')
+class CaseAttachmentUploadView(LoginRequiredMixin, View):
+    """
+    Diagnostic media upload endpoint (FR2b, NFR9).
+    Exclusively available to the Case Owner (Primary Physician).
+    """
+    def post(self, request, case_id):
+        case = request.case
+        if case.status in [CaseStatus.DECIDED, CaseStatus.CLOSED]:
+            log_event(
+                action=AuditAction.ACCESS_DENIED,
+                actor=request.user,
+                case_id=case.id,
+                request=request,
+                status=AuditStatus.DENIED,
+                details={'reason': f'Cannot upload attachments to case in terminal status {case.status}'}
+            )
+            return HttpResponseForbidden("<h1>403 Forbidden</h1><p>Cannot upload attachments to a closed case.</p>")
+
+        form = CaseAttachmentUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            uploaded_file = request.FILES['file']
+            attachment = form.save(commit=False)
+            attachment.case = case
+            attachment.uploaded_by = request.user
+            attachment.mime_type = getattr(uploaded_file, 'content_type', 'application/octet-stream')
+            attachment.file_size_bytes = uploaded_file.size
+            attachment.save()
+
+            log_event(
+                action=AuditAction.ATTACHMENT_UPLOADED,
+                actor=request.user,
+                case_id=case.id,
+                entity_type='cases_attachment',
+                entity_id=str(attachment.id),
+                request=request,
+                status=AuditStatus.ALLOWED,
+                details={
+                    'title': attachment.title,
+                    'category': attachment.category,
+                    'mime_type': attachment.mime_type,
+                    'file_size_bytes': attachment.file_size_bytes
+                }
+            )
+            messages.success(request, f"Diagnostic media '{attachment.title}' uploaded successfully.")
+            return redirect('cases:workspace', case_id=case.id)
+
+        # Form invalid
+        context = get_workspace_context(case, request.user)
+        context['attachment_form'] = form
+        return render(request, 'cases/workspace.html', context, status=400)
+
+
+@method_decorator(case_access_required, name='dispatch')
+class CaseAttachmentDownloadView(LoginRequiredMixin, View):
+    """
+    Secure diagnostic media streaming endpoint (FR2d, NFR9).
+    Accessible strictly to Case Owner and Admitted Specialists on the team.
+    Serves files inline with verified MIME headers, preventing direct URL exposure.
+    """
+    def get(self, request, case_id, attachment_id):
+        case = request.case
+        attachment = get_object_or_404(CaseAttachment, pk=attachment_id, case=case)
+
+        # Log ATTACHMENT_ACCESSED in immutable audit trail
+        log_event(
+            action=AuditAction.ATTACHMENT_ACCESSED,
+            actor=request.user,
+            case_id=case.id,
+            entity_type='cases_attachment',
+            entity_id=str(attachment.id),
+            request=request,
+            status=AuditStatus.ALLOWED,
+            details={
+                'title': attachment.title,
+                'category': attachment.category,
+                'mime_type': attachment.mime_type
+            }
+        )
+
+        response = FileResponse(attachment.file.open('rb'), content_type=attachment.mime_type)
+        filename = attachment.file.name.split('/')[-1]
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
+        return response
 
 

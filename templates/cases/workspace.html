@@ -374,6 +374,47 @@
                     <div class="findings-inset">{{ case.findings }}</div>
                 </div>
 
+                <!-- Diagnostic Media & Attachments (FR2b, NFR9) -->
+                <div class="detail-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <div class="detail-label" style="margin-bottom: 0;">Diagnostic Media & Studies ({{ attachments|length }})</div>
+                        {% if can_upload_attachments %}
+                            <button type="button" onclick="document.getElementById('uploadMediaModal').style.display='flex'" class="btn-link" style="font-size: 0.75rem; font-weight: 600;">
+                                + Upload Media
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    {% if attachments %}
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.35rem;">
+                            {% for att in attachments %}
+                                <div style="display: flex; align-items: center; justify-content: space-between; background: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem 0.75rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; overflow: hidden;">
+                                        <span style="font-size: 0.9rem;">
+                                            {% if 'image' in att.mime_type %}&#128247;{% elif 'pdf' in att.mime_type %}&#128196;{% else %}&#128202;{% endif %}
+                                        </span>
+                                        <div style="overflow: hidden;">
+                                            <div style="font-size: 0.75rem; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                                                {{ att.title }}
+                                            </div>
+                                            <div style="font-size: 0.6875rem; color: var(--color-text-muted);">
+                                                {{ att.get_category_display }} &bull; {{ att.file_size_bytes|filesizeformat }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'cases:attachment_download' case_id=case.id attachment_id=att.id %}" target="_blank" class="btn btn-secondary" style="font-size: 0.6875rem; padding: 0.2rem 0.5rem; white-space: nowrap;">
+                                        View Study &rarr;
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.25rem;">
+                            No diagnostic media attached to this case.
+                        </p>
+                    {% endif %}
+                </div>
+
                 <div class="detail-section" style="margin-bottom: 0;">
                     <div class="detail-label">Admitted Specialists ({{ team_memberships|length }})</div>
                     {% if team_memberships %}
@@ -771,4 +812,37 @@
         </div>
     </div>
 </div>
+
+{% if can_upload_attachments %}
+<div id="uploadMediaModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div style="background: white; border-radius: 12px; width: 90%; max-width: 500px; padding: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0; font-size: 1.125rem; font-weight: 700; color: #0F172A;">Upload Diagnostic Media (FR2b)</h3>
+            <button type="button" onclick="document.getElementById('uploadMediaModal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #64748B;">&times;</button>
+        </div>
+        <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 0.625rem 0.75rem; margin-bottom: 1rem; font-size: 0.75rem; color: #1E40AF; line-height: 1.4;">
+            <strong>Clinical Privacy (NFR9):</strong> Please ensure patient direct identifiers (Name, MRN, National ID) are cropped or redacted prior to uploading study files.
+        </div>
+        <form method="post" action="{% url 'cases:attachment_upload' case_id=case.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div style="margin-bottom: 0.875rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">Study / Media Title *</label>
+                {{ attachment_form.title }}
+            </div>
+            <div style="margin-bottom: 0.875rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">Diagnostic Category</label>
+                {{ attachment_form.category }}
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">Diagnostic File (.jpg, .png, .webp, .pdf &le; 10MB) *</label>
+                {{ attachment_form.file }}
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button type="button" onclick="document.getElementById('uploadMediaModal').style.display='none'" class="btn btn-secondary" style="font-size: 0.8125rem;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="font-size: 0.8125rem;">Upload Diagnostic Study</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
