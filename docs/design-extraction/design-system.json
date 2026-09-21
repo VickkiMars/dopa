@@ -1,0 +1,586 @@
+{
+  "metadata": {
+    "extractedAt": "2026-09-21T08:39:00Z",
+    "viewportWidth": 1440,
+    "viewportHeight": 1024,
+    "source": "Clinical / Health-Blue Fintech Dashboard Reference UI",
+    "theme": "Light Modern / Clean Clinical Minimalist"
+  },
+  "designSystem": {
+    "colors": {
+      "primaries": [
+        {
+          "name": "Health Blue Primary",
+          "value": "#2563EB",
+          "hsl": "hsl(221, 83%, 53%)",
+          "usage": ["Primary action buttons", "Active selection indicators", "Key data visualizer arcs", "Links"]
+        },
+        {
+          "name": "Health Blue Dark / Deep Navy",
+          "value": "#1D4ED8",
+          "hsl": "hsl(224, 76%, 48%)",
+          "usage": ["Primary button hover state", "Emphasized chart accents"]
+        },
+        {
+          "name": "Health Blue Soft / Sky",
+          "value": "#0284C7",
+          "hsl": "hsl(200, 98%, 39%)",
+          "usage": ["Secondary chart series", "Progress bar indicator", "CTA gradient stop"]
+        },
+        {
+          "name": "Health Blue Light / Tint",
+          "value": "#38BDF8",
+          "hsl": "hsl(199, 89%, 48%)",
+          "usage": ["Tertiary chart series", "Glow gradients", "Info chips"]
+        },
+        {
+          "name": "Health Blue Subtly Tinted Wash",
+          "value": "#EFF6FF",
+          "hsl": "hsl(214, 100%, 97%)",
+          "usage": ["Active navigation pill background", "Selected item background", "Avatar border wash"]
+        }
+      ],
+      "neutrals": [
+        {
+          "name": "Surface Canvas / App Shell",
+          "value": "#F1F5F9",
+          "hsl": "hsl(210, 40%, 96%)",
+          "usage": ["Outer dashboard background"]
+        },
+        {
+          "name": "Surface White",
+          "value": "#FFFFFF",
+          "hsl": "hsl(0, 0%, 100%)",
+          "usage": ["Main cards", "Sidebar panel", "Content containers", "Active modal"]
+        },
+        {
+          "name": "Surface Sub-Card / Inset",
+          "value": "#F8FAFC",
+          "hsl": "hsl(210, 40%, 98%)",
+          "usage": ["Input backgrounds", "Action tile buttons", "Category chips", "Search field"]
+        },
+        {
+          "name": "Text Primary (Slate 900)",
+          "value": "#0F172A",
+          "hsl": "hsl(222, 47%, 11%)",
+          "usage": ["Main numerals", "Headings", "Primary labels", "Card titles"]
+        },
+        {
+          "name": "Text Secondary (Slate 600)",
+          "value": "#475569",
+          "hsl": "hsl(215, 19%, 35%)",
+          "usage": ["Navigation inactive labels", "Secondary descriptions", "Table headers"]
+        },
+        {
+          "name": "Text Muted (Slate 400)",
+          "value": "#94A3B8",
+          "hsl": "hsl(215, 16%, 65%)",
+          "usage": ["Search placeholder", "Micro-captions", "Unselected axis labels", "Keyboard shortcut tags"]
+        },
+        {
+          "name": "Border Subtle (Slate 200)",
+          "value": "#E2E8F0",
+          "hsl": "hsl(214, 32%, 91%)",
+          "usage": ["Card borders", "Dividers", "Input boundaries", "Quick action button borders"]
+        },
+        {
+          "name": "Border Faint (Slate 100)",
+          "value": "#F1F5F9",
+          "hsl": "hsl(210, 40%, 96%)",
+          "usage": ["Internal card item dividers", "Inner cell gridlines"]
+        }
+      ],
+      "accents": [
+        {
+          "name": "Cyan Glow / Highlight",
+          "value": "#BAE6FD",
+          "hsl": "hsl(201, 94%, 86%)",
+          "usage": ["Radial chart lightest arc", "Glow ring"]
+        }
+      ],
+      "semantic": {
+        "success": "#10B981",
+        "successBg": "#ECFDF5",
+        "successText": "#047857",
+        "error": "#EF4444",
+        "errorBg": "#FEF2F2",
+        "errorText": "#B91C1C",
+        "warning": "#F59E0B",
+        "warningBg": "#FFFBEB",
+        "warningText": "#B45309",
+        "info": "#0284C7",
+        "infoBg": "#F0F9FF",
+        "infoText": "#0369A1"
+      },
+      "gradients": [
+        {
+          "name": "Primary Hero Glow CTA",
+          "value": "linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)",
+          "usage": "Upgrade Now button, Promotional hero banners, Highlight cards"
+        },
+        {
+          "name": "Soft Surface Gradient",
+          "value": "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
+          "usage": "Metric stat cards, Sidebar promo panel"
+        },
+        {
+          "name": "Subtle Chart Fill Area",
+          "value": "linear-gradient(180deg, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0.00) 100%)",
+          "usage": "Area chart fills below trend lines"
+        }
+      ],
+      "backgrounds": [
+        { "element": "body", "value": "#F1F5F9" },
+        { "element": "app-container", "value": "#FFFFFF" },
+        { "element": "card-elevated", "value": "#FFFFFF" },
+        { "element": "card-inset", "value": "#F8FAFC" },
+        { "element": "promo-panel", "value": "#F0F9FF" }
+      ]
+    },
+    "typography": {
+      "fontFamilies": [
+        {
+          "name": "Primary Sans",
+          "faces": ["Inter", "Plus Jakarta Sans", "system-ui", "-apple-system", "sans-serif"],
+          "source": "google"
+        }
+      ],
+      "fontSizes": {
+        "min": "0.6875rem",
+        "max": "1.75rem",
+        "scale": [
+          { "name": "2xs", "size": "0.6875rem", "px": "11px", "lineHeight": 1.4, "letterSpacing": "0em", "fontWeight": 500 },
+          { "name": "xs", "size": "0.75rem", "px": "12px", "lineHeight": 1.4, "letterSpacing": "0em", "fontWeight": 400 },
+          { "name": "sm", "size": "0.8125rem", "px": "13px", "lineHeight": 1.45, "letterSpacing": "-0.005em", "fontWeight": 500 },
+          { "name": "base", "size": "0.875rem", "px": "14px", "lineHeight": 1.5, "letterSpacing": "-0.01em", "fontWeight": 400 },
+          { "name": "md", "size": "1rem", "px": "16px", "lineHeight": 1.5, "letterSpacing": "-0.015em", "fontWeight": 600 },
+          { "name": "lg", "size": "1.125rem", "px": "18px", "lineHeight": 1.4, "letterSpacing": "-0.02em", "fontWeight": 600 },
+          { "name": "xl", "size": "1.25rem", "px": "20px", "lineHeight": 1.35, "letterSpacing": "-0.025em", "fontWeight": 700 },
+          { "name": "display", "size": "1.75rem", "px": "28px", "lineHeight": 1.2, "letterSpacing": "-0.03em", "fontWeight": 700 }
+        ]
+      },
+      "headings": {
+        "h1": { "size": "1.25rem", "weight": 700, "lineHeight": 1.35, "letterSpacing": "-0.025em", "marginBottom": "0.25rem", "color": "#0F172A" },
+        "h2": { "size": "1.125rem", "weight": 600, "lineHeight": 1.4, "letterSpacing": "-0.02em", "marginBottom": "0.5rem", "color": "#0F172A" },
+        "h3": { "size": "1rem", "weight": 600, "lineHeight": 1.45, "letterSpacing": "-0.015em", "marginBottom": "0.5rem", "color": "#0F172A" },
+        "h4": { "size": "0.875rem", "weight": 600, "lineHeight": 1.5, "letterSpacing": "-0.01em", "marginBottom": "0.25rem", "color": "#0F172A" },
+        "h5": { "size": "0.8125rem", "weight": 500, "lineHeight": 1.45, "letterSpacing": "0em", "marginBottom": "0.25rem", "color": "#475569" },
+        "h6": { "size": "0.75rem", "weight": 500, "lineHeight": 1.4, "letterSpacing": "0.02em", "marginBottom": "0.25rem", "color": "#64748B" }
+      },
+      "body": {
+        "size": "0.875rem",
+        "weight": 400,
+        "lineHeight": 1.5,
+        "color": "#475569"
+      },
+      "small": {
+        "size": "0.75rem",
+        "weight": 400,
+        "lineHeight": 1.4,
+        "color": "#64748B"
+      },
+      "link": {
+        "color": "#2563EB",
+        "hoverColor": "#1D4ED8",
+        "textDecoration": "none",
+        "fontWeight": 500
+      }
+    },
+    "spacing": {
+      "baseUnit": "0.25rem",
+      "scale": [
+        { "name": "1", "value": "0.25rem", "px": "4px" },
+        { "name": "1.5", "value": "0.375rem", "px": "6px" },
+        { "name": "2", "value": "0.5rem", "px": "8px" },
+        { "name": "2.5", "value": "0.625rem", "px": "10px" },
+        { "name": "3", "value": "0.75rem", "px": "12px" },
+        { "name": "4", "value": "1rem", "px": "16px" },
+        { "name": "5", "value": "1.25rem", "px": "20px" },
+        { "name": "6", "value": "1.5rem", "px": "24px" },
+        { "name": "8", "value": "2rem", "px": "32px" }
+      ],
+      "containerPadding": {
+        "mobile": "1rem",
+        "tablet": "1.5rem",
+        "desktop": "2rem"
+      },
+      "sectionGaps": {
+        "between": "1.25rem",
+        "within": "0.75rem"
+      }
+    },
+    "layout": {
+      "gridSystem": {
+        "columns": 12,
+        "gutter": "1.25rem",
+        "margin": "1.5rem",
+        "breakpoints": {
+          "mobile": 375,
+          "tablet": 768,
+          "desktop": 1280
+        }
+      },
+      "maxWidths": {
+        "container": "88rem",
+        "sidebar": "15rem",
+        "metricCard": "22rem"
+      },
+      "zIndexLayers": [
+        { "name": "base", "value": 0 },
+        { "name": "card", "value": 1 },
+        { "name": "dropdown", "value": 10 },
+        { "name": "stickyNav", "value": 50 },
+        { "name": "modal", "value": 100 }
+      ],
+      "positioningStrategy": "relative"
+    },
+    "borders": {
+      "radius": {
+        "none": "0px",
+        "xs": "0.25rem",
+        "sm": "0.375rem",
+        "md": "0.5rem",
+        "lg": "0.75rem",
+        "xl": "1rem",
+        "2xl": "1.25rem",
+        "3xl": "1.5rem",
+        "full": "9999px"
+      },
+      "widths": {
+        "thin": "1px",
+        "normal": "1.5px",
+        "thick": "2px"
+      },
+      "styles": ["solid", "dashed"]
+    },
+    "shadows": {
+      "sm": {
+        "value": "0 1px 2px 0 rgba(0, 0, 0, 0.04)",
+        "usage": ["Action tile buttons", "Select dropdown triggers", "Search input"]
+      },
+      "md": {
+        "value": "0 2px 6px -1px rgba(0, 0, 0, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03)",
+        "usage": ["Sub-cards", "Navigation popovers"]
+      },
+      "lg": {
+        "value": "0 10px 20px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02)",
+        "usage": ["Main cards", "Sidebar panel"]
+      },
+      "xl": {
+        "value": "0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02)",
+        "usage": ["Modals", "Floating overlay drawers"]
+      },
+      "glow": {
+        "value": "0 8px 20px -4px rgba(37, 99, 235, 0.40)",
+        "usage": ["Primary gradient CTA button hover/active state"]
+      },
+      "inner": {
+        "value": "inset 0 1px 2px 0 rgba(0, 0, 0, 0.04)",
+        "usage": ["Progress bar tracks", "Inset search boxes"]
+      }
+    },
+    "animation": {
+      "durations": {
+        "instant": "100ms",
+        "fast": "150ms",
+        "normal": "200ms",
+        "slow": "300ms",
+        "verySlow": "500ms"
+      },
+      "easing": {
+        "default": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "enter": "cubic-bezier(0, 0, 0.2, 1)",
+        "exit": "cubic-bezier(0.4, 0, 1, 1)",
+        "spring": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+      },
+      "transitions": [
+        { "property": "all", "duration": "150ms", "easing": "cubic-bezier(0.4, 0, 0.2, 1)" },
+        { "property": "transform", "duration": "200ms", "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)" }
+      ]
+    },
+    "interactions": {
+      "hover": {
+        "scale": 1.015,
+        "opacity": 0.96,
+        "transition": "all 150ms cubic-bezier(0.4, 0, 0.2, 1)"
+      },
+      "focus": {
+        "outlineWidth": "2px",
+        "outlineColor": "#2563EB",
+        "offset": "2px"
+      },
+      "active": {
+        "scale": 0.98,
+        "opacity": 0.92
+      },
+      "loading": {
+        "spinnerType": "circular-ring-pulse",
+        "skeletonColor": "#F1F5F9"
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Button",
+      "selector": ".btn",
+      "description": "Standard interactive button element across all application states and variants",
+      "shapes": ["pill", "rounded-md", "square-icon", "tile-card"],
+      "sizes": {
+        "xs": { "height": "28px", "paddingX": "10px", "fontSize": "11px", "radius": "6px" },
+        "sm": { "height": "34px", "paddingX": "14px", "fontSize": "12px", "radius": "8px" },
+        "md": { "height": "40px", "paddingX": "18px", "fontSize": "14px", "radius": "10px" },
+        "lg": { "height": "46px", "paddingX": "24px", "fontSize": "15px", "radius": "9999px" }
+      },
+      "variants": [
+        {
+          "name": "Primary Solid",
+          "styles": {
+            "background": "#2563EB",
+            "color": "#FFFFFF",
+            "border": "none",
+            "shadow": "0 2px 4px rgba(37, 99, 235, 0.25)",
+            "hover": { "background": "#1D4ED8", "shadow": "0 4px 12px rgba(37, 99, 235, 0.35)" }
+          }
+        },
+        {
+          "name": "Secondary Outlined / Soft White",
+          "styles": {
+            "background": "#FFFFFF",
+            "color": "#0F172A",
+            "border": "1px solid #E2E8F0",
+            "shadow": "0 1px 2px rgba(0, 0, 0, 0.04)",
+            "hover": { "background": "#F8FAFC", "border": "1px solid #CBD5E1" }
+          }
+        },
+        {
+          "name": "Gradient Hero Glow (Upgrade Now)",
+          "styles": {
+            "background": "linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%)",
+            "color": "#FFFFFF",
+            "border": "none",
+            "radius": "9999px",
+            "shadow": "0 8px 20px -4px rgba(37, 99, 235, 0.45)",
+            "hover": { "transform": "translateY(-1px)", "shadow": "0 12px 24px -4px rgba(37, 99, 235, 0.55)" }
+          }
+        },
+        {
+          "name": "Action Tile Button (Pay, Transfer, Add Money)",
+          "styles": {
+            "display": "flex",
+            "flexDirection": "row",
+            "alignItems": "center",
+            "gap": "8px",
+            "background": "#FFFFFF",
+            "color": "#0F172A",
+            "border": "1px solid #E2E8F0",
+            "radius": "10px",
+            "padding": "8px 16px",
+            "hover": { "background": "#F8FAFC", "borderColor": "#CBD5E1" }
+          }
+        },
+        {
+          "name": "Ghost / Text Link CTA",
+          "styles": {
+            "background": "transparent",
+            "color": "#2563EB",
+            "border": "none",
+            "padding": "4px 8px",
+            "fontSize": "12px",
+            "fontWeight": 500,
+            "hover": { "color": "#1D4ED8", "textDecoration": "underline" }
+          }
+        },
+        {
+          "name": "Icon Only (Notification Bell / Search)",
+          "styles": {
+            "width": "38px",
+            "height": "38px",
+            "radius": "50%",
+            "background": "#F8FAFC",
+            "color": "#475569",
+            "border": "1px solid #E2E8F0",
+            "display": "flex",
+            "alignItems": "center",
+            "justifyContent": "center",
+            "hover": { "background": "#F1F5F9", "color": "#0F172A" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SearchInput",
+      "selector": ".search-bar",
+      "description": "Global header search input with icon prefix and keyboard shortcut badge",
+      "styles": {
+        "height": "40px",
+        "background": "#F8FAFC",
+        "border": "1px solid #E2E8F0",
+        "radius": "9999px",
+        "padding": "0 16px 0 38px",
+        "fontSize": "13px",
+        "color": "#0F172A",
+        "placeholderColor": "#94A3B8",
+        "focus": {
+          "background": "#FFFFFF",
+          "borderColor": "#2563EB",
+          "shadow": "0 0 0 3px rgba(37, 99, 235, 0.12)"
+        }
+      },
+      "subcomponents": {
+        "prefixIcon": { "color": "#94A3B8", "size": "16px", "left": "14px" },
+        "shortcutKeyBadge": {
+          "background": "#FFFFFF",
+          "border": "1px solid #E2E8F0",
+          "radius": "6px",
+          "padding": "2px 6px",
+          "fontSize": "11px",
+          "color": "#64748B",
+          "fontWeight": 500
+        }
+      }
+    },
+    {
+      "name": "MetricCard",
+      "selector": ".metric-card",
+      "description": "Financial / clinical statistic container displaying primary value and delta indicator",
+      "styles": {
+        "background": "#FFFFFF",
+        "border": "1px solid #E2E8F0",
+        "radius": "16px",
+        "padding": "20px 22px",
+        "shadow": "0 1px 3px rgba(0, 0, 0, 0.03)"
+      },
+      "elements": {
+        "headerLabel": { "fontSize": "13px", "fontWeight": 500, "color": "#64748B" },
+        "displayValue": { "fontSize": "26px", "fontWeight": 700, "color": "#0F172A", "letterSpacing": "-0.03em" },
+        "trendBadge": {
+          "display": "inline-flex",
+          "alignItems": "center",
+          "gap": "4px",
+          "fontSize": "11px",
+          "fontWeight": 600,
+          "padding": "2px 6px",
+          "radius": "4px",
+          "positive": { "background": "#ECFDF5", "color": "#047857" },
+          "negative": { "background": "#FEF2F2", "color": "#B91C1C" }
+        },
+        "footerAction": { "fontSize": "11px", "fontWeight": 500, "color": "#2563EB" }
+      }
+    },
+    {
+      "name": "SidebarNavigation",
+      "selector": ".sidebar-nav",
+      "description": "Left vertical application navigation column",
+      "styles": {
+        "width": "240px",
+        "background": "#FFFFFF",
+        "borderRight": "1px solid #F1F5F9",
+        "padding": "24px 16px"
+      },
+      "itemStyles": {
+        "default": {
+          "display": "flex",
+          "alignItems": "center",
+          "gap": "12px",
+          "height": "40px",
+          "padding": "0 14px",
+          "radius": "8px",
+          "fontSize": "14px",
+          "fontWeight": 500,
+          "color": "#64748B",
+          "hover": { "background": "#F8FAFC", "color": "#0F172A" }
+        },
+        "active": {
+          "background": "#EFF6FF",
+          "color": "#2563EB",
+          "fontWeight": 600
+        }
+      }
+    },
+    {
+      "name": "MultiArcGaugeChart",
+      "selector": ".gauge-chart",
+      "description": "Semi-circular concentric multi-tiered arc chart for category summaries",
+      "styles": {
+        "outerArcColor": "#0F172A",
+        "middleArcColor": "#0284C7",
+        "innerArcColor": "#38BDF8",
+        "trackBackground": "#F1F5F9",
+        "strokeWidth": "12px",
+        "legendDotSize": "8px",
+        "legendLabelColor": "#64748B",
+        "legendValueColor": "#0F172A"
+      }
+    },
+    {
+      "name": "PromoCard",
+      "selector": ".promo-card",
+      "description": "Embedded sidebar callout widget with progress tracker and prominent CTA",
+      "styles": {
+        "background": "#F8FAFC",
+        "border": "1px solid #E2E8F0",
+        "radius": "14px",
+        "padding": "16px",
+        "title": { "fontSize": "13px", "fontWeight": 600, "color": "#0F172A" },
+        "description": { "fontSize": "11px", "color": "#64748B", "lineHeight": 1.4 },
+        "progressBar": {
+          "height": "5px",
+          "trackColor": "#E2E8F0",
+          "fillColor": "#2563EB",
+          "radius": "9999px"
+        }
+      }
+    }
+  ],
+  "patterns": {
+    "navigation": {
+      "type": "side",
+      "behavior": "fixed",
+      "items": 8,
+      "mobileBehavior": "drawer"
+    },
+    "cards": {
+      "count": 6,
+      "layout": "grid",
+      "hoverEffect": "subtle-border-highlight",
+      "contentStructure": ["label", "value", "trendBadge", "actionLink"]
+    },
+    "forms": {
+      "inputStyle": "outlined",
+      "borderRadius": "0.625rem",
+      "validationStyle": "inline"
+    },
+    "modals": {
+      "triggerType": "click",
+      "animation": "scale",
+      "backdropBlur": true,
+      "closeBehavior": "click-outside"
+    }
+  },
+  "designPrinciples": {
+    "overallVibe": [
+      "Clinical Precision",
+      "Trustworthy & Calming (Health-Blue)",
+      "High Information Density without Clutter",
+      "Soft Neomorphic & Card Surface Depth",
+      "Crisp Micro-Typography"
+    ],
+    "references": ["Modern HealthTech SaaS", "Stripe Dashboard", "Linear App Light Mode"],
+    "uniqueElements": [
+      "Segmented Action Tiles inside Metric Containers",
+      "Concentric Triple-Arc Donut Gauge",
+      "Gradient Glow Pill CTAs",
+      "Rounded Status Chips with Up/Down Trend Chevrons"
+    ],
+    "accessibility": {
+      "contrastRatios": { "minimum": 4.5, "violations": [] },
+      "focusIndicators": true,
+      "ariaLabels": true
+    },
+    "performance": {
+      "imageOptimization": true,
+      "fontLoading": "swap",
+      "criticalCSS": "inline"
+    }
+  }
+}

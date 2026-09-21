@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Clinician Dashboard — DOPA{% endblock %}
+
+{% block extra_head %}
+<style>
+    .dashboard-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+    .metric-card {
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-card);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-card);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .metric-label {
+        font-size: 0.8125rem;
+        color: var(--color-text-sub);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    .metric-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--color-text-main);
+        letter-spacing: -0.03em;
+        margin-bottom: 0.5rem;
+    }
+    .metric-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.75rem;
+    }
+    .status-pill {
+        padding: 0.2rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        background-color: var(--color-primary-wash);
+        color: var(--color-primary);
+    }
+    .sprint-notice {
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-card);
+        padding: 2.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-card);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div>
+        <h1 style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.25rem;">
+            Welcome, {{ user.full_name }}
+        </h1>
+        <p style="font-size: 0.875rem; color: var(--color-text-sub);">
+            Registered Role: <strong style="color: var(--color-text-main);">{{ role_display }}</strong> &bull; Authenticated Session Active
+        </p>
+    </div>
+    <div>
+        {% if is_primary_physician %}
+            <span class="btn btn-secondary" style="opacity: 0.7; cursor: default;" title="Unlocks in Sprint 2">
+                + Create Case (Sprint 2)
+            </span>
+        {% else %}
+            <span class="btn btn-secondary" style="opacity: 0.7; cursor: default;" title="Admissions active in Sprint 2">
+                Admitted Cases (Sprint 2)
+            </span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Active Clinical Cases</div>
+            <div class="metric-value">0</div>
+        </div>
+        <div class="metric-footer">
+            <span class="status-pill">Sprint 1 Ready</span>
+            <span style="color: var(--color-text-muted);">Database Initialized</span>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Advisory Consultations</div>
+            <div class="metric-value">0</div>
+        </div>
+        <div class="metric-footer">
+            <span class="status-pill">RBAC Protected</span>
+            <span style="color: var(--color-text-muted);">Append-Only Audit</span>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Recorded Decisions</div>
+            <div class="metric-value">0</div>
+        </div>
+        <div class="metric-footer">
+            <span class="status-pill">Governance Armed</span>
+            <span style="color: var(--color-text-muted);">Singularity Guarded</span>
+        </div>
+    </div>
+</div>
+
+<div class="sprint-notice">
+    <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-primary-wash); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 1.25rem auto;">
+        ✓
+    </div>
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">
+        Sprint 1 Security & Identity Foundation Active
+    </h2>
+    <p style="font-size: 0.875rem; color: var(--color-text-sub); max-width: 540px; margin: 0 auto 1.5rem auto;">
+        Your identity is securely bound to the <strong>{{ role_display }}</strong> clinical role. Case creation, team admission, and filtered case workspaces will be enabled in Sprint 2.
+    </p>
+    <div style="display: inline-flex; gap: 0.75rem;">
+        <span class="role-badge">Session Expires: 30m Idle</span>
+        <span class="role-badge">PBKDF2-SHA256 Encrypted</span>
+        <span class="role-badge">Forensics Logging Active</span>
+    </div>
+</div>
+{% endblock %}
