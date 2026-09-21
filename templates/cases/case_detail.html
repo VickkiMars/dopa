@@ -51,6 +51,9 @@
             <a href="{% url 'cases:workspace' case_id=case.id %}" class="btn btn-primary">
                 Open Clinical Workspace &rarr;
             </a>
+            <a href="{% url 'cases:audit_trail' case_id=case.id %}" class="btn btn-secondary">
+                Audit Trail
+            </a>
             {% if is_case_owner %}
                 <a href="{% url 'cases:team_admit' case_id=case.id %}" class="btn btn-secondary">
                     Manage Specialist Team ({{ team_members.count }})

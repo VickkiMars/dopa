@@ -10,5 +10,6 @@ urlpatterns = [
     path('cases/<uuid:case_id>/workspace/', views.WorkspaceView.as_view(), name='workspace'),
     path('cases/<uuid:case_id>/ranking/reorder/', views.RankingReorderView.as_view(), name='ranking_reorder'),
     path('cases/<uuid:case_id>/decision/record/', views.DecisionRecordView.as_view(), name='decision_record'),
+    path('cases/<uuid:case_id>/audit/', views.AuditTrailView.as_view(), name='audit_trail'),
     path('cases/<uuid:case_id>/', views.CaseDetailView.as_view(), name='case_detail'),
 ]

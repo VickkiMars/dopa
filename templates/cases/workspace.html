@@ -332,6 +332,9 @@
         </div>
 
         <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="{% url 'cases:audit_trail' case_id=case.id %}" class="btn btn-secondary" id="btn-view-audit-trail" style="font-size: 0.8125rem; padding: 0.5rem 0.875rem;">
+                Forensic Audit Trail
+            </a>
             {% if is_case_owner %}
                 <a href="{% url 'cases:team_admit' case_id=case.id %}" class="btn btn-secondary" style="font-size: 0.8125rem; padding: 0.5rem 0.875rem;">
                     Specialist Team ({{ team_memberships|length }})

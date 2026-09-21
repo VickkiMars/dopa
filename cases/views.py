@@ -10,7 +10,7 @@ from django.core.cache import cache
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 
 from audit.services import log_event
-from audit.models import AuditAction, AuditStatus
+from audit.models import AuditLog, AuditAction, AuditStatus
 from accounts.models import Role
 from .models import Case, CaseTeam, CaseStatus, Notification, DiagnosisRanking, Decision
 from .forms import CaseCreateForm, TeamAdmitForm, RankingReorderForm, DecisionRecordForm
@@ -477,5 +477,38 @@ class DecisionRecordView(View):
         context = get_workspace_context(case, request.user)
         context['decision_form'] = form
         return render(request, 'cases/workspace.html', context, status=400)
+
+
+@method_decorator(case_access_required, name='dispatch')
+class AuditTrailView(LoginRequiredMixin, View):
+    """
+    Forensic read-only audit trail presentation for Case Owner and Admitted Specialists (FT11, FR7, NFR8).
+    Displays the complete chronological sequence of all clinical case operations and security access attempts.
+    """
+    template_name = 'cases/audit_trail.html'
+
+    def get(self, request, case_id):
+        case = request.case
+
+        # Retrieve all audit entries associated with this case
+        audit_entries = list(
+            AuditLog.objects.filter(
+                Q(case_id=case.id) | Q(entity_type='cases_case', entity_id=str(case.id))
+            ).select_related('actor').order_by('timestamp')
+        )
+
+        total_events = len(audit_entries)
+        allowed_count = sum(1 for e in audit_entries if e.status == AuditStatus.ALLOWED)
+        denied_count = sum(1 for e in audit_entries if e.status == AuditStatus.DENIED)
+
+        return render(request, self.template_name, {
+            'case': case,
+            'audit_entries': audit_entries,
+            'total_events': total_events,
+            'allowed_count': allowed_count,
+            'denied_count': denied_count,
+            'is_case_owner': request.is_case_owner,
+            'is_team_member': request.is_team_member,
+        })
 
 
