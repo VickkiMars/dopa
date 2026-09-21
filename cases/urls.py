@@ -8,5 +8,7 @@ urlpatterns = [
     path('cases/create/', views.CaseCreateView.as_view(), name='case_create'),
     path('cases/<uuid:case_id>/team/admit/', views.TeamAdmitView.as_view(), name='team_admit'),
     path('cases/<uuid:case_id>/workspace/', views.WorkspaceView.as_view(), name='workspace'),
+    path('cases/<uuid:case_id>/ranking/reorder/', views.RankingReorderView.as_view(), name='ranking_reorder'),
+    path('cases/<uuid:case_id>/decision/record/', views.DecisionRecordView.as_view(), name='decision_record'),
     path('cases/<uuid:case_id>/', views.CaseDetailView.as_view(), name='case_detail'),
 ]

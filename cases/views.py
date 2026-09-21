@@ -1,15 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.db.models import Q
+from django.db import transaction
+from django.core.cache import cache
+from django.http import HttpResponseBadRequest, HttpResponseForbidden
 
 from audit.services import log_event
 from audit.models import AuditAction, AuditStatus
 from accounts.models import Role
-from .models import Case, CaseTeam, CaseStatus, Notification
-from .forms import CaseCreateForm, TeamAdmitForm
+from .models import Case, CaseTeam, CaseStatus, Notification, DiagnosisRanking, Decision
+from .forms import CaseCreateForm, TeamAdmitForm, RankingReorderForm, DecisionRecordForm
 from .decorators import role_required, case_owner_required, case_access_required
 
 
@@ -192,15 +196,58 @@ def get_workspace_case(case_id):
     """
     Optimized bounded query loader for 3-pane clinical workspace (S3-02, B30).
     Loads case presentation data, owner, team members, hypotheses with specialists,
-    and chronological discussion notes with authors in strictly <= 4 SQL queries.
+    chronological discussion notes with authors, and decision in strictly <= 4 SQL queries.
     """
     from django.db.models import Prefetch
     from collaboration.models import Hypothesis, DiscussionNote
-    return Case.objects.select_related('owner').prefetch_related(
+    return Case.objects.select_related('owner', 'decision', 'decision__decider').prefetch_related(
         Prefetch('team_memberships', queryset=CaseTeam.objects.select_related('specialist')),
         Prefetch('hypotheses', queryset=Hypothesis.objects.select_related('specialist').order_by('-submitted_at')),
         Prefetch('discussion_notes', queryset=DiscussionNote.objects.select_related('author').order_by('posted_at'))
     ).get(pk=case_id)
+
+
+def sync_case_rankings(case):
+    """
+    Ensures that every active hypothesis has a sequential rank position in DiagnosisRanking.
+    Removes entries for withdrawn hypotheses and fills any gaps.
+    """
+    from collaboration.models import HypothesisStatus
+    with transaction.atomic():
+        # Clean up withdrawn hypotheses
+        DiagnosisRanking.objects.filter(
+            case=case, hypothesis__status=HypothesisStatus.WITHDRAWN
+        ).delete()
+
+        existing_entries = list(
+            DiagnosisRanking.objects.filter(case=case).order_by('rank_position')
+        )
+        existing_hypo_ids = {e.hypothesis_id for e in existing_entries}
+
+        active_hypos = list(
+            case.hypotheses.filter(status=HypothesisStatus.ACTIVE).order_by('submitted_at')
+        )
+
+        max_rank = len(existing_entries)
+        for h in active_hypos:
+            if h.id not in existing_hypo_ids:
+                max_rank += 1
+                DiagnosisRanking.objects.create(
+                    case=case,
+                    hypothesis=h,
+                    rank_position=max_rank
+                )
+
+        # Re-compact ranks to 1, 2, 3...
+        all_entries = list(DiagnosisRanking.objects.filter(case=case).order_by('rank_position'))
+        for idx, entry in enumerate(all_entries, start=1):
+            if entry.rank_position != idx:
+                entry.rank_position = 900000 + idx
+                entry.save(update_fields=['rank_position'])
+        for idx, entry in enumerate(all_entries, start=1):
+            if entry.rank_position != idx:
+                entry.rank_position = idx
+                entry.save(update_fields=['rank_position', 'updated_at'])
 
 
 def get_workspace_context(case, user):
@@ -220,6 +267,20 @@ def get_workspace_context(case, user):
     withdrawn_hypotheses = [h for h in all_hypotheses if h.status == 'WITHDRAWN']
     discussion_notes = list(case.discussion_notes.all())
 
+    # Differential rankings
+    if active_hypotheses:
+        sync_case_rankings(case)
+        rankings = list(
+            DiagnosisRanking.objects.filter(case=case).select_related('hypothesis', 'hypothesis__specialist').order_by('rank_position')
+        )
+    else:
+        rankings = []
+
+    try:
+        decision = case.decision
+    except Exception:
+        decision = None
+
     can_submit_hypothesis = (
         user.is_authenticated and
         user.role == 'SPECIALIST' and
@@ -231,6 +292,19 @@ def get_workspace_context(case, user):
         (is_owner or is_admitted_specialist) and
         case.status not in [CaseStatus.DECIDED, CaseStatus.CLOSED]
     )
+    can_reorder_rankings = (
+        user.is_authenticated and
+        is_owner and
+        case.status not in [CaseStatus.DECIDED, CaseStatus.CLOSED]
+    )
+    can_record_decision = (
+        user.is_authenticated and
+        is_owner and
+        case.status not in [CaseStatus.DECIDED, CaseStatus.CLOSED] and
+        decision is None
+    )
+
+    default_diag = rankings[0].hypothesis.proposed_diagnosis if rankings else ''
 
     return {
         'case': case,
@@ -239,13 +313,21 @@ def get_workspace_context(case, user):
         'withdrawn_hypotheses': withdrawn_hypotheses,
         'all_hypotheses': all_hypotheses,
         'discussion_notes': discussion_notes,
+        'rankings': rankings,
+        'decision': decision,
         'is_case_owner': is_owner,
         'is_admitted_specialist': is_admitted_specialist,
         'can_submit_hypothesis': can_submit_hypothesis,
         'can_post_notes': can_post_notes,
+        'can_reorder_rankings': can_reorder_rankings,
+        'can_record_decision': can_record_decision,
         'hypothesis_form': HypothesisCreateForm(initial={'idempotency_token': uuid.uuid4()}),
         'withdraw_form': HypothesisWithdrawForm(initial={'idempotency_token': uuid.uuid4()}),
         'note_form': DiscussionNoteCreateForm(initial={'idempotency_token': uuid.uuid4()}),
+        'decision_form': DecisionRecordForm(initial={
+            'idempotency_token': uuid.uuid4(),
+            'final_diagnosis': default_diag
+        }),
     }
 
 
@@ -255,7 +337,7 @@ class WorkspaceView(LoginRequiredMixin, View):
     Unified 3-Pane Clinical Workspace (S3-01, B29).
     - Left Pane: Case presentation & chronological discussion notes thread.
     - Center Pane: Structured hypotheses submission deck and withdrawal tracking.
-    - Right Pane: Differential diagnosis ranking and final decision governance (preview/foundation for Sprint 4).
+    - Right Pane: Differential diagnosis ranking and final decision governance.
     """
     template_name = 'cases/workspace.html'
 
@@ -263,4 +345,137 @@ class WorkspaceView(LoginRequiredMixin, View):
         case = getattr(request, 'case', None) or get_workspace_case(case_id)
         context = get_workspace_context(case, request.user)
         return render(request, self.template_name, context)
+
+
+@method_decorator([login_required, case_owner_required], name='dispatch')
+class RankingReorderView(View):
+    """
+    Differential diagnosis priority reorder endpoint (FR5, C-20, FT07, FT08).
+    Restricted to Primary Physician case owner. Swaps adjacent rank positions atomically.
+    Dispatches RANK_UPDATED audit log.
+    """
+    def post(self, request, case_id):
+        case = request.case
+        if case.status in [CaseStatus.DECIDED, CaseStatus.CLOSED]:
+            return HttpResponseForbidden("<h1>403 Forbidden</h1><p>Cannot reorder ranking on a closed case.</p>")
+
+        form = RankingReorderForm(request.POST)
+        if not form.is_valid():
+            return HttpResponseBadRequest("Invalid reorder parameters.")
+
+        hypothesis_id = form.cleaned_data['hypothesis_id']
+        direction = form.cleaned_data['direction']
+
+        sync_case_rankings(case)
+
+        with transaction.atomic():
+            try:
+                current_entry = DiagnosisRanking.objects.select_for_update().get(
+                    case=case, hypothesis_id=hypothesis_id
+                )
+            except DiagnosisRanking.DoesNotExist:
+                return HttpResponseBadRequest("Hypothesis not ranked.")
+
+            current_pos = current_entry.rank_position
+
+            if direction == 'UP':
+                target_pos = current_pos - 1
+            else:
+                target_pos = current_pos + 1
+
+            target_entry = DiagnosisRanking.objects.select_for_update().filter(
+                case=case, rank_position=target_pos
+            ).first()
+
+            if target_entry:
+                # Atomically swap using temporary high position to avoid UNIQUE constraint collision
+                temp_pos = 999999
+                current_entry.rank_position = temp_pos
+                current_entry.save(update_fields=['rank_position', 'updated_at'])
+
+                target_entry.rank_position = current_pos
+                target_entry.save(update_fields=['rank_position', 'updated_at'])
+
+                current_entry.rank_position = target_pos
+                current_entry.save(update_fields=['rank_position', 'updated_at'])
+
+                # Log RANK_UPDATED
+                log_event(
+                    action=AuditAction.RANK_UPDATED,
+                    actor=request.user,
+                    case_id=case.id,
+                    entity_type='cases_diagnosisranking',
+                    entity_id=str(current_entry.id),
+                    request=request,
+                    status=AuditStatus.ALLOWED,
+                    details={
+                        'hypothesis_id': str(hypothesis_id),
+                        'new_rank': target_pos
+                    }
+                )
+
+                messages.success(request, f"Differential priority updated: '{current_entry.hypothesis.proposed_diagnosis}' moved to rank #{target_pos}.")
+
+        return redirect('cases:workspace', case_id=case.id)
+
+
+@method_decorator([login_required, case_owner_required], name='dispatch')
+class DecisionRecordView(View):
+    """
+    Definitive clinical decision recording endpoint (FR6, C-21, C-22, FT09, FT10).
+    Restricted to Primary Physician case owner. Requires mandatory advisory acknowledgement.
+    Transitions case status to CLOSED, locking the workspace, and logs DECISION_RECORDED.
+    """
+    def post(self, request, case_id):
+        case = request.case
+        if Decision.objects.filter(case=case).exists():
+            return HttpResponseForbidden("<h1>403 Forbidden</h1><p>A final decision has already been recorded for this case.</p>")
+
+        form = DecisionRecordForm(request.POST)
+
+        idempotency_token = request.POST.get('idempotency_token', '')
+        if idempotency_token:
+            cache_key = f"idem_dec_{idempotency_token}"
+            if not cache.add(cache_key, 1, timeout=3600):
+                return redirect('cases:workspace', case_id=case.id)
+
+        if form.is_valid():
+            with transaction.atomic():
+                decision = Decision.objects.create(
+                    case=case,
+                    decider=request.user,
+                    final_diagnosis=form.cleaned_data['final_diagnosis'],
+                    advisory_acknowledged=form.cleaned_data['advisory_acknowledged'],
+                    governance_statement=form.cleaned_data['governance_statement']
+                )
+
+                case.status = CaseStatus.CLOSED
+                case.save(update_fields=['status', 'updated_at'])
+
+                # Log DECISION_RECORDED
+                log_event(
+                    action=AuditAction.DECISION_RECORDED,
+                    actor=request.user,
+                    case_id=case.id,
+                    entity_type='cases_decision',
+                    entity_id=str(decision.id),
+                    request=request,
+                    status=AuditStatus.ALLOWED,
+                    details={
+                        'final_diagnosis': decision.final_diagnosis,
+                        'advisory_acknowledged': True
+                    }
+                )
+
+                messages.success(
+                    request,
+                    f"Definitive clinical decision recorded for case '{case.title}'. Consultation is closed."
+                )
+                return redirect('cases:workspace', case_id=case.id)
+
+        # Form validation failure (e.g. advisory_acknowledged unchecked - FT09)
+        context = get_workspace_context(case, request.user)
+        context['decision_form'] = form
+        return render(request, 'cases/workspace.html', context, status=400)
+
 

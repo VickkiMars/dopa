@@ -82,3 +82,70 @@ class TeamAdmitForm(forms.Form):
 
         self.target_specialist = target_user
         return email
+
+
+DEFAULT_GOVERNANCE_STATEMENT = (
+    "As the designated Primary Physician and case owner, I acknowledge that all specialist diagnostic "
+    "hypotheses, findings interpretations, and clinical discussion notes provided through the DOPA platform "
+    "are advisory in nature. I confirm that I retain sole diagnostic authority, ethical accountability, and "
+    "legal responsibility for the final medical decision and subsequent patient management recorded herein."
+)
+
+
+class RankingReorderForm(forms.Form):
+    hypothesis_id = forms.UUIDField(required=True)
+    direction = forms.ChoiceField(
+        choices=[('UP', 'Up'), ('DOWN', 'Down')],
+        required=True
+    )
+
+
+class DecisionRecordForm(forms.ModelForm):
+    idempotency_token = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=True
+    )
+    advisory_acknowledged = forms.BooleanField(
+        required=True,
+        error_messages={
+            'required': "You must acknowledge that specialist advice is advisory and you retain sole clinical responsibility before recording the decision."
+        },
+        widget=forms.CheckboxInput(attrs={'class': 'form-checkbox', 'id': 'id_advisory_acknowledged'}),
+        label="I acknowledge that all specialist hypotheses are advisory and I retain sole clinical responsibility for this final medical decision."
+    )
+    governance_statement = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False
+    )
+
+    class Meta:
+        model = Case
+        # We define fields on Decision
+        fields = []
+
+    final_diagnosis = forms.CharField(
+        max_length=250,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Definitive Clinical Diagnosis (e.g. Anti-NMDA Receptor Encephalitis)',
+            'required': 'required',
+            'id': 'id_final_diagnosis'
+        }),
+        help_text="Definitive diagnostic conclusion reached for this clinical case."
+    )
+
+    def clean_advisory_acknowledged(self):
+        ack = self.cleaned_data.get('advisory_acknowledged', False)
+        if not ack:
+            raise ValidationError(
+                "You must acknowledge that specialist advice is advisory and you retain sole clinical responsibility before recording the decision."
+            )
+        return ack
+
+    def clean_governance_statement(self):
+        stmt = self.cleaned_data.get('governance_statement')
+        if not stmt or not stmt.strip():
+            stmt = DEFAULT_GOVERNANCE_STATEMENT
+        return stmt
+

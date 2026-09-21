@@ -134,3 +134,96 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.recipient.full_name}: {self.verb}"
+
+
+class DiagnosisRanking(models.Model):
+    """
+    Differential diagnosis ranking maintained exclusively by the Primary Physician (FR5, C-20, S4-01).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    case = models.ForeignKey(
+        Case,
+        on_delete=models.CASCADE,
+        related_name='rankings',
+        help_text="Target clinical case"
+    )
+    hypothesis = models.ForeignKey(
+        'collaboration.Hypothesis',
+        on_delete=models.CASCADE,
+        related_name='ranking_entries',
+        help_text="Ranked diagnostic hypothesis"
+    )
+    rank_position = models.PositiveIntegerField(
+        help_text="Relative priority ranking (1 = highest priority)"
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'cases_diagnosisranking'
+        ordering = ['rank_position']
+        constraints = [
+            models.UniqueConstraint(fields=['case', 'hypothesis'], name='unique_case_hypothesis_rank'),
+            models.UniqueConstraint(fields=['case', 'rank_position'], name='unique_case_rank_position'),
+            models.CheckConstraint(check=models.Q(rank_position__gt=0), name='rank_position_positive'),
+        ]
+
+    def __str__(self):
+        return f"Rank {self.rank_position}: {self.hypothesis.proposed_diagnosis} on Case: {self.case.title}"
+
+
+class Decision(models.Model):
+    """
+    Final clinical diagnostic decision recorded exclusively by the Primary Physician (FR6, C-21, C-22).
+    Requires mandatory advisory legal acknowledgement and enforces database singularity (UNIQUE case_id).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    case = models.OneToOneField(
+        Case,
+        on_delete=models.CASCADE,
+        related_name='decision',
+        help_text="Target clinical case (Enforces 1 decision per case)"
+    )
+    decider = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='decisions_made',
+        help_text="Attending Primary Physician who recorded the decision"
+    )
+    final_diagnosis = models.CharField(
+        max_length=250,
+        help_text="Definitive clinical diagnosis"
+    )
+    advisory_acknowledged = models.BooleanField(
+        default=False,
+        help_text="Mandatory legal acknowledgment that specialist advice is advisory"
+    )
+    governance_statement = models.TextField(
+        help_text="Rendered text of governance modal statement agreed to"
+    )
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'cases_decision'
+        ordering = ['-recorded_at']
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(advisory_acknowledged=True),
+                name='decision_must_acknowledge_advisory'
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        if not self.advisory_acknowledged:
+            raise ValidationError({
+                'advisory_acknowledged': "You must acknowledge that specialist advice is advisory and you retain sole clinical responsibility before recording the decision."
+            })
+        if getattr(self, 'decider_id', None) and getattr(self, 'case_id', None):
+            if hasattr(self, 'case') and self.case.owner_id != self.decider_id:
+                raise ValidationError({
+                    'decider': "Only the designated Primary Physician case owner can record the definitive clinical decision."
+                })
+
+    def __str__(self):
+        return f"Decision: {self.final_diagnosis} on Case: {self.case.title} by Dr. {self.decider.full_name}"
+

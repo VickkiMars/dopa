@@ -630,19 +630,39 @@
                     Active differential diagnosis ordered by clinical priority. Sole authority to reorder belongs to the Primary Physician (FR5).
                 </p>
 
-                {% if active_hypotheses %}
+                {% if rankings %}
                     <div class="diff-list">
-                        {% for h in active_hypotheses %}
+                        {% for r in rankings %}
                             <div class="diff-item">
-                                <div class="diff-rank-badge">{{ forloop.counter }}</div>
+                                <div class="diff-rank-badge">{{ r.rank_position }}</div>
                                 <div style="flex: 1; min-width: 0;">
                                     <div style="font-size: 0.8125rem; font-weight: 600; color: var(--color-text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                        {{ h.proposed_diagnosis }}
+                                        {{ r.hypothesis.proposed_diagnosis }}
                                     </div>
                                     <div style="font-size: 0.6875rem; color: var(--color-text-muted);">
-                                        Dr. {{ h.specialist.full_name }}
+                                        Dr. {{ r.hypothesis.specialist.full_name }}
                                     </div>
                                 </div>
+                                {% if can_reorder_rankings %}
+                                    <div style="display: flex; gap: 0.25rem;">
+                                        {% if not forloop.first %}
+                                            <form method="POST" action="{% url 'cases:ranking_reorder' case_id=case.id %}" style="display: inline;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="hypothesis_id" value="{{ r.hypothesis.id }}">
+                                                <input type="hidden" name="direction" value="UP">
+                                                <button type="submit" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 0.6875rem; line-height: 1;" title="Move Priority Up">&uarr;</button>
+                                            </form>
+                                        {% endif %}
+                                        {% if not forloop.last %}
+                                            <form method="POST" action="{% url 'cases:ranking_reorder' case_id=case.id %}" style="display: inline;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="hypothesis_id" value="{{ r.hypothesis.id }}">
+                                                <input type="hidden" name="direction" value="DOWN">
+                                                <button type="submit" class="btn btn-secondary" style="padding: 0.2rem 0.45rem; font-size: 0.6875rem; line-height: 1;" title="Move Priority Down">&darr;</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>
@@ -652,35 +672,98 @@
                     </div>
                 {% endif %}
 
-                {% if is_case_owner %}
-                    <div style="background-color: var(--color-primary-wash); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: var(--radius-md); padding: 0.75rem; font-size: 0.75rem; color: #1E40AF; margin-top: 0.5rem;">
-                        <strong>Primary Physician Console:</strong> Differential drag/swap controls and definitive clinical decision recording activate in Sprint 4.
-                    </div>
-                {% else %}
-                    <div style="background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.75rem; font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.5rem;">
+                {% if is_case_owner and not case.status == 'CLOSED' %}
+                    <p style="font-size: 0.6875rem; color: var(--color-primary); margin-top: 0.5rem;">
+                        &uarr;&darr; Use priority arrows to adjust differential ranking order.
+                    </p>
+                {% elif not is_case_owner %}
+                    <div style="background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem 0.75rem; font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.5rem;">
                         Specialists view differential ranking in read-only mode (B20).
                     </div>
                 {% endif %}
             </div>
 
-            <!-- Decision Governance & Lifecycle -->
-            <div class="pane-card">
-                <div class="pane-card-header">
-                    <span class="pane-card-title">
+            <!-- Decision Governance & Final Decision Console (FR6, C-21, C-22, FT09, FT10) -->
+            <div class="pane-card" style="{% if decision %}border: 1px solid #10B981; background-color: #F0FDF4;{% endif %}">
+                <div class="pane-card-header" style="{% if decision %}border-bottom: 1px solid #BBF7D0;{% endif %}">
+                    <span class="pane-card-title" style="{% if decision %}color: #166534;{% endif %}">
                         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                        Clinical Governance
+                        Definitive Clinical Decision
                     </span>
                     <span class="status-badge status-{{ case.status }}">{{ case.get_status_display }}</span>
                 </div>
 
-                <div style="font-size: 0.75rem; line-height: 1.5; color: var(--color-text-sub);">
-                    <div style="margin-bottom: 0.5rem;">
-                        <strong>Advisory Principle:</strong> All specialist hypotheses and comments are advisory. Sole legal and clinical responsibility remains with Primary Physician <strong>Dr. {{ case.owner.full_name }}</strong>.
+                {% if decision %}
+                    <!-- Rendered Final Decision -->
+                    <div style="margin-bottom: 0.75rem;">
+                        <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: #166534; letter-spacing: 0.04em;">
+                            Definitive Diagnosis
+                        </div>
+                        <div style="font-size: 1.125rem; font-weight: 700; color: #15803D; margin-top: 0.25rem;">
+                            {{ decision.final_diagnosis }}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #166534; margin-top: 0.25rem;">
+                            Decided by <strong>Dr. {{ decision.decider.full_name }}</strong> &bull; {{ decision.recorded_at|date:"M d, Y H:i" }} UTC
+                        </div>
                     </div>
-                    <div>
-                        <strong>Audit Integrity:</strong> Every hypothesis submission, withdrawal, and discussion note is immutably logged with actor, UTC timestamp, and client telemetry.
+
+                    <div style="background-color: #DCFCE7; border: 1px solid #86EFAC; border-radius: var(--radius-md); padding: 0.625rem 0.75rem; font-size: 0.75rem; color: #14532D; line-height: 1.4; margin-top: 0.5rem;">
+                        <strong>Governance Statement Acknowledged:</strong><br>
+                        {{ decision.governance_statement }}
                     </div>
-                </div>
+
+                    <p style="font-size: 0.75rem; color: #15803D; margin-top: 0.75rem; font-weight: 600;">
+                        ✓ Consultation closed and archived. Case modifications are permanently locked.
+                    </p>
+                {% elif can_record_decision %}
+                    <!-- Primary Physician Decision Recording Form -->
+                    <form method="POST" action="{% url 'cases:decision_record' case_id=case.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="idempotency_token" value="{{ decision_form.idempotency_token.value }}">
+                        <input type="hidden" name="governance_statement" value="{{ decision_form.governance_statement.value }}">
+
+                        {% if decision_form.errors %}
+                            <div class="alert alert-error" style="font-size: 0.75rem; padding: 0.625rem; margin-bottom: 0.75rem;">
+                                {% if decision_form.advisory_acknowledged.errors %}
+                                    {{ decision_form.advisory_acknowledged.errors.0 }}
+                                {% elif decision_form.final_diagnosis.errors %}
+                                    {{ decision_form.final_diagnosis.errors.0 }}
+                                {% else %}
+                                    Please complete all required fields.
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group" style="margin-bottom: 0.75rem;">
+                            <label class="form-label" style="font-size: 0.75rem;">Definitive Diagnosis *</label>
+                            {{ decision_form.final_diagnosis }}
+                        </div>
+
+                        <div style="background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.625rem 0.75rem; font-size: 0.6875rem; color: var(--color-text-sub); line-height: 1.4; margin-bottom: 0.75rem;">
+                            <strong>Legal Advisory Notice:</strong> Specialist hypotheses and discussion notes are advisory. The Primary Physician retains sole clinical responsibility for patient care.
+                        </div>
+
+                        <div style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 1rem;">
+                            <input type="checkbox" name="advisory_acknowledged" id="id_advisory_acknowledged" value="True" style="margin-top: 0.2rem;" required>
+                            <label for="id_advisory_acknowledged" style="font-size: 0.75rem; font-weight: 600; color: var(--color-text-main); cursor: pointer;">
+                                I acknowledge that specialist hypotheses are advisory and I retain sole clinical responsibility for this final medical decision. *
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 0.8125rem; padding: 0.625rem;">
+                            Record Final Decision & Close Case
+                        </button>
+                    </form>
+                {% else %}
+                    <div style="font-size: 0.75rem; line-height: 1.5; color: var(--color-text-sub);">
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Advisory Principle:</strong> All specialist hypotheses and comments are advisory. Sole legal and clinical responsibility remains with Primary Physician <strong>Dr. {{ case.owner.full_name }}</strong>.
+                        </div>
+                        <div>
+                            Only the attending Primary Physician can record the definitive diagnostic decision and close the consultation.
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
