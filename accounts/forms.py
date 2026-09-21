@@ -94,10 +94,12 @@ class LoginForm(forms.Form):
         password = cleaned_data.get('password')
 
         if email and password:
+            user = User.objects.filter(email__iexact=email).first()
+            if user and user.check_password(password) and not user.is_active:
+                raise ValidationError("This account is currently inactive. Contact your administrator.")
+
             self.user = authenticate(username=email, password=password)
             if self.user is None:
                 raise ValidationError("Invalid email or password. Please verify your credentials.")
-            if not self.user.is_active:
-                raise ValidationError("This account is currently inactive. Contact your administrator.")
 
         return cleaned_data
