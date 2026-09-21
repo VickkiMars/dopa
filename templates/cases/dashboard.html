@@ -14,7 +14,7 @@
     }
     .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 1.25rem;
         margin-bottom: 2rem;
     }
@@ -32,14 +32,14 @@
         font-size: 0.8125rem;
         color: var(--color-text-sub);
         font-weight: 500;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.375rem;
     }
     .metric-value {
         font-size: 1.75rem;
         font-weight: 700;
         color: var(--color-text-main);
         letter-spacing: -0.03em;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
     }
     .metric-footer {
         display: flex;
@@ -51,16 +51,75 @@
         padding: 0.2rem 0.5rem;
         border-radius: var(--radius-sm);
         font-weight: 600;
-        background-color: var(--color-primary-wash);
-        color: var(--color-primary);
+        font-size: 0.7rem;
     }
-    .sprint-notice {
+    .status-OPEN { background-color: #EFF6FF; color: #2563EB; }
+    .status-UNDER_REVIEW { background-color: #FEF3C7; color: #B45309; }
+    .status-DECIDED { background-color: #ECFDF5; color: #047857; }
+    .status-CLOSED { background-color: #F1F5F9; color: #64748B; }
+
+    .search-filter-bar {
         background-color: var(--color-surface);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-card);
-        padding: 2.5rem;
-        text-align: center;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
         box-shadow: var(--shadow-card);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .filter-pills {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .filter-pill {
+        padding: 0.4rem 0.875rem;
+        border-radius: var(--radius-pill);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        text-decoration: none;
+        color: var(--color-text-sub);
+        border: 1px solid var(--color-border);
+        background-color: var(--color-surface);
+        transition: all 150ms ease;
+    }
+    .filter-pill:hover {
+        background-color: var(--color-surface-inset);
+        color: var(--color-text-main);
+    }
+    .filter-pill.active {
+        background-color: var(--color-primary);
+        color: #FFFFFF;
+        border-color: var(--color-primary);
+    }
+    .search-form {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .case-card {
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-card);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-card);
+        transition: all 150ms ease;
+    }
+    .case-card:hover {
+        border-color: #CBD5E1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .notification-banner {
+        background-color: #F0FDF4;
+        border: 1px solid #BBF7D0;
+        border-radius: var(--radius-lg);
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
     }
 </style>
 {% endblock %}
@@ -68,75 +127,164 @@
 {% block content %}
 <div class="dashboard-header">
     <div>
-        <h1 style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.25rem;">
-            Welcome, {{ user.full_name }}
+        <h1 style="font-size: 1.625rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 0.25rem;">
+            Welcome, Dr. {{ user.full_name }}
         </h1>
         <p style="font-size: 0.875rem; color: var(--color-text-sub);">
-            Registered Role: <strong style="color: var(--color-text-main);">{{ role_display }}</strong> &bull; Authenticated Session Active
+            Registered Role: <strong style="color: var(--color-text-main);">{{ role_display }}</strong> &bull; Clinical Collaboration Workspace
         </p>
     </div>
     <div>
         {% if is_primary_physician %}
-            <span class="btn btn-secondary" style="opacity: 0.7; cursor: default;" title="Unlocks in Sprint 2">
-                + Create Case (Sprint 2)
-            </span>
+            <a href="{% url 'cases:case_create' %}" class="btn btn-primary" style="height: 42px;">
+                + Create New Clinical Case
+            </a>
         {% else %}
-            <span class="btn btn-secondary" style="opacity: 0.7; cursor: default;" title="Admissions active in Sprint 2">
-                Admitted Cases (Sprint 2)
+            <span class="role-badge" style="padding: 0.5rem 1rem; font-size: 0.8125rem;">
+                Advisory Specialist Portal
             </span>
         {% endif %}
     </div>
 </div>
 
+{% if notifications %}
+    <div class="notification-banner">
+        <div style="font-size: 0.8125rem; font-weight: 600; color: #166534; margin-bottom: 0.5rem;">
+            Recent Consultation Alerts:
+        </div>
+        {% for notif in notifications %}
+            <div style="font-size: 0.8125rem; color: #15803D; margin-bottom: 0.25rem;">
+                &bull; {{ notif.message }} <span style="font-size: 0.75rem; color: #4ADE80;">({{ notif.created_at|timesince }} ago)</span>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
 <div class="metrics-grid">
     <div class="metric-card">
         <div>
-            <div class="metric-label">Active Clinical Cases</div>
-            <div class="metric-value">0</div>
+            <div class="metric-label">Total Cases</div>
+            <div class="metric-value">{{ metrics.total }}</div>
         </div>
         <div class="metric-footer">
-            <span class="status-pill">Sprint 1 Ready</span>
-            <span style="color: var(--color-text-muted);">Database Initialized</span>
+            <span style="color: var(--color-text-muted);">
+                {% if is_primary_physician %}Owned Records{% else %}Admitted Consultations{% endif %}
+            </span>
         </div>
     </div>
 
     <div class="metric-card">
         <div>
-            <div class="metric-label">Advisory Consultations</div>
-            <div class="metric-value">0</div>
+            <div class="metric-label">Open Intake</div>
+            <div class="metric-value">{{ metrics.open }}</div>
         </div>
         <div class="metric-footer">
-            <span class="status-pill">RBAC Protected</span>
-            <span style="color: var(--color-text-muted);">Append-Only Audit</span>
+            <span class="status-pill status-OPEN">Intake Stage</span>
         </div>
     </div>
 
     <div class="metric-card">
         <div>
-            <div class="metric-label">Recorded Decisions</div>
-            <div class="metric-value">0</div>
+            <div class="metric-label">Under Active Review</div>
+            <div class="metric-value">{{ metrics.under_review }}</div>
         </div>
         <div class="metric-footer">
-            <span class="status-pill">Governance Armed</span>
-            <span style="color: var(--color-text-muted);">Singularity Guarded</span>
+            <span class="status-pill status-UNDER_REVIEW">Collaborating</span>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Decided / Closed</div>
+            <div class="metric-value">{{ metrics.decided_or_closed }}</div>
+        </div>
+        <div class="metric-footer">
+            <span class="status-pill status-CLOSED">Finalized</span>
         </div>
     </div>
 </div>
 
-<div class="sprint-notice">
-    <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-primary-wash); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 1.25rem auto;">
-        ✓
+<!-- Search & Filtering Bar (GAP-07) -->
+<div class="search-filter-bar">
+    <div class="filter-pills">
+        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}" class="filter-pill {% if not status_filter %}active{% endif %}">
+            All Cases
+        </a>
+        {% for code, label in status_choices %}
+            <a href="?status={{ code }}{% if search_query %}&q={{ search_query }}{% endif %}" class="filter-pill {% if status_filter == code %}active{% endif %}">
+                {{ label }}
+            </a>
+        {% endfor %}
     </div>
-    <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">
-        Sprint 1 Security & Identity Foundation Active
-    </h2>
-    <p style="font-size: 0.875rem; color: var(--color-text-sub); max-width: 540px; margin: 0 auto 1.5rem auto;">
-        Your identity is securely bound to the <strong>{{ role_display }}</strong> clinical role. Case creation, team admission, and filtered case workspaces will be enabled in Sprint 2.
-    </p>
-    <div style="display: inline-flex; gap: 0.75rem;">
-        <span class="role-badge">Session Expires: 30m Idle</span>
-        <span class="role-badge">PBKDF2-SHA256 Encrypted</span>
-        <span class="role-badge">Forensics Logging Active</span>
-    </div>
+
+    <form method="get" class="search-form">
+        {% if status_filter %}
+            <input type="hidden" name="status" value="{{ status_filter }}">
+        {% endif %}
+        <input type="text" name="q" value="{{ search_query }}" placeholder="Search cases by title or summary..." class="form-input" style="width: 260px; height: 38px;">
+        <button type="submit" class="btn btn-secondary" style="height: 38px; padding: 0 0.875rem;">
+            Search
+        </button>
+        {% if search_query %}
+            <a href="?{% if status_filter %}status={{ status_filter }}{% endif %}" class="btn-link" style="margin-left: 0.25rem;">Clear</a>
+        {% endif %}
+    </form>
 </div>
+
+<!-- Case Roster -->
+{% if cases %}
+    {% for case in cases %}
+        <div class="case-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                    <span class="status-pill status-{{ case.status }}" style="margin-bottom: 0.375rem; display: inline-block;">
+                        {{ case.get_status_display }}
+                    </span>
+                    <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.375rem;">
+                        <a href="{% url 'cases:case_detail' case_id=case.id %}" style="text-decoration: none; color: var(--color-text-main);">
+                            {{ case.title }}
+                        </a>
+                    </h2>
+                    <p style="font-size: 0.8125rem; color: var(--color-text-sub); max-width: 700px;">
+                        {{ case.clinical_summary|truncatewords:28 }}
+                    </p>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+                        Created {{ case.created_at|date:"M d, Y" }}
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                        {% if is_primary_physician %}
+                            <a href="{% url 'cases:team_admit' case_id=case.id %}" class="btn btn-secondary" style="padding: 0.375rem 0.75rem; font-size: 0.8125rem;">
+                                Admit Specialists ({{ case.team_memberships.count }})
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'cases:case_detail' case_id=case.id %}" class="btn btn-primary" style="padding: 0.375rem 0.875rem; font-size: 0.8125rem;">
+                            View Case
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="card" style="text-align: center; padding: 3.5rem 2rem;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.75rem; color: var(--color-text-muted);">📋</div>
+        <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.375rem;">No clinical cases found</h3>
+        <p style="font-size: 0.875rem; color: var(--color-text-sub); max-width: 440px; margin: 0 auto 1.5rem auto;">
+            {% if search_query or status_filter %}
+                No cases match the current filter or search criteria. Try resetting your search terms.
+            {% elif is_primary_physician %}
+                You have not initiated any clinical consultation cases yet. Click the button below to create your first case.
+            {% else %}
+                You have not been admitted to any case teams yet. When a Primary Physician invites you by email, the consultation will appear here.
+            {% endif %}
+        </p>
+        {% if is_primary_physician and not search_query and not status_filter %}
+            <a href="{% url 'cases:case_create' %}" class="btn btn-primary">
+                + Initiate First Case
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
 {% endblock %}
