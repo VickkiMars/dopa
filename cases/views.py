@@ -186,3 +186,81 @@ class CaseDetailView(LoginRequiredMixin, View):
             'is_team_member': request.is_team_member,
             'team_members': team_members
         })
+
+
+def get_workspace_case(case_id):
+    """
+    Optimized bounded query loader for 3-pane clinical workspace (S3-02, B30).
+    Loads case presentation data, owner, team members, hypotheses with specialists,
+    and chronological discussion notes with authors in strictly <= 4 SQL queries.
+    """
+    from django.db.models import Prefetch
+    from collaboration.models import Hypothesis, DiscussionNote
+    return Case.objects.select_related('owner').prefetch_related(
+        Prefetch('team_memberships', queryset=CaseTeam.objects.select_related('specialist')),
+        Prefetch('hypotheses', queryset=Hypothesis.objects.select_related('specialist').order_by('-submitted_at')),
+        Prefetch('discussion_notes', queryset=DiscussionNote.objects.select_related('author').order_by('posted_at'))
+    ).get(pk=case_id)
+
+
+def get_workspace_context(case, user):
+    """
+    Constructs the complete template context for the 3-pane clinical workspace.
+    Processes in-memory prefetched relationships without issuing extra database queries.
+    """
+    import uuid
+    from collaboration.forms import HypothesisCreateForm, HypothesisWithdrawForm, DiscussionNoteCreateForm
+
+    team_memberships = list(case.team_memberships.all())
+    is_owner = (case.owner_id == user.id)
+    is_admitted_specialist = any(m.specialist_id == user.id for m in team_memberships)
+
+    all_hypotheses = list(case.hypotheses.all())
+    active_hypotheses = [h for h in all_hypotheses if h.status == 'ACTIVE']
+    withdrawn_hypotheses = [h for h in all_hypotheses if h.status == 'WITHDRAWN']
+    discussion_notes = list(case.discussion_notes.all())
+
+    can_submit_hypothesis = (
+        user.is_authenticated and
+        user.role == 'SPECIALIST' and
+        is_admitted_specialist and
+        case.status in [CaseStatus.OPEN, CaseStatus.UNDER_REVIEW]
+    )
+    can_post_notes = (
+        user.is_authenticated and
+        (is_owner or is_admitted_specialist) and
+        case.status not in [CaseStatus.DECIDED, CaseStatus.CLOSED]
+    )
+
+    return {
+        'case': case,
+        'team_memberships': team_memberships,
+        'active_hypotheses': active_hypotheses,
+        'withdrawn_hypotheses': withdrawn_hypotheses,
+        'all_hypotheses': all_hypotheses,
+        'discussion_notes': discussion_notes,
+        'is_case_owner': is_owner,
+        'is_admitted_specialist': is_admitted_specialist,
+        'can_submit_hypothesis': can_submit_hypothesis,
+        'can_post_notes': can_post_notes,
+        'hypothesis_form': HypothesisCreateForm(initial={'idempotency_token': uuid.uuid4()}),
+        'withdraw_form': HypothesisWithdrawForm(initial={'idempotency_token': uuid.uuid4()}),
+        'note_form': DiscussionNoteCreateForm(initial={'idempotency_token': uuid.uuid4()}),
+    }
+
+
+@method_decorator(case_access_required, name='dispatch')
+class WorkspaceView(LoginRequiredMixin, View):
+    """
+    Unified 3-Pane Clinical Workspace (S3-01, B29).
+    - Left Pane: Case presentation & chronological discussion notes thread.
+    - Center Pane: Structured hypotheses submission deck and withdrawal tracking.
+    - Right Pane: Differential diagnosis ranking and final decision governance (preview/foundation for Sprint 4).
+    """
+    template_name = 'cases/workspace.html'
+
+    def get(self, request, case_id):
+        case = getattr(request, 'case', None) or get_workspace_case(case_id)
+        context = get_workspace_context(case, request.user)
+        return render(request, self.template_name, context)
+

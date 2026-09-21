@@ -6,5 +6,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', lambda request: redirect('cases:dashboard')),
     path('', include('cases.urls')),
+    path('', include('collaboration.urls')),
     path('accounts/', include('accounts.urls')),
 ]

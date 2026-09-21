@@ -1,0 +1,688 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ case.title }} — Clinical Workspace (3-Pane){% endblock %}
+
+{% block extra_head %}
+<style>
+    .workspace-shell {
+        max-width: 1560px;
+        margin: 0 auto;
+        padding: 0 1rem 3rem 1rem;
+    }
+
+    .workspace-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-pill);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+    .status-OPEN { background-color: #EFF6FF; color: #2563EB; border: 1px solid rgba(37, 99, 235, 0.25); }
+    .status-UNDER_REVIEW { background-color: #FEF3C7; color: #B45309; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-DECIDED { background-color: #ECFDF5; color: #047857; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-CLOSED { background-color: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0; }
+
+    .role-tag-physician {
+        background-color: #EFF6FF;
+        color: #1D4ED8;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        padding: 0.125rem 0.5rem;
+        border-radius: var(--radius-pill);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .role-tag-specialist {
+        background-color: #ECFDF5;
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        padding: 0.125rem 0.5rem;
+        border-radius: var(--radius-pill);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    /* 3-Pane Layout */
+    .workspace-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.35fr 0.95fr;
+        gap: 1.25rem;
+        align-items: start;
+    }
+
+    @media (max-width: 1180px) {
+        .workspace-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+        .workspace-col-right {
+            grid-column: span 2;
+        }
+    }
+
+    @media (max-width: 820px) {
+        .workspace-grid {
+            grid-template-columns: 1fr;
+        }
+        .workspace-col-right {
+            grid-column: span 1;
+        }
+    }
+
+    .pane-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-card);
+        padding: 1.25rem;
+        box-shadow: var(--shadow-card);
+        margin-bottom: 1.25rem;
+    }
+
+    .pane-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--color-border-faint);
+    }
+
+    .pane-card-title {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--color-text-main);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .count-pill {
+        background-color: var(--color-canvas);
+        color: var(--color-text-sub);
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.125rem 0.5rem;
+        border-radius: var(--radius-pill);
+        border: 1px solid var(--color-border);
+    }
+
+    /* Clinical presentation styling */
+    .detail-section {
+        margin-bottom: 1rem;
+    }
+    .detail-label {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-text-muted);
+        margin-bottom: 0.25rem;
+    }
+    .detail-body {
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: var(--color-text-main);
+        white-space: pre-line;
+    }
+    .findings-inset {
+        background-color: var(--color-surface-inset);
+        padding: 0.75rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border-faint);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.75rem;
+    }
+
+    /* Discussion Thread */
+    .note-feed {
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+        max-height: 480px;
+        overflow-y: auto;
+        padding-right: 0.375rem;
+        margin-bottom: 1rem;
+    }
+
+    .note-item {
+        background-color: var(--color-surface-inset);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: 0.75rem;
+        transition: border-color 0.15s ease;
+    }
+    .note-item:hover {
+        border-color: #CBD5E1;
+    }
+
+    .note-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.375rem;
+        font-size: 0.75rem;
+    }
+
+    .note-author {
+        font-weight: 600;
+        color: var(--color-text-main);
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .note-time {
+        color: var(--color-text-muted);
+        font-size: 0.6875rem;
+    }
+
+    .note-body {
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: var(--color-text-main);
+        white-space: pre-line;
+    }
+
+    /* Hypotheses Deck */
+    .hypo-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .hypo-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .hypo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .hypo-diagnosis {
+        font-size: 1.0625rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        letter-spacing: -0.01em;
+    }
+
+    .hypo-withdrawn-card {
+        background-color: #FFFDF7;
+        border: 1px dashed #F59E0B;
+        opacity: 0.9;
+    }
+
+    .badge-withdrawn {
+        background-color: #FEF3C7;
+        color: #92400E;
+        border: 1px solid #FCD34D;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: var(--radius-pill);
+        letter-spacing: 0.05em;
+    }
+
+    .withdrawal-callout {
+        margin-top: 0.75rem;
+        padding: 0.625rem 0.75rem;
+        background-color: #FEF2F2;
+        border-left: 3px solid #EF4444;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        color: #991B1B;
+    }
+
+    .hypo-field-label {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-text-muted);
+        margin-top: 0.5rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .hypo-field-text {
+        font-size: 0.8125rem;
+        line-height: 1.5;
+        color: var(--color-text-main);
+        white-space: pre-line;
+    }
+
+    /* Withdrawal inline panel */
+    .withdraw-panel {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--color-border-faint);
+    }
+
+    /* Differential ranking list */
+    .diff-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+    .diff-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
+        background-color: var(--color-surface-inset);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+    }
+    .diff-rank-badge {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: var(--color-primary);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="workspace-shell">
+    <!-- Top Workspace Header -->
+    <div class="workspace-header">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <a href="{% url 'cases:dashboard' %}" class="btn-link" style="font-size: 0.8125rem;">&larr; Cases Dashboard</a>
+                <span style="color: var(--color-text-muted);">&bull;</span>
+                <a href="{% url 'cases:case_detail' case_id=case.id %}" class="btn-link" style="font-size: 0.8125rem;">Case Summary</a>
+                <span class="status-badge status-{{ case.status }}">{{ case.get_status_display }}</span>
+            </div>
+            <h1 style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em;">
+                {{ case.title }}
+            </h1>
+            <p style="font-size: 0.8125rem; color: var(--color-text-sub); margin-top: 0.25rem;">
+                Attending: <strong>Dr. {{ case.owner.full_name }}</strong> &bull; Registered: {{ case.created_at|date:"M d, Y H:i" }} UTC
+            </p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            {% if is_case_owner %}
+                <a href="{% url 'cases:team_admit' case_id=case.id %}" class="btn btn-secondary" style="font-size: 0.8125rem; padding: 0.5rem 0.875rem;">
+                    Specialist Team ({{ team_memberships|length }})
+                </a>
+            {% else %}
+                <span class="role-tag-specialist">Admitted Advisory Specialist</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 3-Pane Clinical Grid -->
+    <div class="workspace-grid">
+        <!-- PANE 1: Case Brief & Chronological Discussion -->
+        <div class="workspace-col-left">
+            <!-- Case Clinical Brief -->
+            <div class="pane-card">
+                <div class="pane-card-header">
+                    <span class="pane-card-title">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Clinical Brief
+                    </span>
+                    <span style="font-size: 0.6875rem; color: var(--color-text-muted);">Confidential Case Data</span>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-label">Presentation Summary</div>
+                    <div class="detail-body">{{ case.clinical_summary }}</div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-label">Patient History</div>
+                    <div class="detail-body">{{ case.history }}</div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-label">Structured Objective Findings</div>
+                    <div class="findings-inset">{{ case.findings }}</div>
+                </div>
+
+                <div class="detail-section" style="margin-bottom: 0;">
+                    <div class="detail-label">Admitted Specialists ({{ team_memberships|length }})</div>
+                    {% if team_memberships %}
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.25rem;">
+                            {% for m in team_memberships %}
+                                <span style="font-size: 0.75rem; background: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: 0.2rem 0.6rem;">
+                                    Dr. {{ m.specialist.full_name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="font-size: 0.75rem; color: var(--color-text-muted);">No advisory specialists admitted yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Chronological Discussion Thread (FR4, C-19, B17) -->
+            <div class="pane-card">
+                <div class="pane-card-header">
+                    <span class="pane-card-title">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        Clinical Discussion Thread
+                    </span>
+                    <span class="count-pill">{{ discussion_notes|length }} notes</span>
+                </div>
+
+                <div class="note-feed" id="discussionFeed">
+                    {% if discussion_notes %}
+                        {% for note in discussion_notes %}
+                            <div class="note-item">
+                                <div class="note-meta">
+                                    <span class="note-author">
+                                        Dr. {{ note.author.full_name }}
+                                        {% if note.author.id == case.owner.id %}
+                                            <span class="role-tag-physician">Primary Phys</span>
+                                        {% else %}
+                                            <span class="role-tag-specialist">Specialist</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="note-time">{{ note.posted_at|date:"M d, H:i" }} UTC</span>
+                                </div>
+                                <div class="note-body">{{ note.body|escape }}</div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div style="text-align: center; padding: 2rem 1rem; color: var(--color-text-muted); font-size: 0.8125rem;">
+                            No discussion notes yet. Authorized clinicians can post clarifications below.
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if can_post_notes %}
+                    <form method="POST" action="{% url 'collaboration:note_create' case_id=case.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="idempotency_token" value="{{ note_form.idempotency_token.value }}">
+                        {% if note_form.body.errors %}
+                            <div class="alert alert-error" style="font-size: 0.75rem; padding: 0.5rem; margin-bottom: 0.5rem;">
+                                {{ note_form.body.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <div class="form-group" style="margin-bottom: 0.5rem;">
+                            {{ note_form.body }}
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 0.8125rem; padding: 0.5rem;">
+                            Post Clinical Note
+                        </button>
+                    </form>
+                {% else %}
+                    <div style="background-color: var(--color-surface-inset); padding: 0.625rem; border-radius: var(--radius-md); font-size: 0.75rem; color: var(--color-text-muted); text-align: center;">
+                        {% if case.status == 'DECIDED' or case.status == 'CLOSED' %}
+                            Case is closed; discussion is locked.
+                        {% else %}
+                            You must be an admitted participant to post notes.
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- PANE 2: Structured Hypotheses Deck (FR3, C-16, FT06, B13, B16) -->
+        <div class="workspace-col-center">
+            <!-- Structured Hypothesis Submission Form (Specialist Only) -->
+            {% if can_submit_hypothesis %}
+                <div class="pane-card" style="border-top: 3px solid var(--color-primary);">
+                    <div class="pane-card-header">
+                        <span class="pane-card-title">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Formulate Diagnostic Hypothesis
+                        </span>
+                        <span style="font-size: 0.6875rem; color: var(--color-primary); font-weight: 600;">Advisory Specialist</span>
+                    </div>
+
+                    <form method="POST" action="{% url 'collaboration:hypothesis_create' case_id=case.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="idempotency_token" value="{{ hypothesis_form.idempotency_token.value }}">
+
+                        {% if hypothesis_form.errors %}
+                            <div class="alert alert-error" style="font-size: 0.75rem; padding: 0.625rem; margin-bottom: 0.75rem;">
+                                Please correct the errors below. All fields are mandatory (min 20 characters for rationale and evidence).
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group" style="margin-bottom: 0.75rem;">
+                            <label class="form-label" style="font-size: 0.75rem;">Proposed Diagnosis *</label>
+                            {{ hypothesis_form.proposed_diagnosis }}
+                            {% if hypothesis_form.proposed_diagnosis.errors %}
+                                <div style="color: var(--color-error); font-size: 0.75rem; margin-top: 0.25rem;">
+                                    {{ hypothesis_form.proposed_diagnosis.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0.75rem;">
+                            <label class="form-label" style="font-size: 0.75rem;">Pathophysiological Rationale * (min 20 chars)</label>
+                            {{ hypothesis_form.rationale }}
+                            {% if hypothesis_form.rationale.errors %}
+                                <div style="color: var(--color-error); font-size: 0.75rem; margin-top: 0.25rem;">
+                                    {{ hypothesis_form.rationale.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0.75rem;">
+                            <label class="form-label" style="font-size: 0.75rem;">Supporting Clinical Evidence * (min 20 chars)</label>
+                            {{ hypothesis_form.supporting_evidence }}
+                            {% if hypothesis_form.supporting_evidence.errors %}
+                                <div style="color: var(--color-error); font-size: 0.75rem; margin-top: 0.25rem;">
+                                    {{ hypothesis_form.supporting_evidence.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 0.875rem;">
+                            Submit Diagnostic Hypothesis
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+
+            <!-- Active Hypotheses Deck -->
+            <div class="pane-card">
+                <div class="pane-card-header">
+                    <span class="pane-card-title">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        Active Diagnostic Hypotheses
+                    </span>
+                    <span class="count-pill">{{ active_hypotheses|length }} active</span>
+                </div>
+
+                {% if active_hypotheses %}
+                    {% for h in active_hypotheses %}
+                        <div class="hypo-card" id="hypo-{{ h.id }}">
+                            <div class="hypo-header">
+                                <div>
+                                    <div class="hypo-diagnosis">{{ h.proposed_diagnosis }}</div>
+                                    <div style="font-size: 0.75rem; color: var(--color-text-sub); margin-top: 0.25rem;">
+                                        Submitted by <strong>Dr. {{ h.specialist.full_name }}</strong> &bull; {{ h.submitted_at|date:"M d, Y H:i" }} UTC
+                                    </div>
+                                </div>
+                                <span class="role-tag-specialist">Active</span>
+                            </div>
+
+                            <div class="hypo-field-label">Pathophysiological Rationale</div>
+                            <div class="hypo-field-text">{{ h.rationale|escape }}</div>
+
+                            <div class="hypo-field-label">Supporting Clinical Evidence</div>
+                            <div class="hypo-field-text">{{ h.supporting_evidence|escape }}</div>
+
+                            <!-- Hypothesis Withdrawal (Author Only, B16, FAULT-03) -->
+                            {% if h.specialist.id == user.id and case.status != 'DECIDED' and case.status != 'CLOSED' %}
+                                <div class="withdraw-panel">
+                                    <details style="font-size: 0.75rem;">
+                                        <summary style="cursor: pointer; color: #DC2626; font-weight: 600;">
+                                            Withdraw this hypothesis...
+                                        </summary>
+                                        <form method="POST" action="{% url 'collaboration:hypothesis_withdraw' case_id=case.id hypo_id=h.id %}" style="margin-top: 0.5rem; background: #FEF2F2; padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid #FCA5A5;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="idempotency_token" value="{{ withdraw_form.idempotency_token.value }}">
+                                            <label style="display: block; font-weight: 600; color: #991B1B; margin-bottom: 0.25rem;">
+                                                Reason for withdrawal * (mandatory, min 10 chars):
+                                            </label>
+                                            <textarea name="withdrawal_reason" class="form-input" rows="2" style="width: 100%; font-size: 0.75rem;" placeholder="State why this diagnosis is being retracted per clinical provenance..." required></textarea>
+                                            <div style="margin-top: 0.5rem; display: flex; justify-content: flex-end;">
+                                                <button type="submit" class="btn btn-error" style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                                                    Confirm Withdrawal
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </details>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align: center; padding: 2.5rem 1rem; color: var(--color-text-muted); font-size: 0.8125rem;">
+                        No active hypotheses have been submitted yet.
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Withdrawn Hypotheses Section (Historical Provenance, FAULT-03, FAULT-06, B16) -->
+            {% if withdrawn_hypotheses %}
+                <div class="pane-card" style="border: 1px dashed #F59E0B; background-color: #FFFDF9;">
+                    <div class="pane-card-header" style="border-bottom: 1px solid #FEF3C7;">
+                        <span class="pane-card-title" style="color: #92400E;">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Historical Withdrawn Hypotheses
+                        </span>
+                        <span class="badge-withdrawn">{{ withdrawn_hypotheses|length }} withdrawn</span>
+                    </div>
+                    <p style="font-size: 0.75rem; color: #92400E; margin-bottom: 0.75rem;">
+                        Permanently preserved for clinical audit and diagnostic provenance. Excluded from differential ranking.
+                    </p>
+
+                    {% for h in withdrawn_hypotheses %}
+                        <div class="hypo-card hypo-withdrawn-card" id="withdrawn-{{ h.id }}">
+                            <div class="hypo-header">
+                                <div>
+                                    <div class="hypo-diagnosis" style="color: #64748B; text-decoration: line-through;">
+                                        {{ h.proposed_diagnosis }}
+                                    </div>
+                                    <div style="font-size: 0.6875rem; color: var(--color-text-muted); margin-top: 0.25rem;">
+                                        Submitted by Dr. {{ h.specialist.full_name }} &bull; Withdrawn: {{ h.withdrawn_at|date:"M d, Y H:i" }} UTC
+                                    </div>
+                                </div>
+                                <span class="badge-withdrawn">[WITHDRAWN]</span>
+                            </div>
+
+                            <div class="withdrawal-callout">
+                                <strong>Withdrawal Reason:</strong> {{ h.withdrawal_reason|escape }}
+                            </div>
+
+                            <div class="hypo-field-label">Original Clinical Rationale</div>
+                            <div class="hypo-field-text" style="color: var(--color-text-sub);">{{ h.rationale|escape }}</div>
+
+                            <div class="hypo-field-label">Original Supporting Evidence</div>
+                            <div class="hypo-field-text" style="color: var(--color-text-sub);">{{ h.supporting_evidence|escape }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- PANE 3: Differential Ranking & Decision Governance (Preview / Sprint 4 Anchor) -->
+        <div class="workspace-col-right">
+            <!-- Differential Ranking Console -->
+            <div class="pane-card">
+                <div class="pane-card-header">
+                    <span class="pane-card-title">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>
+                        Differential Ranking
+                    </span>
+                    <span class="count-pill">{{ active_hypotheses|length }} ranked</span>
+                </div>
+
+                <p style="font-size: 0.75rem; color: var(--color-text-sub); margin-bottom: 0.75rem;">
+                    Active differential diagnosis ordered by clinical priority. Sole authority to reorder belongs to the Primary Physician (FR5).
+                </p>
+
+                {% if active_hypotheses %}
+                    <div class="diff-list">
+                        {% for h in active_hypotheses %}
+                            <div class="diff-item">
+                                <div class="diff-rank-badge">{{ forloop.counter }}</div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-size: 0.8125rem; font-weight: 600; color: var(--color-text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        {{ h.proposed_diagnosis }}
+                                    </div>
+                                    <div style="font-size: 0.6875rem; color: var(--color-text-muted);">
+                                        Dr. {{ h.specialist.full_name }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 1.5rem 0.5rem; color: var(--color-text-muted); font-size: 0.75rem;">
+                        No active hypotheses to rank.
+                    </div>
+                {% endif %}
+
+                {% if is_case_owner %}
+                    <div style="background-color: var(--color-primary-wash); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: var(--radius-md); padding: 0.75rem; font-size: 0.75rem; color: #1E40AF; margin-top: 0.5rem;">
+                        <strong>Primary Physician Console:</strong> Differential drag/swap controls and definitive clinical decision recording activate in Sprint 4.
+                    </div>
+                {% else %}
+                    <div style="background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.75rem; font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.5rem;">
+                        Specialists view differential ranking in read-only mode (B20).
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Decision Governance & Lifecycle -->
+            <div class="pane-card">
+                <div class="pane-card-header">
+                    <span class="pane-card-title">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        Clinical Governance
+                    </span>
+                    <span class="status-badge status-{{ case.status }}">{{ case.get_status_display }}</span>
+                </div>
+
+                <div style="font-size: 0.75rem; line-height: 1.5; color: var(--color-text-sub);">
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong>Advisory Principle:</strong> All specialist hypotheses and comments are advisory. Sole legal and clinical responsibility remains with Primary Physician <strong>Dr. {{ case.owner.full_name }}</strong>.
+                    </div>
+                    <div>
+                        <strong>Audit Integrity:</strong> Every hypothesis submission, withdrawal, and discussion note is immutably logged with actor, UTC timestamp, and client telemetry.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

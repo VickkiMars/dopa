@@ -91,10 +91,15 @@ def case_access_required(view_func):
             return redirect('accounts:login')
 
         case_id = kwargs.get('case_id') or kwargs.get('pk')
-        case = get_object_or_404(Case, pk=case_id)
-
-        is_owner = (case.owner == request.user)
-        is_team_member = CaseTeam.objects.filter(case=case, specialist=request.user).exists()
+        try:
+            from .views import get_workspace_case
+            case = get_workspace_case(case_id)
+            is_owner = (case.owner_id == request.user.id)
+            is_team_member = any(m.specialist_id == request.user.id for m in case.team_memberships.all())
+        except Exception:
+            case = get_object_or_404(Case, pk=case_id)
+            is_owner = (case.owner_id == request.user.id)
+            is_team_member = CaseTeam.objects.filter(case=case, specialist=request.user).exists()
 
         if not (is_owner or is_team_member):
             log_event(
@@ -119,3 +124,142 @@ def case_access_required(view_func):
         request.is_team_member = is_team_member
         return view_func(request, *args, **kwargs)
     return _wrapped_view
+
+
+def specialist_team_required(view_func):
+    """
+    Decorator enforcing that:
+    1. User is authenticated and possesses the SPECIALIST role.
+    2. User is admitted to the CaseTeam for this case.
+    3. Case is not in a terminal state (DECIDED or CLOSED).
+    Rejects unauthorized access with HTTP 403 and records an ACCESS_DENIED audit log entry.
+    """
+    @wraps(view_func)
+    def _wrapped_view(request: HttpRequest, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('accounts:login')
+
+        case_id = kwargs.get('case_id') or kwargs.get('pk')
+        case = get_object_or_404(Case, pk=case_id)
+
+        if getattr(request.user, 'role', None) != 'SPECIALIST':
+            log_event(
+                action=AuditAction.ACCESS_DENIED,
+                actor=request.user,
+                case_id=case.id,
+                entity_type='cases_case',
+                entity_id=str(case.id),
+                request=request,
+                status=AuditStatus.DENIED,
+                details={
+                    'reason': f'Role {getattr(request.user, "role", None)} is not SPECIALIST',
+                    'path': request.path
+                }
+            )
+            return HttpResponseForbidden(
+                "<h1>403 Forbidden</h1><p>Access denied: Only specialists can submit diagnostic hypotheses.</p>"
+            )
+
+        is_admitted = CaseTeam.objects.filter(case=case, specialist=request.user).exists()
+        if not is_admitted:
+            log_event(
+                action=AuditAction.ACCESS_DENIED,
+                actor=request.user,
+                case_id=case.id,
+                entity_type='cases_case',
+                entity_id=str(case.id),
+                request=request,
+                status=AuditStatus.DENIED,
+                details={
+                    'reason': 'Specialist is not an admitted member of this case team',
+                    'path': request.path
+                }
+            )
+            return HttpResponseForbidden(
+                "<h1>403 Forbidden</h1><p>Access denied: You must be an admitted specialist on this case team.</p>"
+            )
+
+        if case.status in ['DECIDED', 'CLOSED']:
+            log_event(
+                action=AuditAction.ACCESS_DENIED,
+                actor=request.user,
+                case_id=case.id,
+                entity_type='cases_case',
+                entity_id=str(case.id),
+                request=request,
+                status=AuditStatus.DENIED,
+                details={
+                    'reason': f'Cannot modify case in terminal status {case.status}',
+                    'path': request.path
+                }
+            )
+            return HttpResponseForbidden(
+                "<h1>403 Forbidden</h1><p>Access denied: This clinical case is already decided or closed.</p>"
+            )
+
+        request.case = case
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
+def hypothesis_author_required(view_func):
+    """
+    Decorator verifying that:
+    1. User is authenticated.
+    2. User is the author (specialist) of the specified hypothesis.
+    3. Case is not in a terminal state (DECIDED or CLOSED).
+    Rejects unauthorized access with HTTP 403 and records an ACCESS_DENIED audit log entry.
+    """
+    @wraps(view_func)
+    def _wrapped_view(request: HttpRequest, *args, **kwargs):
+        from collaboration.models import Hypothesis
+
+        if not request.user.is_authenticated:
+            return redirect('accounts:login')
+
+        case_id = kwargs.get('case_id')
+        hypo_id = kwargs.get('hypo_id') or kwargs.get('hypothesis_id')
+        case = get_object_or_404(Case, pk=case_id)
+        hypothesis = get_object_or_404(Hypothesis, pk=hypo_id, case=case)
+
+        if hypothesis.specialist != request.user:
+            log_event(
+                action=AuditAction.ACCESS_DENIED,
+                actor=request.user,
+                case_id=case.id,
+                entity_type='collaboration_hypothesis',
+                entity_id=str(hypothesis.id),
+                request=request,
+                status=AuditStatus.DENIED,
+                details={
+                    'reason': 'Actor is not the author of this hypothesis',
+                    'path': request.path
+                }
+            )
+            return HttpResponseForbidden(
+                "<h1>403 Forbidden</h1><p>Access denied: Only the authoring specialist can withdraw this hypothesis.</p>"
+            )
+
+        if case.status in ['DECIDED', 'CLOSED']:
+            log_event(
+                action=AuditAction.ACCESS_DENIED,
+                actor=request.user,
+                case_id=case.id,
+                entity_type='cases_case',
+                entity_id=str(case.id),
+                request=request,
+                status=AuditStatus.DENIED,
+                details={
+                    'reason': f'Cannot modify hypothesis on case with terminal status {case.status}',
+                    'path': request.path
+                }
+            )
+            return HttpResponseForbidden(
+                "<h1>403 Forbidden</h1><p>Access denied: This clinical case is already decided or closed.</p>"
+            )
+
+        request.case = case
+        request.hypothesis = hypothesis
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
