@@ -4,292 +4,333 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}DOPA — Clinical Case Collaboration{% endblock %}</title>
-    <!-- Modern typography -->
+
+    <!-- Bootstrap 5 Classic CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Source Sans Pro Typography (Bootstrap 5 Classic Aesthetic) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --color-primary: #2563EB;
-            --color-primary-hover: #1D4ED8;
-            --color-primary-sky: #0EA5E9;
-            --color-primary-wash: #EFF6FF;
-            --color-canvas: #F1F5F9;
-            --color-surface: #FFFFFF;
-            --color-surface-inset: #F8FAFC;
-            --color-text-main: #0F172A;
-            --color-text-sub: #475569;
-            --color-text-muted: #94A3B8;
-            --color-border: #E2E8F0;
-            --color-border-faint: #F1F5F9;
-            --color-success: #10B981;
-            --color-success-bg: #ECFDF5;
-            --color-error: #EF4444;
-            --color-error-bg: #FEF2F2;
-            
-            --radius-sm: 6px;
-            --radius-md: 8px;
-            --radius-lg: 10px;
-            --radius-card: 16px;
-            --radius-pill: 9999px;
-            
-            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.02);
-            --shadow-glow: 0 8px 20px -4px rgba(37, 99, 235, 0.40);
-        }
+            /* Bootstrap 5 Classic Palette */
+            --bs-body-font-family: 'Source Sans Pro', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --bs-body-bg: #F8F9FA;
+            --bs-body-color: #212529;
+            --bs-primary: #0D6EFD;
+            --bs-primary-rgb: 13, 110, 253;
+            --bs-secondary: #6C757D;
+            --bs-success: #198754;
+            --bs-danger: #DC3545;
+            --bs-warning: #FFC107;
+            --bs-info: #0DCAF0;
+            --bs-light: #F8F9FA;
+            --bs-dark: #212529;
+            --bs-border-color: #DEE2E6;
+            --bs-border-radius: 0.25rem;
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            /* Legacy Design System Token Aliases */
+            --color-primary: #0D6EFD;
+            --color-primary-hover: #0B5ED7;
+            --color-primary-sky: #0DCAF0;
+            --color-primary-wash: #E7F1FF;
+            --color-canvas: #F8F9FA;
+            --color-surface: #FFFFFF;
+            --color-surface-inset: #F8F9FA;
+            --color-text-main: #212529;
+            --color-text-sub: #495057;
+            --color-text-muted: #6C757D;
+            --color-border: #DEE2E6;
+            --color-border-faint: #E9ECEF;
+            --color-success: #198754;
+            --color-success-bg: #D1E7DD;
+            --color-error: #DC3545;
+            --color-error-bg: #F8D7DA;
+            
+            --radius-sm: 0.2rem;
+            --radius-md: 0.25rem;
+            --radius-lg: 0.375rem;
+            --radius-card: 0.375rem;
+            --radius-pill: 50rem;
+            
+            --shadow-card: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --shadow-glow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--color-canvas);
-            color: var(--color-text-main);
-            line-height: 1.5;
+            font-family: var(--bs-body-font-family);
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        .header-bar {
-            background-color: var(--color-surface);
-            border-bottom: 1px solid var(--color-border);
-            padding: 0.875rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 50;
+        /* Navbar Customization */
+        .navbar-classic {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #DEE2E6;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
         }
 
-        .brand-cluster {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            color: var(--color-text-main);
-        }
-
-        .brand-emblem {
+        .brand-badge {
             width: 32px;
             height: 32px;
-            border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--color-primary-sky) 0%, var(--color-primary) 100%);
+            border-radius: 4px;
+            background-color: #0D6EFD;
+            color: #FFFFFF;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             font-weight: 700;
-            font-size: 16px;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+            font-size: 1.1rem;
         }
 
-        .brand-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .brand-subtitle {
-            font-size: 0.75rem;
-            color: var(--color-text-muted);
-            font-weight: 500;
-            margin-left: 0.25rem;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .role-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
-            padding: 0.25rem 0.625rem;
-            border-radius: var(--radius-pill);
-            font-size: 0.75rem;
-            font-weight: 600;
-            background-color: var(--color-primary-wash);
-            color: var(--color-primary);
-            border: 1px solid rgba(37, 99, 235, 0.15);
-        }
-
-        .main-container {
-            flex: 1;
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
+        /* Classic Card System */
         .card {
-            background-color: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-card);
-            box-shadow: var(--shadow-card);
-            padding: 2rem;
+            background-color: #FFFFFF;
+            border: 1px solid #DEE2E6;
+            border-radius: 0.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
+        .card-header-classic {
+            background-color: #F8F9FA;
+            border-bottom: 1px solid #DEE2E6;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        /* Classic Button Radii and Focus */
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 0.25rem;
             font-weight: 500;
-            font-size: 0.875rem;
-            border-radius: var(--radius-lg);
-            padding: 0.625rem 1.125rem;
-            cursor: pointer;
-            transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-            text-decoration: none;
-            border: 1px solid transparent;
+            padding: 0.45rem 0.9rem;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
         }
 
         .btn-primary {
-            background-color: var(--color-primary);
-            color: #FFFFFF;
-            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+            background-color: #0D6EFD;
+            border-color: #0D6EFD;
         }
+
         .btn-primary:hover {
-            background-color: var(--color-primary-hover);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
-            transform: translateY(-1px);
+            background-color: #0B5ED7;
+            border-color: #0A58CA;
         }
 
         .btn-secondary {
-            background-color: var(--color-surface);
-            border-color: var(--color-border);
-            color: var(--color-text-main);
+            background-color: #6C757D;
+            border-color: #6C757D;
+            color: #FFFFFF;
         }
+
         .btn-secondary:hover {
-            background-color: var(--color-surface-inset);
-            border-color: #CBD5E1;
+            background-color: #5C636A;
+            border-color: #565E64;
+            color: #FFFFFF;
+        }
+
+        .btn-outline-secondary {
+            border-color: #DEE2E6;
+            color: #495057;
+            background-color: #FFFFFF;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #F8F9FA;
+            border-color: #CED4DA;
+            color: #212529;
         }
 
         .btn-link {
-            background: transparent;
-            color: var(--color-primary);
-            padding: 0;
-            font-size: 0.8125rem;
+            color: #0D6EFD;
+            text-decoration: none;
         }
+
         .btn-link:hover {
-            color: var(--color-primary-hover);
+            color: #0A58CA;
             text-decoration: underline;
         }
 
+        /* Forms */
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 0.35rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 0.25rem;
+            border: 1px solid #CED4DA;
+            font-size: 0.9375rem;
+            padding: 0.45rem 0.75rem;
+            color: #212529;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #86B7FE;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .form-text {
+            font-size: 0.8125rem;
+            color: #6C757D;
+        }
+
+        /* Legacy Compatibility Classes */
         .form-group {
             margin-bottom: 1.25rem;
         }
-
-        .form-label {
-            display: block;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            color: var(--color-text-main);
-            margin-bottom: 0.375rem;
-        }
-
         .form-input {
             width: 100%;
-            height: 42px;
-            padding: 0 0.875rem;
-            font-size: 0.875rem;
+            height: 38px;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.9375rem;
             font-family: inherit;
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            background-color: var(--color-surface-inset);
-            color: var(--color-text-main);
-            transition: all 150ms ease;
+            border: 1px solid #CED4DA;
+            border-radius: 0.25rem;
+            background-color: #FFFFFF;
+            color: #212529;
         }
         .form-input:focus {
             outline: none;
-            border-color: var(--color-primary);
-            background-color: var(--color-surface);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+            border-color: #86B7FE;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         }
 
-        .alert-container {
-            margin-bottom: 1.5rem;
-        }
-
-        .alert {
-            padding: 0.875rem 1.25rem;
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            margin-bottom: 0.5rem;
-            display: flex;
+        /* Badges */
+        .role-badge {
+            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.35rem;
+            padding: 0.3rem 0.65rem;
+            border-radius: 50rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background-color: #E7F1FF;
+            color: #0D6EFD;
+            border: 1px solid #B6D4FE;
         }
-        .alert-success {
-            background-color: var(--color-success-bg);
-            color: var(--color-success);
-            border: 1px solid rgba(16, 185, 129, 0.2);
+
+        /* Tables */
+        .table {
+            border-color: #DEE2E6;
         }
-        .alert-error {
-            background-color: var(--color-error-bg);
-            color: var(--color-error);
-            border: 1px solid rgba(239, 68, 68, 0.2);
+
+        .table > thead {
+            background-color: #F8F9FA;
+            color: #495057;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
+
+        .table th, .table td {
+            vertical-align: middle;
+            padding: 0.65rem 0.75rem;
+        }
+
+        /* Notifications & Alerts */
+        .alert {
+            border-radius: 0.25rem;
+            border: 1px solid transparent;
+            font-size: 0.875rem;
+        }
+
         .alert-info {
-            background-color: var(--color-primary-wash);
-            color: var(--color-primary);
-            border: 1px solid rgba(37, 99, 235, 0.2);
+            background-color: #CFF4FC;
+            border-color: #B6EFFB;
+            color: #055160;
+        }
+
+        .alert-success {
+            background-color: #D1E7DD;
+            border-color: #BADBCC;
+            color: #0F5132;
+        }
+
+        .alert-danger, .alert-error {
+            background-color: #F8D7DA;
+            border-color: #F5C2C7;
+            color: #842029;
+        }
+
+        .alert-warning {
+            background-color: #FFF3CD;
+            border-color: #FFECB5;
+            color: #664D03;
         }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <header class="header-bar">
-        <a href="{% url 'cases:dashboard' %}" class="brand-cluster">
-            <div class="brand-emblem">+</div>
-            <div>
-                <span class="brand-title">DOPA</span>
-                <span class="brand-subtitle">Clinical Collaboration</span>
-            </div>
-        </a>
-        <div class="header-actions">
-            {% if request.user.is_authenticated %}
-                <span class="role-badge">
-                    ● {{ request.user.get_role_display }}
-                </span>
-                <a href="{% url 'cases:notifications_list' %}" class="btn btn-secondary" style="position: relative; padding: 0.375rem 0.625rem; font-size: 0.8125rem;" title="Clinical Notifications">
-                    🔔
-                    {% if unread_notifications_count > 0 %}
-                        <span style="position: absolute; top: -6px; right: -6px; background: var(--color-error); color: white; border-radius: 9999px; font-size: 0.6875rem; font-weight: 700; min-width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
-                            {{ unread_notifications_count }}
+    <header class="navbar navbar-expand-lg navbar-classic sticky-top py-2 px-3 px-lg-4">
+        <div class="container-fluid p-0">
+            <a href="{% url 'cases:dashboard' %}" class="d-flex align-items-center gap-2 text-decoration-none text-dark me-4">
+                <div class="brand-badge">+</div>
+                <div>
+                    <span class="fw-bold fs-5 text-dark">DOPA</span>
+                    <span class="text-secondary small ms-1 d-none d-sm-inline">Clinical Collaboration</span>
+                </div>
+            </a>
+
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                {% if request.user.is_authenticated %}
+                    <span class="role-badge d-none d-md-inline-flex">
+                        <i class="bi bi-person-badge-fill"></i> {{ request.user.get_role_display }}
+                    </span>
+
+                    <!-- Notification Center Bell -->
+                    <a href="{% url 'cases:notifications_list' %}" class="btn btn-outline-secondary position-relative px-2 py-1" title="Clinical Notifications">
+                        <i class="bi bi-bell-fill"></i>
+                        {% if unread_notifications_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.65rem;">
+                                {{ unread_notifications_count }}
+                                <span class="visually-hidden">unread notifications</span>
+                            </span>
+                        {% endif %}
+                    </a>
+
+                    <!-- Account Security & MFA -->
+                    <a href="{% url 'accounts:mfa_settings' %}" class="btn btn-outline-secondary px-2 py-1" title="Account Security & MFA">
+                        <i class="bi bi-shield-lock-fill text-primary"></i> <span class="d-none d-lg-inline small">Security</span>
+                    </a>
+
+                    <!-- User Name & Sign Out -->
+                    <div class="d-flex align-items-center ms-2 gap-2">
+                        <span class="small fw-semibold text-dark d-none d-sm-inline">
+                            Dr. {{ request.user.full_name }}
                         </span>
-                    {% endif %}
-                </a>
-                <a href="{% url 'accounts:mfa_settings' %}" class="btn btn-secondary" style="padding: 0.375rem 0.625rem; font-size: 0.8125rem;" title="Account Security & MFA">
-                    🛡️ Security
-                </a>
-                <span style="font-size: 0.875rem; font-weight: 500; color: var(--color-text-main);">
-                    {{ request.user.full_name }}
-                </span>
-                <form action="{% url 'accounts:logout' %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-secondary" style="padding: 0.375rem 0.75rem; font-size: 0.8125rem;">
-                        Sign Out
-                    </button>
-                </form>
-            {% else %}
-                <a href="{% url 'accounts:login' %}" class="btn btn-secondary">Sign In</a>
-                <a href="{% url 'accounts:register' %}" class="btn btn-primary">Register Account</a>
-            {% endif %}
+                        <form action="{% url 'accounts:logout' %}" method="post" class="d-inline m-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" title="Sign Out">
+                                <i class="bi bi-box-arrow-right"></i> <span class="d-none d-md-inline">Sign Out</span>
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline-primary">Sign In</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-primary">Register</a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
-    <main class="main-container">
+    <main class="container-xl py-4 flex-grow-1">
         {% if messages %}
-            <div class="alert-container">
+            <div class="mb-4">
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags|default:'info' }}">
-                        {{ message }}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show d-flex align-items-center gap-2 mb-2" role="alert">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <div>{{ message }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 {% endfor %}
             </div>
@@ -297,5 +338,15 @@
 
         {% block content %}{% endblock %}
     </main>
+
+    <footer class="bg-white border-top py-3 text-center text-muted small mt-auto">
+        <div class="container-xl">
+            <span>&copy; 2026 DOPA Clinical Collaboration Platform &bull; Diagnostic Decision Support</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

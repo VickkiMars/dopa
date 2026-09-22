@@ -2,395 +2,186 @@
 
 {% block title %}Forensic Audit Trail: {{ case.title }} — DOPA{% endblock %}
 
-{% block extra_head %}
-<style>
-    .audit-container {
-        max-width: 1200px;
-        margin: 1.5rem auto;
-        padding: 0 1rem;
-    }
-
-    .audit-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .audit-title-block h1 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--color-text-main, #0F172A);
-        margin: 0.25rem 0 0.5rem 0;
-    }
-
-    .case-meta-line {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-size: 0.875rem;
-        color: var(--color-text-muted, #64748B);
-        flex-wrap: wrap;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.2rem 0.625rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-    .status-OPEN { background-color: #EFF6FF; color: #2563EB; border: 1px solid rgba(37, 99, 235, 0.2); }
-    .status-UNDER_REVIEW { background-color: #FEF3C7; color: #B45309; border: 1px solid rgba(245, 158, 11, 0.2); }
-    .status-DECIDED { background-color: #ECFDF5; color: #047857; border: 1px solid rgba(16, 185, 129, 0.2); }
-    .status-CLOSED { background-color: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0; }
-
-    /* Security banner */
-    .security-banner {
-        background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
-        border: 1px solid #BFDBFE;
-        border-radius: 8px;
-        padding: 1rem 1.25rem;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-    .security-icon {
-        width: 2rem;
-        height: 2rem;
-        border-radius: 50%;
-        background-color: #DBEAFE;
-        color: #1D4ED8;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 1rem;
-        flex-shrink: 0;
-    }
-    .security-banner-text h4 {
-        margin: 0 0 0.25rem 0;
-        font-size: 0.9375rem;
-        font-weight: 600;
-        color: #1E3A8A;
-    }
-    .security-banner-text p {
-        margin: 0;
-        font-size: 0.8125rem;
-        line-height: 1.5;
-        color: #3B82F6;
-    }
-
-    /* Metric cards */
-    .metric-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-    .metric-card {
-        background: #FFFFFF;
-        border: 1px solid var(--color-border-faint, #E2E8F0);
-        border-radius: 8px;
-        padding: 1rem 1.25rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    .metric-card .label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 600;
-        color: #64748B;
-        margin-bottom: 0.25rem;
-    }
-    .metric-card .value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #0F172A;
-    }
-
-    /* Table styling */
-    .audit-table-card {
-        background: #FFFFFF;
-        border: 1px solid var(--color-border-faint, #E2E8F0);
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        overflow: hidden;
-    }
-    .audit-table-header {
-        padding: 1rem 1.25rem;
-        background: #F8FAFC;
-        border-bottom: 1px solid #E2E8F0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-    }
-    .audit-table-header h3 {
-        margin: 0;
-        font-size: 0.9375rem;
-        font-weight: 600;
-        color: #1E293B;
-    }
-
-    .audit-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.8125rem;
-    }
-    .audit-table th {
-        background-color: #F8FAFC;
-        color: #475569;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        padding: 0.75rem 1rem;
-        text-align: left;
-        border-bottom: 1px solid #E2E8F0;
-    }
-    .audit-table td {
-        padding: 0.875rem 1rem;
-        border-bottom: 1px solid #F1F5F9;
-        vertical-align: top;
-        color: #1E293B;
-    }
-    .audit-table tr:hover {
-        background-color: #F8FAFC;
-    }
-
-    /* Action badges */
-    .action-badge {
-        display: inline-block;
-        padding: 0.2rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.6875rem;
-        font-weight: 700;
-        letter-spacing: 0.03em;
-        white-space: nowrap;
-    }
-    .action-CASE_CREATED { background-color: #DBEAFE; color: #1E40AF; }
-    .action-SPECIALIST_ADMITTED { background-color: #E0E7FF; color: #3730A3; }
-    .action-HYPOTHESIS_SUBMITTED { background-color: #E0F2FE; color: #0369A1; }
-    .action-HYPOTHESIS_WITHDRAWN { background-color: #FEF3C7; color: #92400E; }
-    .action-DISCUSSION_POSTED { background-color: #F1F5F9; color: #334155; }
-    .action-RANK_UPDATED { background-color: #F3E8FF; color: #6B21A8; }
-    .action-DECISION_RECORDED { background-color: #D1FAE5; color: #065F46; }
-    .action-ACCESS_DENIED { background-color: #FFE4E6; color: #9F1239; font-weight: 800; border: 1px solid #FECDD3; }
-
-    /* Outcome pills */
-    .outcome-pill {
-        display: inline-block;
-        padding: 0.15rem 0.45rem;
-        border-radius: 9999px;
-        font-size: 0.6875rem;
-        font-weight: 700;
-    }
-    .outcome-ALLOWED { background-color: #DCFCE7; color: #166534; }
-    .outcome-DENIED { background-color: #FEE2E2; color: #991B1B; }
-
-    /* Role pill */
-    .role-pill {
-        font-size: 0.6875rem;
-        padding: 0.125rem 0.375rem;
-        border-radius: 4px;
-        font-weight: 600;
-        margin-left: 0.25rem;
-    }
-    .role-PRIMARY_PHYSICIAN { background-color: #EFF6FF; color: #1D4ED8; }
-    .role-SPECIALIST { background-color: #ECFDF5; color: #047857; }
-    .role-SYSTEM { background-color: #F1F5F9; color: #475569; }
-
-    /* Details payload formatting */
-    .details-box {
-        font-family: monospace;
-        font-size: 0.75rem;
-        background-color: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 4px;
-        padding: 0.4rem 0.6rem;
-        max-width: 380px;
-        overflow-x: auto;
-        color: #334155;
-    }
-    details summary {
-        cursor: pointer;
-        color: #2563EB;
-        font-weight: 600;
-        font-size: 0.75rem;
-        margin-top: 0.25rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="audit-container">
-
-    <!-- Top Navigation & Actions -->
-    <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-        <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <a href="{% url 'cases:workspace' case_id=case.id %}" class="btn-link">&larr; Back to Clinical Workspace</a>
-            <span style="color: #CBD5E1;">|</span>
-            <a href="{% url 'cases:case_detail' case_id=case.id %}" class="btn-link">Case Summary</a>
-        </div>
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <button onclick="window.print()" class="btn btn-secondary" style="font-size: 0.8125rem; padding: 0.375rem 0.75rem;">
-                Print Audit Record
-            </button>
-        </div>
-    </div>
-
-    <!-- Header Block -->
-    <div class="audit-header">
-        <div class="audit-title-block">
-            <div class="case-meta-line">
-                <span class="status-badge status-{{ case.status }}">Case {{ case.get_status_display }}</span>
-                <span>Case ID: <code>{{ case.id }}</code></span>
+<div class="row justify-content-center">
+    <div class="col-12">
+        <!-- Top Navigation -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'cases:workspace' case_id=case.id %}" class="btn btn-sm btn-link text-decoration-none p-0 text-secondary">
+                    <i class="bi bi-arrow-left"></i> Clinical Workspace
+                </a>
+                <span class="text-muted">|</span>
+                <a href="{% url 'cases:case_detail' case_id=case.id %}" class="btn btn-sm btn-link text-decoration-none p-0 text-secondary">
+                    Case Summary
+                </a>
             </div>
-            <h1>Forensic Audit Trail: {{ case.title }}</h1>
-            <div class="case-meta-line">
-                <span><strong>Primary Physician:</strong> {{ case.owner.full_name }} ({{ case.owner.email }})</span>
-                <span>&bull;</span>
-                <span><strong>Created:</strong> {{ case.created_at|date:"Y-m-d H:i:s" }} UTC</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Security Assurance Banner -->
-    <div class="security-banner">
-        <div class="security-icon">&#128274;</div>
-        <div class="security-banner-text">
-            <h4>Append-Only Forensic Integrity Guaranteed (FR7, NFR8)</h4>
-            <p>
-                Every clinical operation, team admission, hypothesis submission/withdrawal, differential rank adjustment, final diagnosis decision, and unauthorized access attempt is immutably registered in this forensic trail. Historical records cannot be modified or deleted.
-            </p>
-        </div>
-    </div>
-
-    <!-- Stat Metric Cards -->
-    <div class="metric-grid">
-        <div class="metric-card">
-            <div class="label">Total Logged Events</div>
-            <div class="value" id="stat-total-events">{{ total_events }}</div>
-        </div>
-        <div class="metric-card">
-            <div class="label">Permitted Clinical Actions</div>
-            <div class="value" style="color: #15803D;">{{ allowed_count }}</div>
-        </div>
-        <div class="metric-card">
-            <div class="label">Security Violations / Denied</div>
-            <div class="value" style="color: {% if denied_count > 0 %}#B91C1C{% else %}#64748B{% endif %};">
-                {{ denied_count }}
-            </div>
-        </div>
-        <div class="metric-card">
-            <div class="label">Audit Trail Scope</div>
-            <div class="value" style="font-size: 1rem; margin-top: 0.35rem; color: #475569;">
-                Case-Scoped
-            </div>
-        </div>
-    </div>
-
-    <!-- Forensic Event Table -->
-    <div class="audit-table-card">
-        <div class="audit-table-header">
-            <h3>Chronological Event History ({{ total_events }} records)</h3>
-            <div style="font-size: 0.75rem; color: #64748B;">
-                Ordered chronologically by timestamp (ascending)
+            <div>
+                <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-printer me-1"></i> Print Audit Record
+                </button>
             </div>
         </div>
 
-        {% if audit_entries %}
-        <div style="overflow-x: auto;">
-            <table class="audit-table" id="audit-log-table">
-                <thead>
-                    <tr>
-                        <th style="width: 170px;">Timestamp (UTC)</th>
-                        <th style="width: 170px;">Action Event</th>
-                        <th style="width: 90px;">Outcome</th>
-                        <th style="width: 210px;">Actor / Role</th>
-                        <th style="width: 120px;">IP Address</th>
-                        <th>Event Payload Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in audit_entries %}
-                    <tr id="audit-row-{{ entry.id }}">
-                        <td style="white-space: nowrap; font-family: monospace; font-size: 0.75rem;">
-                            {{ entry.timestamp|date:"Y-m-d H:i:s" }}
-                        </td>
-                        <td>
-                            <span class="action-badge action-{{ entry.action }}">
-                                {{ entry.get_action_display }}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="outcome-pill outcome-{{ entry.status }}">
-                                {{ entry.status }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if entry.actor %}
-                                <div style="font-weight: 600; font-size: 0.8125rem;">
-                                    {{ entry.actor.full_name }}
-                                </div>
-                                <div style="font-size: 0.75rem; color: #64748B;">
-                                    {{ entry.actor.email }}
-                                    <span class="role-pill role-{{ entry.actor.role }}">{{ entry.actor.get_role_display }}</span>
-                                </div>
-                            {% else %}
-                                <span style="color: #64748B; font-style: italic;">System / Anonymous</span>
-                            {% endif %}
-                        </td>
-                        <td style="font-family: monospace; font-size: 0.75rem; color: #475569;">
-                            {{ entry.ip_address|default:"127.0.0.1" }}
-                        </td>
-                        <td>
-                            {% if entry.details %}
-                                <div style="font-size: 0.8125rem; line-height: 1.4; color: #1E293B;">
-                                    {% if entry.action == 'CASE_CREATED' %}
-                                        Created case titled: <em>"{{ entry.details.title|default:case.title }}"</em>
-                                    {% elif entry.action == 'SPECIALIST_ADMITTED' %}
-                                        Admitted specialist: <strong>{{ entry.details.specialist_email }}</strong>
-                                    {% elif entry.action == 'HYPOTHESIS_SUBMITTED' %}
-                                        Diagnosis: <strong>{{ entry.details.proposed_diagnosis }}</strong>
-                                    {% elif entry.action == 'HYPOTHESIS_WITHDRAWN' %}
-                                        Reason: <em>"{{ entry.details.reason }}"</em>
-                                    {% elif entry.action == 'DISCUSSION_POSTED' %}
-                                        Snippet: <em>"{{ entry.details.snippet }}"</em>
-                                    {% elif entry.action == 'RANK_UPDATED' %}
-                                        Reordered hypothesis to rank <strong>#{{ entry.details.new_rank }}</strong> ({{ entry.details.direction }})
-                                    {% elif entry.action == 'DECISION_RECORDED' %}
-                                        Definitive Diagnosis: <strong>{{ entry.details.final_diagnosis }}</strong> (Advisory acknowledged: Yes)
-                                    {% elif entry.action == 'ACCESS_DENIED' %}
-                                        <span style="color: #B91C1C; font-weight: 600;">Violation:</span> {{ entry.details.reason }}
-                                    {% else %}
-                                        {{ entry.details }}
-                                    {% endif %}
-                                </div>
-                                <details>
-                                    <summary>Inspect raw JSON payload</summary>
-                                    <div class="details-box">{{ entry.details }}</div>
-                                </details>
-                            {% else %}
-                                <span style="color: #94A3B8; font-style: italic;">No additional payload</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div style="padding: 3rem 1.5rem; text-align: center; color: #64748B;">
-            <p style="margin: 0; font-size: 0.9375rem;">No audit events recorded for this case.</p>
-        </div>
-        {% endif %}
-    </div>
+        <!-- Header Block -->
+        <div class="card border shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pb-3 border-bottom">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-secondary-subtle text-secondary border">
+                            Case {{ case.get_status_display }}
+                        </span>
+                        <code class="text-muted small">Case ID: {{ case.id }}</code>
+                    </div>
+                    <h1 class="h4 fw-bold text-dark mb-1">
+                        Forensic Audit Trail: {{ case.title }}
+                    </h1>
+                    <p class="text-secondary small mb-0">
+                        Primary Physician: <strong class="text-dark">{{ case.owner.full_name }}</strong> ({{ case.owner.email }}) &bull; Initiated {{ case.created_at|date:"Y-m-d H:i:s" }} UTC
+                    </p>
+                </div>
+            </div>
 
+            <!-- Security Assurance Banner -->
+            <div class="alert alert-info d-flex align-items-start gap-2 shadow-sm my-3">
+                <i class="bi bi-shield-lock-fill fs-5 mt-1 text-primary"></i>
+                <div class="small">
+                    <strong>Append-Only Forensic Integrity Guaranteed:</strong> Every clinical transaction, team admission, hypothesis submission/withdrawal, differential rank adjustment, final diagnosis decision, and unauthorized access attempt is immutably registered in this cryptographic audit trail. Historical log entries cannot be modified or deleted.
+                </div>
+            </div>
+
+            <!-- Metric Cards (12-Column Grid) -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card border bg-light p-3 h-100">
+                        <div class="text-uppercase text-secondary fw-semibold" style="font-size: 0.7rem;">Total Logged Events</div>
+                        <div class="fs-3 fw-bold text-dark my-1" id="stat-total-events">{{ total_events }}</div>
+                        <div class="text-muted small">Immutable records</div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card border bg-light p-3 h-100">
+                        <div class="text-uppercase text-secondary fw-semibold" style="font-size: 0.7rem;">Permitted Actions</div>
+                        <div class="fs-3 fw-bold text-success my-1">{{ allowed_count }}</div>
+                        <div class="text-muted small">Authorized operations</div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card border bg-light p-3 h-100">
+                        <div class="text-uppercase text-secondary fw-semibold" style="font-size: 0.7rem;">Security Violations / Denied</div>
+                        <div class="fs-3 fw-bold {% if denied_count > 0 %}text-danger{% else %}text-muted{% endif %} my-1">
+                            {{ denied_count }}
+                        </div>
+                        <div class="text-muted small">RBAC rejections</div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card border bg-light p-3 h-100">
+                        <div class="text-uppercase text-secondary fw-semibold" style="font-size: 0.7rem;">Audit Trail Scope</div>
+                        <div class="fs-4 fw-bold text-secondary my-1">Case-Scoped</div>
+                        <div class="text-muted small">Zero-bypass provenance</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forensic Event Table -->
+            <div class="card border">
+                <div class="card-header bg-light py-2 px-3 fw-bold small text-uppercase text-secondary d-flex justify-content-between align-items-center">
+                    <span>Chronological Event History ({{ total_events }} records)</span>
+                    <span class="text-muted" style="font-size: 0.75rem; text-transform: none;">Ordered chronologically (ascending)</span>
+                </div>
+
+                {% if audit_entries %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered table-hover align-middle mb-0" id="audit-log-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 170px;">Timestamp (UTC)</th>
+                                    <th style="width: 170px;">Action Event</th>
+                                    <th style="width: 90px;">Outcome</th>
+                                    <th style="width: 210px;">Actor / Role</th>
+                                    <th style="width: 120px;">IP Address</th>
+                                    <th>Event Payload Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in audit_entries %}
+                                    <tr id="audit-row-{{ entry.id }}">
+                                        <td class="small font-monospace text-muted text-nowrap">
+                                            {{ entry.timestamp|date:"Y-m-d H:i:s" }}
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if entry.action == 'ACCESS_DENIED' %}bg-danger text-white{% elif entry.action == 'DECISION_RECORDED' %}bg-success text-white{% else %}bg-primary-subtle text-primary border border-primary-subtle{% endif %}">
+                                                {{ entry.get_action_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if entry.status == 'ALLOWED' %}bg-success-subtle text-success border border-success-subtle{% else %}bg-danger-subtle text-danger border border-danger-subtle{% endif %}">
+                                                {{ entry.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if entry.actor %}
+                                                <div class="fw-semibold small text-dark">
+                                                    {{ entry.actor.full_name }}
+                                                </div>
+                                                <div class="text-muted small">
+                                                    {{ entry.actor.email }}
+                                                    <span class="badge bg-light text-secondary border">{{ entry.actor.get_role_display }}</span>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted small fst-italic">System / Anonymous</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="small font-monospace text-secondary">
+                                            {{ entry.ip_address|default:"127.0.0.1" }}
+                                        </td>
+                                        <td>
+                                            {% if entry.details %}
+                                                <div class="small text-dark mb-1">
+                                                    {% if entry.action == 'CASE_CREATED' %}
+                                                        Created case titled: <em>"{{ entry.details.title|default:case.title }}"</em>
+                                                    {% elif entry.action == 'SPECIALIST_ADMITTED' %}
+                                                        Admitted specialist: <strong>{{ entry.details.specialist_email }}</strong>
+                                                    {% elif entry.action == 'HYPOTHESIS_SUBMITTED' %}
+                                                        Diagnosis: <strong>{{ entry.details.proposed_diagnosis }}</strong>
+                                                    {% elif entry.action == 'HYPOTHESIS_WITHDRAWN' %}
+                                                        Reason: <em>"{{ entry.details.reason }}"</em>
+                                                    {% elif entry.action == 'DISCUSSION_POSTED' %}
+                                                        Snippet: <em>"{{ entry.details.snippet }}"</em>
+                                                    {% elif entry.action == 'RANK_UPDATED' %}
+                                                        Reordered hypothesis to rank <strong>#{{ entry.details.new_rank }}</strong> ({{ entry.details.direction }})
+                                                    {% elif entry.action == 'DECISION_RECORDED' %}
+                                                        Definitive Diagnosis: <strong>{{ entry.details.final_diagnosis }}</strong> (Advisory acknowledged: Yes)
+                                                    {% elif entry.action == 'ACCESS_DENIED' %}
+                                                        <span class="text-danger fw-bold">Violation:</span> {{ entry.details.reason }}
+                                                    {% else %}
+                                                        {{ entry.details }}
+                                                    {% endif %}
+                                                </div>
+                                                <details>
+                                                    <summary class="small text-primary fw-semibold" style="cursor: pointer;">Inspect raw JSON payload</summary>
+                                                    <pre class="bg-light p-2 rounded small text-dark border mb-0 mt-1" style="max-height: 150px; overflow-y: auto;">{{ entry.details }}</pre>
+                                                </details>
+                                            {% else %}
+                                                <span class="text-muted small fst-italic">No additional payload</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="card-body text-center py-4 text-muted small">
+                        No audit events recorded for this case.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

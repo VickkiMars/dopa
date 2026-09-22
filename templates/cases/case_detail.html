@@ -2,196 +2,206 @@
 
 {% block title %}{{ case.title }} — Clinical Case Summary{% endblock %}
 
-{% block extra_head %}
-<style>
-    .case-container {
-        max-width: 900px;
-        margin: 1rem auto;
-    }
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.25rem 0.75rem;
-        border-radius: var(--radius-pill);
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-    .status-OPEN { background-color: #EFF6FF; color: #2563EB; border: 1px solid rgba(37, 99, 235, 0.2); }
-    .status-UNDER_REVIEW { background-color: #FEF3C7; color: #B45309; border: 1px solid rgba(245, 158, 11, 0.2); }
-    .status-DECIDED { background-color: #ECFDF5; color: #047857; border: 1px solid rgba(16, 185, 129, 0.2); }
-    .status-CLOSED { background-color: #F1F5F9; color: #64748B; border: 1px solid #E2E8F0; }
-
-    .clinical-section {
-        margin-top: 1.5rem;
-        padding-top: 1.25rem;
-        border-top: 1px solid var(--color-border-faint);
-    }
-    .section-heading {
-        font-size: 0.8125rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--color-text-muted);
-        margin-bottom: 0.5rem;
-    }
-    .clinical-text {
-        font-size: 0.875rem;
-        line-height: 1.6;
-        color: var(--color-text-main);
-        white-space: pre-line;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="case-container">
-    <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-        <a href="{% url 'cases:dashboard' %}" class="btn-link">&larr; Back to Dashboard</a>
-        <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <a href="{% url 'cases:workspace' case_id=case.id %}" class="btn btn-primary">
-                Open Clinical Workspace &rarr;
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Top Navigation & Action Toolbar -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <a href="{% url 'cases:dashboard' %}" class="btn btn-sm btn-link text-decoration-none p-0 text-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
-            <a href="{% url 'cases:case_report' case_id=case.id %}" class="btn btn-secondary">
-                &#128196; Export Dossier
-            </a>
-            <a href="{% url 'cases:audit_trail' case_id=case.id %}" class="btn btn-secondary">
-                Audit Trail
-            </a>
-            {% if is_case_owner %}
-                <a href="{% url 'cases:team_admit' case_id=case.id %}" class="btn btn-secondary">
-                    Manage Specialist Team ({{ team_members.count }})
+            <div class="btn-group btn-group-sm shadow-sm">
+                <a href="{% url 'cases:workspace' case_id=case.id %}" class="btn btn-primary">
+                    <i class="bi bi-layout-three-columns me-1"></i> Open Workspace
                 </a>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
-            <div>
-                <span class="status-badge status-{{ case.status }}">{{ case.get_status_display }}</span>
-                <h1 style="font-size: 1.5rem; font-weight: 700; margin-top: 0.5rem; letter-spacing: -0.02em;">
-                    {{ case.title }}
-                </h1>
-                <p style="font-size: 0.8125rem; color: var(--color-text-sub); margin-top: 0.25rem;">
-                    Created by Dr. {{ case.owner.full_name }} &bull; {{ case.created_at|date:"M d, Y H:i" }} UTC
-                </p>
-            </div>
-            <div>
-                <span class="role-badge">
-                    {% if is_case_owner %}You are the Case Owner{% else %}You are an Admitted Specialist{% endif %}
-                </span>
+                <a href="{% url 'cases:case_report' case_id=case.id %}" class="btn btn-outline-secondary" title="Export Consultation Dossier">
+                    <i class="bi bi-file-earmark-medical me-1"></i> Dossier
+                </a>
+                <a href="{% url 'cases:audit_trail' case_id=case.id %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-clock-history me-1"></i> Audit Trail
+                </a>
+                {% if is_case_owner %}
+                    <a href="{% url 'cases:team_admit' case_id=case.id %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-person-plus me-1"></i> Team ({{ team_members.count }})
+                    </a>
+                {% endif %}
             </div>
         </div>
 
-        <div class="clinical-section">
-            <div class="section-heading">Clinical Summary</div>
-            <div class="clinical-text">{{ case.clinical_summary }}</div>
-        </div>
-
-        <div class="clinical-section">
-            <div class="section-heading">Patient History</div>
-            <div class="clinical-text">{{ case.history }}</div>
-        </div>
-
-        <div class="clinical-section">
-            <div class="section-heading">Objective Clinical Findings (FR2c)</div>
-
-            {% if case.has_vitals %}
-                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 0.35rem;">
-                    Bedside Physiological Vitals:
+        <div class="card border shadow-sm p-4 mb-4">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap pb-3 border-bottom">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        {% if case.status == 'OPEN' %}
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Open Intake</span>
+                        {% elif case.status == 'UNDER_REVIEW' %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Under Active Review</span>
+                        {% elif case.status == 'DECIDED' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Decided / Closed</span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ case.get_status_display }}</span>
+                        {% endif %}
+                    </div>
+                    <h1 class="h4 fw-bold text-dark mb-1">
+                        {{ case.title }}
+                    </h1>
+                    <p class="text-secondary small mb-0">
+                        Initiated by <strong class="text-dark">Dr. {{ case.owner.full_name }}</strong> &bull; {{ case.created_at|date:"M d, Y H:i" }} UTC
+                    </p>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem; margin-bottom: 1rem;">
-                    {% for v in case.vitals_list %}
-                        <div style="background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem 0.75rem;">
-                            <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted);">{{ v.name }}</div>
-                            <div style="font-size: 0.9375rem; font-weight: 700; color: var(--color-text-main); margin: 0.2rem 0;">{{ v.value }}</div>
-                            <span style="font-size: 0.6875rem; font-weight: 600; padding: 0.1rem 0.4rem; border-radius: var(--radius-pill); background: {% if v.flag == 'critical' %}#FEE2E2; color: #B91C1C;{% elif v.flag == 'warning' %}#FEF3C7; color: #B45309;{% else %}#ECFDF5; color: #047857;{% endif %}">
-                                {{ v.tag }}
-                            </span>
+                <div>
+                    <span class="badge bg-light text-secondary border px-3 py-2">
+                        {% if is_case_owner %}<i class="bi bi-star-fill text-warning me-1"></i> Case Owner{% else %}<i class="bi bi-person-check-fill text-primary me-1"></i> Admitted Specialist{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Clinical Summary -->
+            <div class="py-3 border-bottom">
+                <h2 class="text-uppercase text-secondary fw-semibold small mb-2" style="font-size: 0.75rem;">
+                    Executive Clinical Summary
+                </h2>
+                <div class="text-dark small lh-base">
+                    {{ case.clinical_summary }}
+                </div>
+            </div>
+
+            <!-- Patient History -->
+            <div class="py-3 border-bottom">
+                <h2 class="text-uppercase text-secondary fw-semibold small mb-2" style="font-size: 0.75rem;">
+                    Patient Medical History
+                </h2>
+                <div class="text-dark small lh-base">
+                    {{ case.history }}
+                </div>
+            </div>
+
+            <!-- Objective Clinical Evidence (Zones A, B, C) -->
+            <div class="py-3 border-bottom">
+                <h2 class="text-uppercase text-secondary fw-semibold small mb-3" style="font-size: 0.75rem;">
+                    Clinical Findings & Diagnostic Evidence
+                </h2>
+
+                <!-- Zone A Vitals -->
+                {% if case.has_vitals %}
+                    <div class="mb-3">
+                        <div class="text-muted small fw-semibold text-uppercase mb-2" style="font-size: 0.7rem;">
+                            Zone A: Bedside Physiological Vitals
                         </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            {% if lab_results %}
-                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 0.35rem;">
-                    Quantitative Laboratory Panels ({{ lab_results|length }}):
-                </div>
-                <div style="overflow-x: auto; background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem; margin-bottom: 1rem;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid var(--color-border); text-align: left; font-size: 0.6875rem; text-transform: uppercase; color: var(--color-text-muted);">
-                                <th style="padding: 0.35rem 0.5rem;">Test Name</th>
-                                <th style="padding: 0.35rem 0.5rem;">Value</th>
-                                <th style="padding: 0.35rem 0.5rem;">Reference Interval</th>
-                                <th style="padding: 0.35rem 0.5rem;">Clinical Flag</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for lab in lab_results %}
-                                <tr style="border-bottom: 1px solid var(--color-border-faint);">
-                                    <td style="padding: 0.4rem 0.5rem; font-weight: 600;">{{ lab.test_name }}</td>
-                                    <td style="padding: 0.4rem 0.5rem;">
-                                        <strong>{{ lab.value }}</strong> {% if lab.unit %}<span style="font-size: 0.75rem; color: var(--color-text-muted);">{{ lab.unit }}</span>{% endif %}
-                                    </td>
-                                    <td style="padding: 0.4rem 0.5rem; font-size: 0.75rem; color: var(--color-text-muted);">
-                                        {% if lab.reference_range %}{{ lab.reference_range }}{% else %}—{% endif %}
-                                    </td>
-                                    <td style="padding: 0.4rem 0.5rem;">
-                                        <span style="font-size: 0.6875rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: var(--radius-pill); background: {% if lab.flag == 'CRITICAL' %}#FEE2E2; color: #B91C1C;{% elif lab.flag == 'HIGH' or lab.flag == 'LOW' %}#FEF3C7; color: #B45309;{% else %}#ECFDF5; color: #047857;{% endif %}">
-                                            {{ lab.get_flag_display }}
-                                        </span>
-                                    </td>
-                                </tr>
+                        <div class="row g-2">
+                            {% for v in case.vitals_list %}
+                                <div class="col-sm-6 col-md-4 col-lg-2">
+                                    <div class="card border bg-light p-2 h-100">
+                                        <div class="text-muted small text-uppercase fw-bold" style="font-size: 0.65rem;">{{ v.name }}</div>
+                                        <div class="fw-bold text-dark my-1" style="font-size: 0.95rem;">{{ v.value }}</div>
+                                        <div class="mt-auto">
+                                            <span class="badge {% if v.flag == 'critical' %}bg-danger-subtle text-danger border border-danger-subtle{% elif v.flag == 'warning' %}bg-warning-subtle text-warning-emphasis border border-warning-subtle{% else %}bg-success-subtle text-success border border-success-subtle{% endif %}" style="font-size: 0.65rem;">
+                                                {{ v.tag }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Zone B Laboratory Panels -->
+                {% if lab_results %}
+                    <div class="mb-3">
+                        <div class="text-muted small fw-semibold text-uppercase mb-2" style="font-size: 0.7rem;">
+                            Zone B: Quantitative Laboratory Panels ({{ lab_results|length }})
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Test Name</th>
+                                        <th>Value</th>
+                                        <th>Reference Interval</th>
+                                        <th>Clinical Flag</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for lab in lab_results %}
+                                        <tr>
+                                            <td class="fw-semibold">{{ lab.test_name }}</td>
+                                            <td>
+                                                <strong class="{% if lab.flag == 'CRITICAL' %}text-danger{% elif lab.flag == 'HIGH' or lab.flag == 'LOW' %}text-warning{% endif %}">
+                                                    {{ lab.value }}
+                                                </strong>
+                                                {% if lab.unit %}<span class="text-muted small">{{ lab.unit }}</span>{% endif %}
+                                            </td>
+                                            <td class="text-muted small">
+                                                {% if lab.reference_range %}{{ lab.reference_range }}{% else %}—{% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge {% if lab.flag == 'CRITICAL' %}bg-danger-subtle text-danger border border-danger-subtle{% elif lab.flag == 'HIGH' or lab.flag == 'LOW' %}bg-warning-subtle text-warning-emphasis border border-warning-subtle{% else %}bg-success-subtle text-success border border-success-subtle{% endif %}">
+                                                    {{ lab.get_flag_display }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Zone C Physical Exam Observations -->
+                <div>
+                    <div class="text-muted small fw-semibold text-uppercase mb-1" style="font-size: 0.7rem;">
+                        Zone C: Physical Examination & Clinical Observations
+                    </div>
+                    <div class="card border bg-light p-3 small text-dark lh-base">
+                        {{ case.findings }}
+                    </div>
                 </div>
-            {% endif %}
-
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 0.35rem;">
-                Physical Examination & Narrative Observations:
             </div>
-            <div class="clinical-text" style="background-color: var(--color-surface-inset); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--color-border-faint);">
-                {{ case.findings }}
-            </div>
-        </div>
 
-        <div class="clinical-section">
-            <div class="section-heading">Diagnostic Media & Attachments ({{ attachments|length }})</div>
-            {% if attachments %}
-                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
-                    {% for att in attachments %}
-                        <div style="display: flex; align-items: center; justify-content: space-between; background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem 0.75rem;">
-                            <div>
-                                <strong style="font-size: 0.8125rem;">{{ att.title }}</strong>
-                                <span style="font-size: 0.75rem; color: var(--color-text-muted);">({{ att.get_category_display }} &bull; {{ att.file_size_bytes|filesizeformat }})</span>
+            <!-- Diagnostic Media -->
+            <div class="py-3 border-bottom">
+                <h2 class="text-uppercase text-secondary fw-semibold small mb-2" style="font-size: 0.75rem;">
+                    Diagnostic Media & Studies ({{ attachments|length }})
+                </h2>
+                {% if attachments %}
+                    <div class="d-flex flex-column gap-2 mt-2">
+                        {% for att in attachments %}
+                            <div class="card border p-2 d-flex flex-row justify-content-between align-items-center">
+                                <div>
+                                    <strong class="small text-dark">{{ att.title }}</strong>
+                                    <span class="text-muted small">({{ att.get_category_display }} &bull; {{ att.file_size_bytes|filesizeformat }})</span>
+                                </div>
+                                <a href="{% url 'cases:attachment_download' case_id=case.id attachment_id=att.id %}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-file-earmark-arrow-down"></i> View Study
+                                </a>
                             </div>
-                            <a href="{% url 'cases:attachment_download' case_id=case.id attachment_id=att.id %}" target="_blank" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                View Study &rarr;
-                            </a>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p style="font-size: 0.8125rem; color: var(--color-text-muted);">No diagnostic media attached to this case.</p>
-            {% endif %}
-        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted small mb-0">No diagnostic imaging or laboratory PDF studies attached.</p>
+                {% endif %}
+            </div>
 
-        <div class="clinical-section">
-            <div class="section-heading">Admitted Specialists</div>
-            {% if team_members %}
-                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
-                    {% for m in team_members %}
-                        <div style="display: inline-flex; align-items: center; gap: 0.5rem; background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: 0.375rem 0.75rem; font-size: 0.8125rem;">
-                            <span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-success);"></span>
-                            {{ m.specialist.full_name }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p style="font-size: 0.8125rem; color: var(--color-text-muted);">No specialists admitted yet.</p>
-            {% endif %}
+            <!-- Admitted Specialists -->
+            <div class="pt-3">
+                <h2 class="text-uppercase text-secondary fw-semibold small mb-2" style="font-size: 0.75rem;">
+                    Admitted Specialist Team ({{ team_members|length }})
+                </h2>
+                {% if team_members %}
+                    <div class="d-flex flex-wrap gap-2 mt-1">
+                        {% for m in team_members %}
+                            <span class="badge bg-light text-dark border px-3 py-2 d-inline-flex align-items-center gap-1">
+                                <span class="bg-success rounded-circle d-inline-block" style="width: 6px; height: 6px;"></span>
+                                Dr. {{ m.specialist.full_name }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted small mb-0">No consulting specialists have been admitted to this case yet.</p>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

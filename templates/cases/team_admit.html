@@ -2,123 +2,103 @@
 
 {% block title %}Admit Specialists — {{ case.title }}{% endblock %}
 
-{% block extra_head %}
-<style>
-    .team-wrapper {
-        max-width: 800px;
-        margin: 1rem auto;
-    }
-    .roster-card {
-        background-color: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-card);
-        padding: 1.5rem;
-        margin-top: 1.5rem;
-        box-shadow: var(--shadow-card);
-    }
-    .roster-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.875rem 0;
-        border-bottom: 1px solid var(--color-border-faint);
-    }
-    .roster-item:last-child {
-        border-bottom: none;
-    }
-    .avatar-chip {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        background-color: var(--color-primary-wash);
-        color: var(--color-primary);
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-    }
-    .error-text {
-        color: var(--color-error);
-        font-size: 0.75rem;
-        margin-top: 0.25rem;
-        font-weight: 500;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="team-wrapper">
-    <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-        <a href="{% url 'cases:dashboard' %}" class="btn-link">&larr; Back to Dashboard</a>
-        <a href="{% url 'cases:case_detail' case_id=case.id %}" class="btn btn-secondary" style="padding: 0.375rem 0.875rem; font-size: 0.8125rem;">
-            View Case Summary
-        </a>
-    </div>
-
-    <div class="card">
-        <div style="margin-bottom: 1.5rem;">
-            <span class="role-badge">Case Team Management</span>
-            <h1 style="font-size: 1.375rem; font-weight: 700; margin-top: 0.375rem;">
-                Admit Advisory Specialists
-            </h1>
-            <p style="font-size: 0.875rem; color: var(--color-text-sub);">
-                Case: <strong style="color: var(--color-text-main);">{{ case.title }}</strong>
-            </p>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Top Toolbar -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="{% url 'cases:dashboard' %}" class="btn btn-sm btn-link text-decoration-none p-0 text-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <div class="btn-group btn-group-sm">
+                <a href="{% url 'cases:workspace' case_id=case.id %}" class="btn btn-outline-primary">
+                    <i class="bi bi-layout-three-columns me-1"></i> Workspace
+                </a>
+                <a href="{% url 'cases:case_detail' case_id=case.id %}" class="btn btn-outline-secondary">
+                    View Case Summary
+                </a>
+            </div>
         </div>
 
-        <form method="post" novalidate style="background-color: var(--color-surface-inset); padding: 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
-            {% csrf_token %}
-            <div class="form-group" style="margin-bottom: 0.75rem;">
-                <label for="id_specialist_email" class="form-label">Specialist Registered Email <span style="color: var(--color-error)">*</span></label>
-                <div style="display: flex; gap: 0.75rem;">
-                    <div style="flex: 1;">
-                        {{ form.specialist_email }}
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="height: 42px; white-space: nowrap;">
-                        + Admit Specialist
+        <div class="card border shadow-sm p-4 mb-4">
+            <!-- Header -->
+            <div class="mb-4 pb-3 border-bottom">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                        Case Team Governance
+                    </span>
+                    <span class="badge bg-light text-secondary border">
+                        Case: {{ case.title }}
+                    </span>
+                </div>
+                <h1 class="h4 fw-bold text-dark mb-1">
+                    Admit Consulting Specialists
+                </h1>
+                <p class="text-secondary small mb-0">
+                    Admit qualified medical specialists to review objective findings, participate in discussion threads, and contribute differential diagnostic hypotheses.
+                </p>
+            </div>
+
+            <!-- Admission Form -->
+            <form method="post" novalidate class="card border bg-light p-3 mb-4 shadow-sm">
+                {% csrf_token %}
+                <label for="id_specialist_email" class="form-label fw-bold">
+                    Specialist Registered Email Address <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                    {{ form.specialist_email }}
+                    <button type="submit" class="btn btn-primary px-3">
+                        <i class="bi bi-person-plus-fill me-1"></i> Admit Specialist
                     </button>
                 </div>
-                <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.25rem;">
-                    Only clinicians registered with the <strong>Specialist</strong> role can be admitted (G-08).
+                <div class="form-text mt-1 text-muted">
+                    <i class="bi bi-info-circle me-1"></i> Only clinicians registered with the <strong>Specialist</strong> role can be admitted to consultation teams.
                 </div>
                 {% if form.specialist_email.errors %}
-                    <div class="error-text">{{ form.specialist_email.errors.0 }}</div>
+                    <div class="text-danger small mt-1">{{ form.specialist_email.errors.0 }}</div>
+                {% endif %}
+            </form>
+
+            <!-- Team Roster -->
+            <div class="card border shadow-sm">
+                <div class="card-header bg-light py-2 px-3 fw-bold small text-uppercase text-secondary d-flex justify-content-between align-items-center">
+                    <span>Admitted Specialists ({{ team_members.count }})</span>
+                    <span class="badge bg-secondary-subtle text-secondary border">Active Team</span>
+                </div>
+
+                {% if team_members %}
+                    <ul class="list-group list-group-flush">
+                        {% for member in team_members %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center border border-primary-subtle" style="width: 38px; height: 38px; font-size: 0.95rem;">
+                                        {{ member.specialist.full_name|slice:":1" }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark mb-0">
+                                            Dr. {{ member.specialist.full_name }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            {{ member.specialist.email }} &bull; Admitted {{ member.admitted_at|date:"M d, Y H:i" }} UTC
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-light text-secondary border px-2 py-1">
+                                    <i class="bi bi-check-circle-fill text-success me-1"></i> Advisory Consultant
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="card-body text-center py-4 text-muted small">
+                        <i class="bi bi-people fs-2 text-secondary mb-2 d-block"></i>
+                        No consulting specialists have been admitted to this case yet. Enter a specialist's email above to grant consultation access.
+                    </div>
                 {% endif %}
             </div>
-        </form>
-
-        <div class="roster-card">
-            <h2 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--color-text-main);">
-                Admitted Specialist Team ({{ team_members.count }})
-            </h2>
-
-            {% if team_members %}
-                {% for member in team_members %}
-                    <div class="roster-item">
-                        <div style="display: flex; align-items: center; gap: 0.875rem;">
-                            <div class="avatar-chip">
-                                {{ member.specialist.full_name|slice:":1" }}
-                            </div>
-                            <div>
-                                <div style="font-size: 0.875rem; font-weight: 600; color: var(--color-text-main);">
-                                    {{ member.specialist.full_name }}
-                                </div>
-                                <div style="font-size: 0.75rem; color: var(--color-text-sub);">
-                                    {{ member.specialist.email }} &bull; Admitted {{ member.admitted_at|date:"M d, Y H:i" }} UTC
-                                </div>
-                            </div>
-                        </div>
-                        <span class="role-badge" style="background-color: var(--color-surface-inset); color: var(--color-text-sub); border: 1px solid var(--color-border);">
-                            Advisory Consultant
-                        </span>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div style="text-align: center; padding: 2rem; color: var(--color-text-muted); font-size: 0.875rem;">
-                    No specialists have been admitted to this case yet. Enter a specialist's email above to grant advisory access.
-                </div>
-            {% endif %}
         </div>
     </div>
 </div>

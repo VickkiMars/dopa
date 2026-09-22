@@ -1,373 +1,310 @@
 {% extends 'base.html' %}
 
-{% block title %}Create New Clinical Case — DOPA{% endblock %}
+{% block title %}Initiate Clinical Case — DOPA{% endblock %}
 
 {% block extra_head %}
 <style>
-    .create-case-wrapper {
-        max-width: 900px;
-        margin: 1.25rem auto;
-    }
-    .form-help {
-        font-size: 0.75rem;
-        color: var(--color-text-muted);
-        margin-top: 0.25rem;
-    }
-    .error-text {
-        color: var(--color-error);
-        font-size: 0.75rem;
-        margin-top: 0.25rem;
-        font-weight: 500;
-    }
-    .hint-box {
-        background-color: var(--color-primary-wash);
-        border: 1px solid rgba(37, 99, 235, 0.2);
-        border-radius: var(--radius-lg);
-        padding: 1rem 1.25rem;
-        margin-bottom: 1.5rem;
-        font-size: 0.8125rem;
-        color: var(--color-primary);
-        line-height: 1.45;
-    }
-
-    /* Structured Clinical Intake Zones */
-    .intake-section {
-        background: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-card);
-        padding: 1.25rem;
-        margin-top: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-    .intake-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 0.625rem;
-        border-bottom: 1px solid var(--color-border-faint);
-    }
-    .intake-title {
-        font-size: 0.9375rem;
-        font-weight: 700;
-        color: var(--color-text-main);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .intake-subtitle {
-        font-size: 0.75rem;
-        color: var(--color-text-muted);
-    }
-
-    /* Zone A: Vitals Grid */
     .vitals-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: 0.75rem;
     }
     .vital-card {
-        background: var(--color-surface-inset);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
+        background-color: #F8F9FA;
+        border: 1px solid #DEE2E6;
+        border-radius: 0.25rem;
         padding: 0.75rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .vital-card:focus-within {
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 2px var(--color-primary-wash);
+        border-color: #86B7FE;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        background-color: #FFFFFF;
     }
     .vital-label {
-        font-size: 0.6875rem;
+        font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: var(--color-text-sub);
-    }
-    .vital-field {
-        font-size: 0.9375rem;
-        font-weight: 600;
-        color: var(--color-text-main);
-        background: transparent;
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-sm);
-        padding: 0.35rem 0.5rem;
-        width: 100%;
+        color: #495057;
+        margin-bottom: 0.25rem;
+        display: block;
     }
     .vital-unit {
-        font-size: 0.6875rem;
-        color: var(--color-text-muted);
-        align-self: flex-end;
+        font-size: 0.7rem;
+        color: #6C757D;
+        margin-top: 0.2rem;
+        display: block;
     }
-
-    /* Zone B: Lab Builder */
     .preset-chips-wrap {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .preset-chip {
-        background: var(--color-surface-inset);
-        border: 1px dashed var(--color-border);
-        color: var(--color-text-sub);
-        font-size: 0.75rem;
-        font-weight: 500;
-        padding: 0.25rem 0.625rem;
-        border-radius: var(--radius-pill);
-        cursor: pointer;
-        transition: all 0.15s ease;
-    }
-    .preset-chip:hover {
-        background: var(--color-primary-wash);
-        color: var(--color-primary);
-        border-color: var(--color-primary);
-    }
-    .lab-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.8125rem;
-    }
-    .lab-table th {
-        text-align: left;
-        padding: 0.5rem;
-        font-size: 0.6875rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--color-text-muted);
-        border-bottom: 1px solid var(--color-border);
-    }
-    .lab-table td {
-        padding: 0.5rem;
-        vertical-align: middle;
-        border-bottom: 1px solid var(--color-border-faint);
+        gap: 0.35rem;
     }
     .lab-input {
         width: 100%;
         font-size: 0.8125rem;
-        padding: 0.35rem 0.5rem;
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-sm);
-        background: var(--color-surface);
+        padding: 0.3rem 0.5rem;
+        border: 1px solid #CED4DA;
+        border-radius: 0.25rem;
+    }
+    .lab-input:focus {
+        border-color: #86B7FE;
+        outline: none;
     }
     .lab-select {
-        font-size: 0.75rem;
-        padding: 0.35rem 0.5rem;
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-sm);
-        background: var(--color-surface);
+        width: 100%;
+        font-size: 0.8125rem;
+        padding: 0.3rem 0.5rem;
+        border: 1px solid #CED4DA;
+        border-radius: 0.25rem;
+        background-color: #FFFFFF;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="create-case-wrapper">
-    <div style="margin-bottom: 1.5rem;">
-        <a href="{% url 'cases:dashboard' %}" class="btn-link">&larr; Back to Dashboard</a>
-    </div>
-
-    <div class="card">
-        <div style="margin-bottom: 1.75rem;">
-            <span class="role-badge" style="margin-bottom: 0.5rem;">Case Owner Intake</span>
-            <h1 style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 0.375rem;">
-                Initiate Complex Clinical Case
-            </h1>
-            <p style="font-size: 0.875rem; color: var(--color-text-sub);">
-                Decompose presentation into structured physiological vitals, quantitative laboratory markers, and narrative observations (FR2c).
-            </p>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Breadcrumb & Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <a href="{% url 'cases:dashboard' %}" class="btn btn-sm btn-link text-decoration-none p-0 text-secondary mb-1">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+                <h1 class="h3 fw-bold text-dark mb-0">Initiate Clinical Case</h1>
+            </div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                Primary Physician Intake
+            </span>
         </div>
 
-        <div class="hint-box">
-            <strong>Clinical Governance Notice:</strong> As the originating Primary Physician, you are designated as the sole Case Owner. You retain full diagnostic and legal authority; all specialist contributions are strictly advisory.
-        </div>
-
-        <form method="post" id="caseCreateForm" novalidate>
-            {% csrf_token %}
-            {{ form.lab_data_json }}
-
-            <div class="form-group">
-                <label for="id_title" class="form-label">Case Title / Presenting Complex <span style="color: var(--color-error)">*</span></label>
-                {{ form.title }}
-                <div class="form-help">{{ form.title.help_text }}</div>
-                {% if form.title.errors %}
-                    <div class="error-text">{{ form.title.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="id_clinical_summary" class="form-label">Clinical Presentation Summary <span style="color: var(--color-error)">*</span></label>
-                {{ form.clinical_summary }}
-                <div class="form-help">{{ form.clinical_summary.help_text }}</div>
-                {% if form.clinical_summary.errors %}
-                    <div class="error-text">{{ form.clinical_summary.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="id_history" class="form-label">Past Medical, Surgical & Social History <span style="color: var(--color-error)">*</span></label>
-                {{ form.history }}
-                <div class="form-help">{{ form.history.help_text }}</div>
-                {% if form.history.errors %}
-                    <div class="error-text">{{ form.history.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <!-- OVERARCHING SECTION HEADER: OBJECTIVE CLINICAL EVIDENCE -->
-            <div style="margin-top: 2.25rem; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--color-border);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div>
-                        <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-main); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                            <span>&#129658;</span> Clinical Findings & Diagnostic Evidence
-                        </h2>
-                        <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.25rem;">
-                            Decomposed telemetry, laboratory panels, and narrative exam observations for multi-specialist consultation.
-                        </div>
-                    </div>
+        <div class="card border shadow-sm p-4 mb-4">
+            <!-- Advisory Banner -->
+            <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+                <i class="bi bi-shield-check fs-5"></i>
+                <div class="small">
+                    <strong>Structured Diagnostic Protocol:</strong> As Primary Physician, you are creating the master consultation dossier. Decomposed bedside vitals, quantitative laboratory panels, and physical observations provide verifiable evidence that admitted specialists will cite when formulating differential diagnoses.
                 </div>
             </div>
 
-            <!-- ZONE A: BEDSIDE TELEMETRY VITALS STRIP -->
-            <div class="intake-section">
-                <div class="intake-header">
-                    <div>
-                        <div class="intake-title">
-                            <span>&#128147;</span> Zone A: Bedside Physiological Vitals
-                        </div>
-                        <div class="intake-subtitle">Record bedside physiological measurements to track patient stability and trigger automated abnormal threshold alerts.</div>
-                    </div>
-                </div>
+            <form method="post" id="caseCreateForm">
+                {% csrf_token %}
+                {{ form.lab_data_json }}
 
-                <div class="vitals-grid">
-                    <div class="vital-card">
-                        <label for="id_temperature_c" class="vital-label">Temperature</label>
-                        {{ form.temperature_c }}
-                        <span class="vital-unit">°C (Celsius)</span>
-                        {% if form.temperature_c.errors %}
-                            <div class="error-text">{{ form.temperature_c.errors.0 }}</div>
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger mb-3">
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Part 1: Case Identification & Narrative -->
+                <div class="mb-4">
+                    <h2 class="h5 fw-bold text-dark pb-2 border-bottom">
+                        1. Patient Presentation & History
+                    </h2>
+
+                    <div class="mb-3">
+                        <label for="id_title" class="form-label">
+                            Clinical Case Title <span class="text-danger">*</span>
+                        </label>
+                        {{ form.title }}
+                        <div class="form-text">{{ form.title.help_text }}</div>
+                        {% if form.title.errors %}
+                            <div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>
                         {% endif %}
                     </div>
 
-                    <div class="vital-card">
-                        <label for="id_heart_rate_bpm" class="vital-label">Heart Rate</label>
-                        {{ form.heart_rate_bpm }}
-                        <span class="vital-unit">bpm</span>
-                        {% if form.heart_rate_bpm.errors %}
-                            <div class="error-text">{{ form.heart_rate_bpm.errors.0 }}</div>
+                    <div class="mb-3">
+                        <label for="id_clinical_summary" class="form-label">
+                            Executive Clinical Summary <span class="text-danger">*</span>
+                        </label>
+                        {{ form.clinical_summary }}
+                        <div class="form-text">{{ form.clinical_summary.help_text }}</div>
+                        {% if form.clinical_summary.errors %}
+                            <div class="text-danger small mt-1">{{ form.clinical_summary.errors.0 }}</div>
                         {% endif %}
                     </div>
 
-                    <div class="vital-card">
-                        <label class="vital-label">Blood Pressure</label>
-                        <div style="display: flex; align-items: center; gap: 0.25rem;">
-                            {{ form.bp_systolic }}
-                            <span style="color: var(--color-text-muted); font-weight: 700;">/</span>
-                            {{ form.bp_diastolic }}
-                        </div>
-                        <span class="vital-unit">mmHg (Sys/Dia)</span>
-                        {% if form.bp_systolic.errors %}
-                            <div class="error-text">{{ form.bp_systolic.errors.0 }}</div>
-                        {% endif %}
-                        {% if form.bp_diastolic.errors %}
-                            <div class="error-text">{{ form.bp_diastolic.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="vital-card">
-                        <label for="id_respiratory_rate" class="vital-label">Resp. Rate</label>
-                        {{ form.respiratory_rate }}
-                        <span class="vital-unit">breaths/min</span>
-                        {% if form.respiratory_rate.errors %}
-                            <div class="error-text">{{ form.respiratory_rate.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="vital-card">
-                        <label for="id_oxygen_saturation" class="vital-label">SpO2</label>
-                        {{ form.oxygen_saturation }}
-                        <span class="vital-unit">% Saturation</span>
-                        {% if form.oxygen_saturation.errors %}
-                            <div class="error-text">{{ form.oxygen_saturation.errors.0 }}</div>
+                    <div class="mb-3">
+                        <label for="id_history" class="form-label">
+                            Comprehensive Patient Medical History <span class="text-danger">*</span>
+                        </label>
+                        {{ form.history }}
+                        <div class="form-text">{{ form.history.help_text }}</div>
+                        {% if form.history.errors %}
+                            <div class="text-danger small mt-1">{{ form.history.errors.0 }}</div>
                         {% endif %}
                     </div>
                 </div>
-            </div>
 
-            <!-- ZONE B: QUANTITATIVE LAB PANELS BUILDER -->
-            <div class="intake-section">
-                <div class="intake-header">
-                    <div>
-                        <div class="intake-title">
-                            <span>&#128300;</span> Zone B: Quantitative Laboratory Tests & Panels
+                <!-- Part 2: Objective Clinical Findings Module -->
+                <div class="mb-4 pt-2">
+                    <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom">
+                        <div>
+                            <h2 class="h5 fw-bold text-dark mb-0">
+                                2. Clinical Findings & Diagnostic Evidence
+                            </h2>
+                            <div class="text-muted small">
+                                Decomposed bedside telemetry, quantitative laboratory panels, and physical exam findings.
+                            </div>
                         </div>
-                        <div class="intake-subtitle">Record discrete biomarkers that admitted specialists can cite as evidence when formulating differential diagnostic hypotheses.</div>
                     </div>
-                    <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.75rem;" onclick="addLabRow()">
-                        + Add Custom Lab Test
+
+                    <!-- Zone A: Bedside Telemetry Vitals -->
+                    <div class="card border bg-white p-3 mb-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div>
+                                <h3 class="h6 fw-bold text-dark mb-0">
+                                    <i class="bi bi-heart-pulse-fill text-danger me-1"></i> Zone A: Bedside Physiological Vitals
+                                </h3>
+                                <div class="text-secondary small">
+                                    Record bedside physiological measurements to track patient stability and trigger automated abnormal threshold alerts.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="vitals-grid mt-2">
+                            <div class="vital-card">
+                                <label for="id_temperature_c" class="vital-label">Temperature</label>
+                                {{ form.temperature_c }}
+                                <span class="vital-unit">°C (Celsius)</span>
+                                {% if form.temperature_c.errors %}
+                                    <div class="text-danger small">{{ form.temperature_c.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="vital-card">
+                                <label for="id_heart_rate_bpm" class="vital-label">Heart Rate</label>
+                                {{ form.heart_rate_bpm }}
+                                <span class="vital-unit">bpm</span>
+                                {% if form.heart_rate_bpm.errors %}
+                                    <div class="text-danger small">{{ form.heart_rate_bpm.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="vital-card">
+                                <label class="vital-label">Blood Pressure</label>
+                                <div class="d-flex align-items-center gap-1">
+                                    {{ form.bp_systolic }}
+                                    <span class="text-muted fw-bold">/</span>
+                                    {{ form.bp_diastolic }}
+                                </div>
+                                <span class="vital-unit">mmHg (Sys/Dia)</span>
+                                {% if form.bp_systolic.errors %}
+                                    <div class="text-danger small">{{ form.bp_systolic.errors.0 }}</div>
+                                {% endif %}
+                                {% if form.bp_diastolic.errors %}
+                                    <div class="text-danger small">{{ form.bp_diastolic.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="vital-card">
+                                <label for="id_respiratory_rate" class="vital-label">Resp. Rate</label>
+                                {{ form.respiratory_rate }}
+                                <span class="vital-unit">breaths/min</span>
+                                {% if form.respiratory_rate.errors %}
+                                    <div class="text-danger small">{{ form.respiratory_rate.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="vital-card">
+                                <label for="id_oxygen_saturation" class="vital-label">SpO2</label>
+                                {{ form.oxygen_saturation }}
+                                <span class="vital-unit">% Saturation</span>
+                                {% if form.oxygen_saturation.errors %}
+                                    <div class="text-danger small">{{ form.oxygen_saturation.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zone B: Quantitative Laboratory Panels -->
+                    <div class="card border bg-white p-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                            <div>
+                                <h3 class="h6 fw-bold text-dark mb-0">
+                                    <i class="bi bi-eyedropper text-primary me-1"></i> Zone B: Quantitative Laboratory Tests & Panels
+                                </h3>
+                                <div class="text-secondary small">
+                                    Record discrete biomarkers that admitted specialists can cite as evidence when formulating differential diagnostic hypotheses.
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addLabRow()">
+                                <i class="bi bi-plus"></i> Add Custom Lab Test
+                            </button>
+                        </div>
+
+                        <!-- Presets -->
+                        <div class="bg-light p-2 rounded border mb-3">
+                            <span class="text-secondary text-uppercase fw-semibold" style="font-size: 0.7rem;">Quick Diagnostic Presets:</span>
+                            <div class="preset-chips-wrap mt-1">
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 small" onclick="addPresetLab('Serum Ferritin', '4200', 'ng/mL', '15 - 200 ng/mL', 'CRITICAL')">+ Ferritin</button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 small" onclick="addPresetLab('White Blood Cells (WBC)', '18.5', 'x10^9/L', '4.5 - 11.0 x10^9/L', 'HIGH')">+ WBC</button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 small" onclick="addPresetLab('Hemoglobin (Hb)', '7.2', 'g/dL', '13.0 - 17.5 g/dL', 'CRITICAL')">+ Hemoglobin</button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 small" onclick="addPresetLab('C-Reactive Protein (CRP)', '120', 'mg/L', '< 5 mg/L', 'HIGH')">+ CRP</button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 small" onclick="addPresetLab('Erythrocyte Sed. Rate (ESR)', '85', 'mm/hr', '< 20 mm/hr', 'HIGH')">+ ESR</button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 small" onclick="addPresetLab('Serum Iron', '20', 'ug/dL', '60 - 170 ug/dL', 'LOW')">+ Serum Iron</button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill py-0 px-2 small" onclick="addPresetLab('Total Iron Binding (TIBC)', '450', 'ug/dL', '250 - 450 ug/dL', 'HIGH')">+ TIBC</button>
+                            </div>
+                        </div>
+
+                        <!-- Lab Table -->
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered align-middle mb-1" id="labTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 28%;">Test / Biomarker</th>
+                                        <th style="width: 20%;">Value</th>
+                                        <th style="width: 16%;">Unit</th>
+                                        <th style="width: 20%;">Ref. Interval</th>
+                                        <th style="width: 12%;">Flag</th>
+                                        <th style="width: 4%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="labTableBody">
+                                    <!-- Populated dynamically via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="noLabsNotice" class="text-center text-muted small py-3">
+                            <i class="bi bi-info-circle me-1"></i> No discrete lab tests added yet. Click a Quick Preset above or "+ Add Custom Lab Test".
+                        </div>
+                    </div>
+
+                    <!-- Zone C: Physical Exam & Narrative Observations -->
+                    <div class="card border bg-white p-3 mb-4">
+                        <div class="mb-2">
+                            <h3 class="h6 fw-bold text-dark mb-0">
+                                <i class="bi bi-clipboard-pulse text-warning me-1"></i> Zone C: Physical Examination & Clinical Observations <span class="text-danger">*</span>
+                            </h3>
+                            <div class="text-secondary small">
+                                Document organ system assessments, dermatological lesions, and qualitative impressions from the bedside physical exam.
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            {{ form.findings }}
+                            <div class="form-text">{{ form.findings.help_text }}</div>
+                            {% if form.findings.errors %}
+                                <div class="text-danger small mt-1">{{ form.findings.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-end align-items-center gap-2 pt-3 border-top">
+                    <a href="{% url 'cases:dashboard' %}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                        Save Case & Proceed to Workspace <i class="bi bi-arrow-right ms-1"></i>
                     </button>
                 </div>
-
-                <div style="margin-bottom: 0.75rem;">
-                    <span style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted);">Quick Diagnostic Presets:</span>
-                    <div class="preset-chips-wrap" style="margin-top: 0.35rem;">
-                        <button type="button" class="preset-chip" onclick="addPresetLab('Serum Ferritin', '4200', 'ng/mL', '15 - 200 ng/mL', 'CRITICAL')">+ Ferritin</button>
-                        <button type="button" class="preset-chip" onclick="addPresetLab('White Blood Cells (WBC)', '18.5', 'x10^9/L', '4.5 - 11.0 x10^9/L', 'HIGH')">+ WBC</button>
-                        <button type="button" class="preset-chip" onclick="addPresetLab('Hemoglobin (Hb)', '7.2', 'g/dL', '13.0 - 17.5 g/dL', 'CRITICAL')">+ Hemoglobin</button>
-                        <button type="button" class="preset-chip" onclick="addPresetLab('C-Reactive Protein (CRP)', '120', 'mg/L', '< 5 mg/L', 'HIGH')">+ CRP</button>
-                        <button type="button" class="preset-chip" onclick="addPresetLab('Erythrocyte Sed. Rate (ESR)', '85', 'mm/hr', '< 20 mm/hr', 'HIGH')">+ ESR</button>
-                        <button type="button" class="preset-chip" onclick="addPresetLab('Serum Iron', '20', 'ug/dL', '60 - 170 ug/dL', 'LOW')">+ Serum Iron</button>
-                        <button type="button" class="preset-chip" onclick="addPresetLab('Total Iron Binding (TIBC)', '450', 'ug/dL', '250 - 450 ug/dL', 'HIGH')">+ TIBC</button>
-                    </div>
-                </div>
-
-                <table class="lab-table" id="labTable">
-                    <thead>
-                        <tr>
-                            <th style="width: 28%;">Test / Panel Name</th>
-                            <th style="width: 20%;">Result Value</th>
-                            <th style="width: 16%;">Unit</th>
-                            <th style="width: 20%;">Reference Interval</th>
-                            <th style="width: 12%;">Flag</th>
-                            <th style="width: 4%;"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="labTableBody">
-                        <!-- Populated dynamically via JavaScript -->
-                    </tbody>
-                </table>
-                <div id="noLabsNotice" style="text-align: center; padding: 1.25rem; font-size: 0.75rem; color: var(--color-text-muted);">
-                    No discrete lab tests added yet. Click a preset above or "+ Add Custom Lab Test".
-                </div>
-            </div>
-
-            <!-- ZONE C: PHYSICAL EXAM & QUALITATIVE OBSERVATIONS -->
-            <div class="intake-section" style="margin-bottom: 2rem;">
-                <div class="intake-header">
-                    <div>
-                        <div class="intake-title">
-                            <span>&#128221;</span> Zone C: Physical Examination & Clinical Observations <span style="color: var(--color-error)">*</span>
-                        </div>
-                        <div class="intake-subtitle">Document organ system assessments, dermatological lesions, and qualitative impressions from the bedside physical exam.</div>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 0;">
-                    {{ form.findings }}
-                    <div class="form-help">{{ form.findings.help_text }}</div>
-                    {% if form.findings.errors %}
-                        <div class="error-text">{{ form.findings.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid var(--color-border-faint); padding-top: 1.25rem;">
-                <a href="{% url 'cases:dashboard' %}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary" style="height: 44px; padding: 0 2rem;">
-                    Save Case & Admit Specialists &rarr;
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -409,8 +346,10 @@
                         <option value="ABNORMAL" ${row.flag === 'ABNORMAL' ? 'selected' : ''}>Abnormal</option>
                     </select>
                 </td>
-                <td>
-                    <button type="button" class="btn-link" style="color: var(--color-error); font-size: 1rem; padding: 0.2rem;" onclick="removeLabRow(${index})" title="Remove test">&times;</button>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removeLabRow(${index})" title="Remove test">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -464,4 +403,3 @@
     });
 </script>
 {% endblock %}
-
