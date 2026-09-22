@@ -67,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cases.context_processors.notification_context',
             ],
         },
     },
@@ -135,6 +136,16 @@ CSRF_COOKIE_SECURE = not DEBUG
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'cases:dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
+
+# Email Configuration (GAP-05, B12, FR-NOTIFY-01)
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'DOPA Clinical Platform <notifications@dopa.internal>')
+SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
 
 import sys
 if 'test' in sys.argv:

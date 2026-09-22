@@ -9,6 +9,7 @@ from django.db import transaction
 from django.core.cache import cache
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, FileResponse, JsonResponse
 from django.utils import timezone
+from django.urls import reverse
 
 from audit.services import log_event
 from audit.models import AuditLog, AuditAction, AuditStatus
@@ -22,6 +23,7 @@ from .forms import (
     CaseAttachmentUploadForm, CaseFindingsUpdateForm, CaseLabResultForm
 )
 from .decorators import role_required, case_owner_required, case_access_required
+from .services.notification_service import notify_user, notify_case_team
 
 
 class DashboardView(LoginRequiredMixin, View):
@@ -150,12 +152,15 @@ class TeamAdmitView(LoginRequiredMixin, View):
                 admitted_by=request.user
             )
 
-            # Dispatch In-App Notification (GAP-05, FAULT-07)
-            Notification.objects.create(
+            # Dispatch In-App & Email Notification (GAP-05, FAULT-07, B12)
+            notify_user(
                 recipient=specialist,
-                case=case,
                 verb='TEAM_ADMISSION',
-                message=f"Dr. {request.user.full_name} has admitted you to collaborate on case '{case.title}'."
+                title="Admitted to Clinical Case Team",
+                message=f"Dr. {request.user.full_name} has admitted you as a consulting specialist on case '{case.title}'.",
+                case=case,
+                action_url=reverse('cases:workspace', kwargs={'case_id': case.id}),
+                send_email=True
             )
 
             # Record SPECIALIST_ADMITTED in audit trail
@@ -434,6 +439,17 @@ class RankingReorderView(View):
                     }
                 )
 
+                # Dispatch Notification (FR-NOTIFY-01)
+                notify_case_team(
+                    case=case,
+                    verb='RANK_UPDATED',
+                    title="Differential Diagnosis Ranking Updated",
+                    message=f"Dr. {request.user.full_name} updated the differential diagnosis ranking for case '{case.title}'. Hypothesis '{current_entry.hypothesis.proposed_diagnosis}' moved to rank #{target_pos}.",
+                    exclude_user=request.user,
+                    action_url=reverse('cases:workspace', kwargs={'case_id': case.id}),
+                    send_email=False
+                )
+
                 messages.success(request, f"Differential priority updated: '{current_entry.hypothesis.proposed_diagnosis}' moved to rank #{target_pos}.")
 
         return redirect('cases:workspace', case_id=case.id)
@@ -485,6 +501,17 @@ class DecisionRecordView(View):
                         'final_diagnosis': decision.final_diagnosis,
                         'advisory_acknowledged': True
                     }
+                )
+
+                # Dispatch In-App & Email Notification (FR-NOTIFY-01)
+                notify_case_team(
+                    case=case,
+                    verb='DECISION_RECORDED',
+                    title="Final Clinical Decision Recorded — Case Closed",
+                    message=f"Dr. {request.user.full_name} has finalized the consultation for case '{case.title}'. Definitive diagnosis: {decision.final_diagnosis}.",
+                    exclude_user=request.user,
+                    action_url=reverse('cases:case_report', kwargs={'case_id': case.id}),
+                    send_email=True
                 )
 
                 messages.success(
@@ -831,5 +858,51 @@ class CaseFindingsUpdateView(LoginRequiredMixin, View):
             messages.error(request, f"Error updating findings: {first_err}")
 
         return redirect('cases:workspace', case_id=case.id)
+
+
+class NotificationListView(LoginRequiredMixin, View):
+    """
+    Dedicated clinical notification center displaying all alerts for the user (GAP-05, B12).
+    """
+    template_name = 'cases/notifications_list.html'
+
+    def get(self, request):
+        user_notifications = Notification.objects.filter(
+            recipient=request.user
+        ).select_related('case').order_by('-created_at')
+
+        return render(request, self.template_name, {
+            'notifications': user_notifications,
+        })
+
+
+class NotificationMarkReadView(LoginRequiredMixin, View):
+    """
+    Marks a single notification as read and navigates to its action_url.
+    """
+    def get(self, request, notification_id):
+        notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+        notification.mark_as_read()
+        if notification.action_url:
+            return redirect(notification.action_url)
+        return redirect('cases:notifications_list')
+
+    def post(self, request, notification_id):
+        notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+        notification.mark_as_read()
+        return redirect('cases:notifications_list')
+
+
+class NotificationMarkAllReadView(LoginRequiredMixin, View):
+    """
+    Marks all notifications for the authenticated clinician as read in bulk.
+    """
+    def post(self, request):
+        Notification.objects.filter(
+            recipient=request.user,
+            is_read=False
+        ).update(is_read=True, read_at=timezone.now())
+        messages.success(request, "All notifications marked as read.")
+        return redirect(request.META.get('HTTP_REFERER') or 'cases:notifications_list')
 
 

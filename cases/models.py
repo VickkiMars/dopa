@@ -2,6 +2,7 @@ from decimal import Decimal
 import uuid
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 
@@ -295,7 +296,7 @@ class CaseTeam(models.Model):
 
 class Notification(models.Model):
     """
-    In-app asynchronous notification for team admission and clinical updates (GAP-05).
+    In-app asynchronous notification for team admission and clinical updates (GAP-05, FAULT-07, FR-NOTIFY-01).
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     recipient = models.ForeignKey(
@@ -311,8 +312,11 @@ class Notification(models.Model):
         related_name='notifications'
     )
     verb = models.CharField(max_length=50)
+    title = models.CharField(max_length=150, default='', blank=True)
     message = models.CharField(max_length=255)
+    action_url = models.CharField(max_length=255, blank=True, default='')
     is_read = models.BooleanField(default=False)
+    read_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -322,6 +326,18 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.recipient.full_name}: {self.verb}"
+
+    def mark_as_read(self):
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
+
+    @classmethod
+    def unread_count_for_user(cls, user):
+        if not user or not user.is_authenticated:
+            return 0
+        return cls.objects.filter(recipient=user, is_read=False).count()
 
 
 class DiagnosisRanking(models.Model):

@@ -1,0 +1,20 @@
+DOPA Clinical Platform — {{ title }}
+
+Dear Dr. {{ recipient.full_name }},
+
+{{ message }}
+
+{% if case %}
+Clinical Case: {{ case.title }}
+Status: {{ case.get_status_display }}
+Primary Physician: Dr. {{ case.owner.full_name }}
+{% endif %}
+
+{% if action_url %}
+Access the case workspace directly:
+{{ action_url }}
+{% endif %}
+
+---
+This is an automated notification from the DOPA Clinical Platform.
+Please do not reply directly to this email.

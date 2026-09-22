@@ -5,6 +5,9 @@ app_name = 'cases'
 
 urlpatterns = [
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+    path('notifications/', views.NotificationListView.as_view(), name='notifications_list'),
+    path('notifications/<uuid:notification_id>/read/', views.NotificationMarkReadView.as_view(), name='notification_read'),
+    path('notifications/mark-all-read/', views.NotificationMarkAllReadView.as_view(), name='notification_mark_all_read'),
     path('cases/create/', views.CaseCreateView.as_view(), name='case_create'),
     path('cases/<uuid:case_id>/team/admit/', views.TeamAdmitView.as_view(), name='team_admit'),
     path('cases/<uuid:case_id>/workspace/', views.WorkspaceView.as_view(), name='workspace'),

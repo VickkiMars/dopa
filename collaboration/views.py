@@ -7,11 +7,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.cache import cache
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
+from django.urls import reverse
 
 from audit.services import log_event
 from audit.models import AuditAction, AuditStatus
 from cases.models import Case, CaseStatus
 from cases.decorators import specialist_team_required, hypothesis_author_required, case_access_required
+from cases.services.notification_service import notify_case_team
 from .models import Hypothesis, DiscussionNote, HypothesisStatus
 from .forms import HypothesisCreateForm, HypothesisWithdrawForm, DiscussionNoteCreateForm
 
@@ -60,6 +62,17 @@ class HypothesisCreateView(View):
                     'proposed_diagnosis': hypothesis.proposed_diagnosis,
                     'case_id': str(case.id)
                 }
+            )
+
+            # Dispatch In-App & Email Notification (FR-NOTIFY-01)
+            notify_case_team(
+                case=case,
+                verb='HYPOTHESIS_SUBMITTED',
+                title="New Diagnostic Hypothesis Submitted",
+                message=f"Dr. {request.user.full_name} submitted a new hypothesis on case '{case.title}': '{hypothesis.proposed_diagnosis}'.",
+                exclude_user=request.user,
+                action_url=reverse('cases:workspace', kwargs={'case_id': case.id}),
+                send_email=True
             )
 
             messages.success(request, f"Hypothesis '{hypothesis.proposed_diagnosis}' submitted successfully.")
@@ -157,6 +170,17 @@ class DiscussionNoteCreateView(View):
                     'note_length': len(note.body),
                     'case_id': str(case.id)
                 }
+            )
+
+            # Dispatch In-App Notification (FR-NOTIFY-01)
+            notify_case_team(
+                case=case,
+                verb='DISCUSSION_POSTED',
+                title="New Clinical Discussion Note",
+                message=f"Dr. {request.user.full_name} posted a note on case '{case.title}'.",
+                exclude_user=request.user,
+                action_url=reverse('cases:workspace', kwargs={'case_id': case.id}),
+                send_email=False
             )
 
             messages.success(request, "Discussion note added.")
