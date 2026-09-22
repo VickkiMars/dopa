@@ -25,6 +25,7 @@ All 11 functional tests from Table 4.2 of the project thesis are formally automa
 | **FT12** | Diagnostic media upload by Case Owner (FR2b) | Logged in as Primary Phys | POST valid JPEG/PNG/WebP/PDF to `/cases/<case_id>/attachments/upload/`. | HTTP 302 redirect to workspace; file listed in Pane 1. | `CaseAttachment` row created; file stored in private media directory; Audit: `ATTACHMENT_UPLOADED`. |
 | **FT13** | Diagnostic media secure streaming (FR2d) | Specialist in `CaseTeam` | GET `/cases/<case_id>/attachments/<attachment_id>/`. | HTTP 200 OK with binary stream and verified MIME header. | File streams inline; unadmitted users receive HTTP 403 Forbidden; Audit: `ATTACHMENT_ACCESSED`. |
 | **FT14** | Structured clinical findings & vitals decomposition (FR2c) | Case Owner or Admitted Specialist | POST vitals and structured lab panel; verify workspace rendering and evidence citations. | HTTP 302 redirect / HTTP 200 OK; vitals ribbon & lab table rendered in Pane 1. | `Case` vitals persisted; `CaseLabResult` rows created; click-to-cite action formats evidence into Pane 2; Audit: `FINDINGS_UPDATED`. |
+| **FT15** | Clinical consultation report & audit dossier export | Case Owner or Admitted Specialist | GET `/cases/<case_id>/report/` (HTML & JSON formats). | HTTP 200 OK; renders comprehensive printable dossier; JSON returns full clinical payload. | Unadmitted users receive HTTP 403 Forbidden; Audit: `REPORT_GENERATED`. |
 
 ---
 

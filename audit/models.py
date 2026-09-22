@@ -18,6 +18,7 @@ class AuditAction(models.TextChoices):
     ATTACHMENT_UPLOADED = 'ATTACHMENT_UPLOADED', 'Attachment Uploaded'
     ATTACHMENT_ACCESSED = 'ATTACHMENT_ACCESSED', 'Attachment Accessed'
     FINDINGS_UPDATED = 'FINDINGS_UPDATED', 'Findings Updated'
+    REPORT_GENERATED = 'REPORT_GENERATED', 'Report Generated'
     ACCESS_DENIED = 'ACCESS_DENIED', 'Access Denied'
 
 

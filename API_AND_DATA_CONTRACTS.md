@@ -27,6 +27,7 @@ All URLs use standard Django namespaced routing.
 | `/cases/<uuid:case_id>/attachments/upload/` | `cases:attachment_upload` | `POST` | `CaseAttachmentUploadView` | `@login_required`, `@case_owner_required` |
 | `/cases/<uuid:case_id>/attachments/<uuid:attachment_id>/` | `cases:attachment_download` | `GET` | `CaseAttachmentDownloadView` | `@login_required`, `@case_access_required` |
 | `/cases/<uuid:case_id>/findings/update/` | `cases:findings_update` | `POST` | `CaseFindingsUpdateView` | `@login_required`, `@case_owner_required` |
+| `/cases/<uuid:case_id>/report/` | `cases:case_report` | `GET` | `CaseReportView` | `@login_required`, `@case_access_required` |
 
 ---
 
@@ -143,6 +144,7 @@ Every event logged to `audit_auditlog` adheres to the following strict taxonomy:
 | `ATTACHMENT_UPLOADED`| Diagnostic media file uploaded | Primary Phys | `cases_caseattachment` | `{ "attachment_id": "...", "title": "..." }` |
 | `ATTACHMENT_ACCESSED`| Diagnostic media streamed | Member | `cases_caseattachment` | `{ "attachment_id": "...", "filename": "..." }` |
 | `FINDINGS_UPDATED` | Structured vitals or labs updated | Primary Phys | `cases_case` | `{ "updated_vitals": [...], "labs_added": 2 }` |
+| `REPORT_GENERATED` | Consultation report/dossier generated | Member | `cases_case` | `{ "format": "html", "case_title": "..." }` |
 | `ACCESS_DENIED` | Blocked authorization check (RBAC) | Any | Context Model | `{ "attempted_action": "...", "reason": "..." }` |
 
 ---

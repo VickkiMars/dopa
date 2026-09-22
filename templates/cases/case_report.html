@@ -1,0 +1,867 @@
+{% extends 'base.html' %}
+
+{% block title %}Clinical Consultation Report: {{ case.title }} — DOPA{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Screen Styles */
+    .report-action-bar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: #1E293B;
+        color: #FFFFFF;
+        padding: 0.75rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .report-action-bar a, .report-action-bar button {
+        text-decoration: none;
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+    .report-btn-print {
+        background: #2563EB;
+        color: #FFFFFF;
+        border: none;
+        padding: 0.45rem 1.1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: background 0.15s;
+    }
+    .report-btn-print:hover {
+        background: #1D4ED8;
+    }
+    .report-btn-json {
+        background: #334155;
+        color: #E2E8F0;
+        border: 1px solid #475569;
+        padding: 0.45rem 0.9rem;
+        border-radius: 6px;
+        transition: background 0.15s;
+    }
+    .report-btn-json:hover {
+        background: #475569;
+        color: #FFFFFF;
+    }
+    .report-btn-back {
+        color: #94A3B8;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .report-btn-back:hover {
+        color: #FFFFFF;
+    }
+
+    .report-paper-container {
+        max-width: 960px;
+        margin: 2rem auto 4rem auto;
+        padding: 0 1rem;
+    }
+
+    .report-paper {
+        background: #FFFFFF;
+        border: 1px solid #CBD5E1;
+        border-radius: 8px;
+        padding: 3rem 3.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        color: #0F172A;
+        font-size: 0.875rem;
+        line-height: 1.6;
+    }
+
+    /* Document Header */
+    .dossier-header {
+        border-bottom: 2px solid #0F172A;
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+    .dossier-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .dossier-logo {
+        width: 36px;
+        height: 36px;
+        background: #0F172A;
+        color: #FFFFFF;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.125rem;
+    }
+    .dossier-title-block h1 {
+        font-size: 1.375rem;
+        font-weight: 800;
+        color: #0F172A;
+        text-transform: uppercase;
+        letter-spacing: -0.01em;
+        margin: 0;
+    }
+    .dossier-title-block .dossier-subtitle {
+        font-size: 0.8125rem;
+        color: #64748B;
+        font-weight: 500;
+        margin-top: 0.15rem;
+    }
+    .dossier-seal-box {
+        text-align: right;
+        font-size: 0.75rem;
+        color: #64748B;
+    }
+    .dossier-seal-badge {
+        display: inline-block;
+        background: #0F172A;
+        color: #FFFFFF;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 0.6875rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Meta Grid */
+    .dossier-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 6px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+    }
+    .meta-label {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748B;
+        margin-bottom: 0.2rem;
+    }
+    .meta-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #0F172A;
+    }
+
+    /* Report Sections */
+    .report-section {
+        margin-bottom: 2.25rem;
+        page-break-inside: avoid;
+    }
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #0F172A;
+        border-bottom: 1px solid #E2E8F0;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .section-number {
+        background: #E2E8F0;
+        color: #334155;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6875rem;
+        font-weight: 700;
+    }
+
+    /* Content Styling */
+    .text-narrative {
+        white-space: pre-wrap;
+        background: #FAFAFA;
+        border: 1px solid #F1F5F9;
+        border-radius: 6px;
+        padding: 0.875rem 1rem;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        color: #334155;
+        margin-top: 0.35rem;
+    }
+
+    /* Vitals Ribbon */
+    .vitals-ribbon {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin: 0.75rem 0 1.25rem 0;
+    }
+    .vital-chip {
+        flex: 1 1 120px;
+        background: #F8FAFC;
+        border: 1px solid #CBD5E1;
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        min-width: 110px;
+    }
+    .vital-chip-title {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #64748B;
+    }
+    .vital-chip-val {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0F172A;
+    }
+    .vital-chip-tag {
+        font-size: 0.625rem;
+        font-weight: 600;
+        padding: 0.1rem 0.35rem;
+        border-radius: 3px;
+        display: inline-block;
+        margin-top: 0.2rem;
+    }
+    .vital-tag-critical { background: #FEE2E2; color: #991B1B; }
+    .vital-tag-warning { background: #FEF3C7; color: #92400E; }
+    .vital-tag-normal { background: #E2E8F0; color: #334155; }
+
+    /* Tables */
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8125rem;
+        margin-top: 0.5rem;
+    }
+    .report-table th {
+        background: #F1F5F9;
+        color: #475569;
+        font-weight: 600;
+        text-align: left;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #E2E8F0;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    .report-table td {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #E2E8F0;
+        color: #1E293B;
+    }
+    .report-table tr:nth-child(even) td {
+        background: #FAFAFA;
+    }
+
+    /* Flag badges */
+    .flag-pill {
+        display: inline-block;
+        padding: 0.15rem 0.45rem;
+        border-radius: 4px;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .flag-CRITICAL { background: #FEE2E2; color: #991B1B; border: 1px solid #F87171; }
+    .flag-HIGH { background: #FEF3C7; color: #92400E; border: 1px solid #FBBF24; }
+    .flag-LOW { background: #E0E7FF; color: #3730A3; border: 1px solid #A5B4FC; }
+    .flag-ABNORMAL { background: #F3E8FF; color: #6B21A8; border: 1px solid #D8B4FE; }
+    .flag-NORMAL { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+
+    /* Hypotheses cards */
+    .hypo-dossier-card {
+        border: 1px solid #CBD5E1;
+        border-radius: 6px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.875rem;
+        background: #FFFFFF;
+        page-break-inside: avoid;
+    }
+    .hypo-dossier-card.withdrawn {
+        background: #F8FAFC;
+        border-style: dashed;
+        border-color: #CBD5E1;
+        opacity: 0.85;
+    }
+    .hypo-top-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.5rem;
+    }
+    .hypo-diagnosis {
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: #0F172A;
+    }
+    .hypo-rank-badge {
+        background: #0F172A;
+        color: #FFFFFF;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    /* Governance Box */
+    .governance-dossier-box {
+        background: #F0FDF4;
+        border: 2px solid #86EFAC;
+        border-radius: 6px;
+        padding: 1.25rem 1.5rem;
+        margin-top: 0.75rem;
+    }
+    .governance-pending-box {
+        background: #FFFBEB;
+        border: 1px solid #FCD34D;
+        border-radius: 6px;
+        padding: 1.25rem 1.5rem;
+        margin-top: 0.75rem;
+        color: #92400E;
+    }
+    .legal-statement-text {
+        font-size: 0.8125rem;
+        font-style: italic;
+        color: #166534;
+        background: #DCFCE7;
+        border-left: 3px solid #16A34A;
+        padding: 0.5rem 0.75rem;
+        margin: 0.75rem 0;
+    }
+
+    /* Audit Certificate */
+    .audit-cert-box {
+        background: #F8FAFC;
+        border: 1px solid #0F172A;
+        border-radius: 6px;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .cert-stamp {
+        border: 2px solid #0F172A;
+        border-radius: 4px;
+        padding: 0.35rem 0.75rem;
+        font-weight: 800;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #0F172A;
+        display: inline-block;
+    }
+
+    /* Confidentiality Notice */
+    .dossier-disclaimer {
+        font-size: 0.6875rem;
+        color: #64748B;
+        border-top: 1px solid #E2E8F0;
+        padding-top: 1rem;
+        margin-top: 2rem;
+        text-align: center;
+        line-height: 1.4;
+    }
+
+    /* PRINT MEDIA RULES */
+    @media print {
+        @page {
+            size: A4 portrait;
+            margin: 15mm 12mm 15mm 12mm;
+        }
+        body {
+            background: #FFFFFF !important;
+            color: #000000 !important;
+            font-size: 8.5pt !important;
+        }
+        .header-bar,
+        .report-action-bar,
+        footer,
+        .btn-print,
+        .toast-container {
+            display: none !important;
+        }
+        .report-paper-container {
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: 100% !important;
+        }
+        .report-paper {
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+        .report-section, .hypo-dossier-card, .dossier-meta-grid, .governance-dossier-box {
+            page-break-inside: avoid !important;
+        }
+        a {
+            color: #000000 !important;
+            text-decoration: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Top Action Bar (Hidden in Print) -->
+<div class="report-action-bar">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="{% url 'cases:workspace' case.id %}" class="report-btn-back">
+            <span>&larr;</span> Back to Workspace
+        </a>
+        <span style="color: #475569;">|</span>
+        <span style="font-size: 0.8125rem; font-weight: 600; color: #CBD5E1;">
+            {{ case.title|truncatechars:45 }}
+        </span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <a href="?format=json" target="_blank" class="report-btn-json" title="Download machine-readable JSON dossier">
+            <span>&#123;&#125;</span> Export JSON
+        </a>
+        <button type="button" class="report-btn-print" onclick="window.print()">
+            <span>&#128438;</span> Print / Save as PDF
+        </button>
+    </div>
+</div>
+
+<div class="report-paper-container">
+    <div class="report-paper">
+        <!-- DOCUMENT HEADER -->
+        <div class="dossier-header">
+            <div style="display: flex; gap: 0.875rem; align-items: center;">
+                <div class="dossier-logo">D</div>
+                <div class="dossier-title-block">
+                    <h1>Clinical Consultation Report</h1>
+                    <div class="dossier-subtitle">Differential Outcome Provider Assistant (DOPA) &bull; Diagnostic Collaboration Dossier</div>
+                </div>
+            </div>
+            <div class="dossier-seal-box">
+                <div class="dossier-seal-badge">OFFICIAL CLINICAL RECORD</div>
+                <div>Generated: {{ generated_at|date:"Y-m-d H:i:s" }} UTC</div>
+                <div>Case UUID: <code style="font-family: monospace; font-size: 0.7rem;">{{ case.id }}</code></div>
+            </div>
+        </div>
+
+        <!-- CASE METADATA GRID -->
+        <div class="dossier-meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Presenting Clinical Case</span>
+                <span class="meta-value">{{ case.title }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Consultation Status</span>
+                <span class="meta-value">
+                    <span class="flag-pill {% if case.status == 'CLOSED' %}flag-NORMAL{% elif case.status == 'UNDER_REVIEW' %}flag-HIGH{% else %}flag-LOW{% endif %}">
+                        {{ case.get_status_display }}
+                    </span>
+                </span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Attending / Primary Physician (Case Owner)</span>
+                <span class="meta-value">{{ case.owner.full_name }} &bull; {{ case.owner.email }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Case Intake Timestamp</span>
+                <span class="meta-value">{{ case.created_at|date:"Y-m-d H:i" }} UTC (Last updated: {{ case.updated_at|date:"Y-m-d H:i" }} UTC)</span>
+            </div>
+        </div>
+
+        <!-- SECTION 1: PRESENTATION & TELEMETRY -->
+        <div class="report-section">
+            <div class="section-heading">
+                <span class="section-number">1</span>
+                Clinical Presentation & Bedside Telemetry
+            </div>
+
+            <div style="margin-bottom: 0.875rem;">
+                <div class="meta-label">Clinical Summary / Chief Presentation</div>
+                <div class="text-narrative">{{ case.clinical_summary }}</div>
+            </div>
+
+            <div style="margin-bottom: 0.875rem;">
+                <div class="meta-label">Patient Medical, Surgical & Exposure History</div>
+                <div class="text-narrative">{{ case.history }}</div>
+            </div>
+
+            {% if case.has_vitals %}
+            <div style="margin-bottom: 0.875rem;">
+                <div class="meta-label">Bedside Physiological Telemetry (Vitals)</div>
+                <div class="vitals-ribbon">
+                    {% for v in case.vitals_list %}
+                    <div class="vital-chip">
+                        <div class="vital-chip-title">{{ v.name }}</div>
+                        <div class="vital-chip-val">{{ v.value }}</div>
+                        <div class="vital-chip-tag {% if v.flag == 'critical' %}vital-tag-critical{% elif v.flag == 'warning' %}vital-tag-warning{% else %}vital-tag-normal{% endif %}">
+                            {{ v.tag }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div>
+                <div class="meta-label">Physical Examination & Bedside Narrative Observations</div>
+                <div class="text-narrative">{{ case.findings }}</div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: OBJECTIVE DIAGNOSTIC EVIDENCE & MEDIA -->
+        <div class="report-section">
+            <div class="section-heading">
+                <span class="section-number">2</span>
+                Objective Diagnostic Laboratory & Media Evidence (FR2b, FR2c)
+            </div>
+
+            <!-- Quantitative Labs -->
+            <div style="margin-bottom: 1.25rem;">
+                <div class="meta-label" style="margin-bottom: 0.35rem;">Quantitative Laboratory Analyte Panels</div>
+                {% if lab_results %}
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">Test / Analyte Name</th>
+                            <th style="width: 18%;">Result Value</th>
+                            <th style="width: 15%;">Unit</th>
+                            <th style="width: 22%;">Reference Range</th>
+                            <th style="width: 15%;">Clinical Flag</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lab in lab_results %}
+                        <tr>
+                            <td style="font-weight: 600;">{{ lab.test_name }}</td>
+                            <td style="font-weight: 700;">{{ lab.value }}</td>
+                            <td>{{ lab.unit|default:"—" }}</td>
+                            <td style="color: #64748B;">{{ lab.reference_range|default:"—" }}</td>
+                            <td>
+                                <span class="flag-pill flag-{{ lab.flag }}">
+                                    {{ lab.get_flag_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div style="font-size: 0.8125rem; color: #64748B; padding: 0.5rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px;">
+                    No discrete quantitative laboratory test results recorded for this case.
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Diagnostic Attachments -->
+            <div>
+                <div class="meta-label" style="margin-bottom: 0.35rem;">Diagnostic Media Attachments & Reports</div>
+                {% if attachments %}
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Category</th>
+                            <th style="width: 40%;">Description / Title</th>
+                            <th style="width: 15%;">File Size</th>
+                            <th style="width: 25%;">Uploaded By & Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for att in attachments %}
+                        <tr>
+                            <td>
+                                <span class="flag-pill flag-LOW">{{ att.get_category_display }}</span>
+                            </td>
+                            <td style="font-weight: 600;">{{ att.title }}</td>
+                            <td>{{ att.file_size_bytes|filesizeformat }}</td>
+                            <td style="color: #64748B; font-size: 0.75rem;">
+                                {{ att.uploaded_by.full_name }} &bull; {{ att.uploaded_at|date:"Y-m-d H:i" }} UTC
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div style="font-size: 0.8125rem; color: #64748B; padding: 0.5rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px;">
+                    No diagnostic media files uploaded for this case.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- SECTION 3: MULTIDISCIPLINARY CONSULTATION TEAM -->
+        <div class="report-section">
+            <div class="section-heading">
+                <span class="section-number">3</span>
+                Admitted Specialist Consultation Team (FR2, B09)
+            </div>
+
+            {% if team_memberships %}
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Specialist Name</th>
+                        <th style="width: 35%;">Email Address / Contact</th>
+                        <th style="width: 30%;">Admitted Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tm in team_memberships %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ tm.specialist.full_name }}</td>
+                        <td>{{ tm.specialist.email }}</td>
+                        <td style="color: #64748B; font-size: 0.75rem;">
+                            {{ tm.admitted_at|date:"Y-m-d H:i" }} UTC
+                            {% if tm.admitted_by %} (by {{ tm.admitted_by.full_name }}){% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="font-size: 0.8125rem; color: #64748B; padding: 0.5rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px;">
+                No external advisory specialists admitted to this case team.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- SECTION 4: DIFFERENTIAL HYPOTHESES & REASONING -->
+        <div class="report-section">
+            <div class="section-heading">
+                <span class="section-number">4</span>
+                Formulated Differential Hypotheses & Clinical Reasoning (FR3, FR5)
+            </div>
+
+            {% if rankings %}
+            <div style="margin-bottom: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #64748B; text-transform: uppercase;">
+                Prioritized Differential Diagnosis Ranking (Set by Attending Physician)
+            </div>
+            {% for r in rankings %}
+            <div class="hypo-dossier-card">
+                <div class="hypo-top-line">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="hypo-rank-badge">RANK #{{ r.rank_position }}</span>
+                        <span class="hypo-diagnosis">{{ r.hypothesis.proposed_diagnosis }}</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #64748B;">
+                        Submitted by <strong>{{ r.hypothesis.specialist.full_name }}</strong> &bull; {{ r.hypothesis.submitted_at|date:"Y-m-d H:i" }} UTC
+                    </div>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Clinical Rationale:</div>
+                    <div style="font-size: 0.8125rem; color: #334155; margin-top: 0.15rem;">{{ r.hypothesis.rationale }}</div>
+                </div>
+                <div style="margin-top: 0.5rem; border-top: 1px dashed #E2E8F0; padding-top: 0.5rem;">
+                    <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Supporting Case Evidence:</div>
+                    <div style="font-size: 0.8125rem; color: #1E3A8A; white-space: pre-line; margin-top: 0.15rem;">{{ r.hypothesis.supporting_evidence }}</div>
+                </div>
+            </div>
+            {% endfor %}
+            {% elif active_hypotheses %}
+            {% for h in active_hypotheses %}
+            <div class="hypo-dossier-card">
+                <div class="hypo-top-line">
+                    <span class="hypo-diagnosis">{{ h.proposed_diagnosis }}</span>
+                    <div style="font-size: 0.75rem; color: #64748B;">
+                        By <strong>{{ h.specialist.full_name }}</strong> &bull; {{ h.submitted_at|date:"Y-m-d H:i" }} UTC
+                    </div>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Clinical Rationale:</div>
+                    <div style="font-size: 0.8125rem; color: #334155;">{{ h.rationale }}</div>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: #64748B;">Supporting Evidence:</div>
+                    <div style="font-size: 0.8125rem; color: #1E3A8A; white-space: pre-line;">{{ h.supporting_evidence }}</div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div style="font-size: 0.8125rem; color: #64748B; padding: 0.5rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px;">
+                No active hypotheses formulated for this case.
+            </div>
+            {% endif %}
+
+            <!-- Withdrawn Hypotheses Provenance -->
+            {% if withdrawn_hypotheses %}
+            <div style="margin-top: 1rem;">
+                <div style="font-size: 0.75rem; font-weight: 600; color: #94A3B8; text-transform: uppercase; margin-bottom: 0.35rem;">
+                    Historical Provenance: Withdrawn Hypotheses (C-18, FAULT-03)
+                </div>
+                {% for wh in withdrawn_hypotheses %}
+                <div class="hypo-dossier-card withdrawn">
+                    <div class="hypo-top-line">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="flag-pill flag-CRITICAL" style="font-size: 0.625rem;">WITHDRAWN</span>
+                            <span class="hypo-diagnosis" style="text-decoration: line-through; color: #64748B;">{{ wh.proposed_diagnosis }}</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #94A3B8;">
+                            Formulated by {{ wh.specialist.full_name }} &bull; Withdrawn {{ wh.withdrawn_at|date:"Y-m-d H:i" }} UTC
+                        </div>
+                    </div>
+                    <div style="margin-top: 0.35rem; font-size: 0.75rem; color: #991B1B; background: #FEF2F2; padding: 0.35rem 0.5rem; border-radius: 4px;">
+                        <strong>Withdrawal Provenance Rationale:</strong> {{ wh.withdrawal_reason }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- SECTION 5: COLLABORATIVE DELIBERATION THREAD -->
+        <div class="report-section">
+            <div class="section-heading">
+                <span class="section-number">5</span>
+                Chronological Deliberation Notes (FR4)
+            </div>
+
+            {% if discussion_notes %}
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                {% for note in discussion_notes %}
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 0.65rem 0.875rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748B; margin-bottom: 0.2rem;">
+                        <strong>{{ note.author.full_name }} ({{ note.author.get_role_display }})</strong>
+                        <span>{{ note.posted_at|date:"Y-m-d H:i:s" }} UTC</span>
+                    </div>
+                    <div style="font-size: 0.8125rem; color: #1E293B; line-height: 1.5;">{{ note.body }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="font-size: 0.8125rem; color: #64748B; padding: 0.5rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px;">
+                No narrative deliberation notes posted.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- SECTION 6: FINAL DECISION & GOVERNANCE -->
+        <div class="report-section">
+            <div class="section-heading">
+                <span class="section-number">6</span>
+                Final Clinical Decision & Medico-Legal Governance (FR6, FR8)
+            </div>
+
+            {% if decision %}
+            <div class="governance-dossier-box">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+                    <div style="font-size: 1.125rem; font-weight: 800; color: #14532D;">
+                        CONFIRMED FINAL DIAGNOSIS: {{ decision.final_diagnosis }}
+                    </div>
+                    <span class="flag-pill flag-NORMAL" style="font-size: 0.75rem;">CASE CLOSED</span>
+                </div>
+
+                <div style="font-size: 0.75rem; color: #166534; margin-bottom: 0.75rem;">
+                    Recorded by Attending Physician <strong>{{ decision.decider.full_name }}</strong> on {{ decision.recorded_at|date:"Y-m-d H:i:s" }} UTC
+                </div>
+
+                <div class="legal-statement-text">
+                    <strong>Mandatory Medico-Legal Governance Acknowledgement (FR8, C-22):</strong><br>
+                    "I acknowledge that specialist advice obtained through the DOPA platform is purely advisory in nature, and as the Primary Physician I retain sole clinical, ethical, and legal responsibility for the final diagnosis, management, and treatment decisions."
+                    <div style="font-size: 0.7rem; font-weight: 700; color: #15803D; margin-top: 0.25rem;">
+                        &check; Verified Acknowledged at Time of Decision
+                    </div>
+                </div>
+
+                {% if decision.governance_statement %}
+                <div style="margin-top: 0.75rem;">
+                    <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: #166534;">Clinical Synthesis & Closing Management Plan:</div>
+                    <div style="font-size: 0.8125rem; color: #14532D; margin-top: 0.15rem; white-space: pre-wrap;">{{ decision.governance_statement }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="governance-pending-box">
+                <div style="font-weight: 700; font-size: 0.875rem; margin-bottom: 0.25rem;">
+                    &#9888; Consultation Pending Final Clinical Decision
+                </div>
+                <div style="font-size: 0.8125rem; line-height: 1.5;">
+                    This case is currently active in collaborative deliberation. The final diagnosis and legal governance acknowledgment have not yet been recorded by the Primary Physician.
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- SECTION 7: FORENSIC AUDIT CERTIFICATE -->
+        <div class="report-section">
+            <div class="section-heading">
+                <span class="section-number">7</span>
+                Append-Only Forensic Audit Certificate (FR7, NFR8)
+            </div>
+
+            <div class="audit-cert-box">
+                <div>
+                    <div style="font-weight: 800; font-size: 0.875rem; color: #0F172A; text-transform: uppercase;">
+                        Non-Repudiation Forensic Audit Trail
+                    </div>
+                    <div style="font-size: 0.75rem; color: #64748B; margin-top: 0.2rem;">
+                        Total Chronological Events: <strong>{{ total_events }}</strong> &bull;
+                        Generated by: <strong>{{ request.user.full_name }}</strong> (IP: {{ request.META.REMOTE_ADDR|default:"Verified" }})
+                    </div>
+                    <div style="font-size: 0.6875rem; color: #94A3B8; margin-top: 0.15rem; font-family: monospace;">
+                        Digital Audit Seal: SHA256-{{ case.id }}-{{ total_events }}-{{ generated_at|date:"U" }}
+                    </div>
+                </div>
+                <div>
+                    <div class="cert-stamp">AUDIT CERTIFIED</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 0.75rem;">
+                <div class="meta-label" style="margin-bottom: 0.35rem;">Recent Key Security & Clinical Operation Log</div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Timestamp (UTC)</th>
+                            <th style="width: 25%;">Action</th>
+                            <th style="width: 30%;">Actor</th>
+                            <th style="width: 20%;">Security Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in audit_entries|slice:":10" %}
+                        <tr>
+                            <td style="font-family: monospace; font-size: 0.7rem;">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                            <td style="font-weight: 600;">{{ log.get_action_display }}</td>
+                            <td>{{ log.actor.full_name|default:"System" }}</td>
+                            <td>
+                                <span class="flag-pill {% if log.status == 'ALLOWED' %}flag-NORMAL{% else %}flag-CRITICAL{% endif %}" style="font-size: 0.625rem;">
+                                    {{ log.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MEDICO-LEGAL DISCLAIMER FOOTER -->
+        <div class="dossier-disclaimer">
+            <strong>CONFIDENTIAL MEDICAL DOCUMENT &bull; SYNTHETIC CLINICAL CONSULTATION DOSSIER</strong><br>
+            This document contains clinical consultation records generated within the Differential Outcome Provider Assistant (DOPA).<br>
+            All specialist opinions are strictly advisory. The Primary Physician retains sole clinical responsibility for patient outcomes.<br>
+            De-identified in accordance with HIPAA Safe Harbor and GDPR Article 9 research standards.
+        </div>
+    </div>
+</div>
+{% endblock %}

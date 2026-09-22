@@ -51,6 +51,9 @@
             <a href="{% url 'cases:workspace' case_id=case.id %}" class="btn btn-primary">
                 Open Clinical Workspace &rarr;
             </a>
+            <a href="{% url 'cases:case_report' case_id=case.id %}" class="btn btn-secondary">
+                &#128196; Export Dossier
+            </a>
             <a href="{% url 'cases:audit_trail' case_id=case.id %}" class="btn btn-secondary">
                 Audit Trail
             </a>

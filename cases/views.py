@@ -7,7 +7,8 @@ from django.contrib import messages
 from django.db.models import Q
 from django.db import transaction
 from django.core.cache import cache
-from django.http import HttpResponseBadRequest, HttpResponseForbidden, FileResponse
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, FileResponse, JsonResponse
+from django.utils import timezone
 
 from audit.services import log_event
 from audit.models import AuditLog, AuditAction, AuditStatus
@@ -526,6 +527,181 @@ class AuditTrailView(LoginRequiredMixin, View):
             'total_events': total_events,
             'allowed_count': allowed_count,
             'denied_count': denied_count,
+            'is_case_owner': request.is_case_owner,
+            'is_team_member': request.is_team_member,
+        })
+
+
+@method_decorator(case_access_required, name='dispatch')
+class CaseReportView(LoginRequiredMixin, View):
+    """
+    Formal Clinical Consultation Report & Audit Dossier Export endpoint.
+    Accessible to Case Owner (Primary Physician) and Admitted Specialists.
+    Renders comprehensive printable HTML/CSS report or machine-readable JSON.
+    Dispatches REPORT_GENERATED audit log.
+    """
+    template_name = 'cases/case_report.html'
+
+    def get(self, request, case_id):
+        case = request.case
+
+        team_memberships = list(
+            case.team_memberships.select_related('specialist', 'admitted_by').order_by('admitted_at')
+        )
+        all_hypotheses = list(
+            case.hypotheses.select_related('specialist').order_by('submitted_at')
+        )
+        active_hypotheses = [h for h in all_hypotheses if h.status == 'ACTIVE']
+        withdrawn_hypotheses = [h for h in all_hypotheses if h.status == 'WITHDRAWN']
+
+        rankings = list(
+            DiagnosisRanking.objects.filter(case=case)
+            .select_related('hypothesis', 'hypothesis__specialist')
+            .order_by('rank_position')
+        )
+        discussion_notes = list(
+            case.discussion_notes.select_related('author').order_by('posted_at')
+        )
+        attachments = list(
+            case.attachments.select_related('uploaded_by').order_by('uploaded_at')
+        )
+        lab_results = list(case.lab_results.all().order_by('created_at'))
+
+        try:
+            decision = case.decision
+        except Exception:
+            decision = None
+
+        is_json = (request.GET.get('format', '').lower() == 'json')
+
+        # Forensic Audit Trail: Log Report Generation
+        log_event(
+            action=AuditAction.REPORT_GENERATED,
+            actor=request.user,
+            case_id=case.id,
+            entity_type='cases_case',
+            entity_id=str(case.id),
+            request=request,
+            details={
+                'format': 'json' if is_json else 'html',
+                'case_title': case.title,
+                'case_status': case.status,
+            }
+        )
+
+        audit_entries = list(
+            AuditLog.objects.filter(
+                Q(case_id=case.id) | Q(entity_type='cases_case', entity_id=str(case.id))
+            ).select_related('actor').order_by('timestamp')
+        )
+
+        if is_json:
+            payload = {
+                'case_id': str(case.id),
+                'title': case.title,
+                'status': case.status,
+                'created_at': case.created_at.isoformat(),
+                'primary_physician': {
+                    'name': case.owner.full_name,
+                    'email': case.owner.email,
+                    'role': case.owner.role,
+                },
+                'clinical_presentation': {
+                    'summary': case.clinical_summary,
+                    'history': case.history,
+                    'findings': case.findings,
+                    'has_vitals': case.has_vitals,
+                    'vitals': case.vitals_list,
+                },
+                'laboratory_results': [
+                    {
+                        'test_name': lab.test_name,
+                        'value': lab.value,
+                        'unit': lab.unit,
+                        'reference_range': lab.reference_range,
+                        'flag': lab.flag,
+                        'citation': lab.citation_text,
+                    }
+                    for lab in lab_results
+                ],
+                'diagnostic_attachments': [
+                    {
+                        'id': str(att.id),
+                        'category': att.category,
+                        'title': att.title,
+                        'mime_type': att.mime_type,
+                        'file_size_bytes': att.file_size_bytes,
+                        'uploaded_by': att.uploaded_by.full_name,
+                        'uploaded_at': att.uploaded_at.isoformat(),
+                    }
+                    for att in attachments
+                ],
+                'consultation_team': [
+                    {
+                        'specialist_name': tm.specialist.full_name,
+                        'specialist_email': tm.specialist.email,
+                        'admitted_at': tm.admitted_at.isoformat(),
+                        'admitted_by': tm.admitted_by.full_name if tm.admitted_by else None,
+                    }
+                    for tm in team_memberships
+                ],
+                'differential_rankings': [
+                    {
+                        'rank': r.rank_position,
+                        'proposed_diagnosis': r.hypothesis.proposed_diagnosis,
+                        'specialist': r.hypothesis.specialist.full_name,
+                        'rationale': r.hypothesis.rationale,
+                        'supporting_evidence': r.hypothesis.supporting_evidence,
+                    }
+                    for r in rankings
+                ],
+                'withdrawn_hypotheses': [
+                    {
+                        'proposed_diagnosis': h.proposed_diagnosis,
+                        'specialist': h.specialist.full_name,
+                        'withdrawal_reason': h.withdrawal_reason,
+                        'withdrawn_at': h.withdrawn_at.isoformat() if h.withdrawn_at else None,
+                    }
+                    for h in withdrawn_hypotheses
+                ],
+                'discussion_notes': [
+                    {
+                        'author': n.author.full_name,
+                        'body': n.body,
+                        'posted_at': n.posted_at.isoformat(),
+                    }
+                    for n in discussion_notes
+                ],
+                'final_decision': {
+                    'final_diagnosis': decision.final_diagnosis,
+                    'decider': decision.decider.full_name,
+                    'governance_statement': decision.governance_statement,
+                    'advisory_acknowledged': decision.advisory_acknowledged,
+                    'recorded_at': decision.recorded_at.isoformat(),
+                } if decision else None,
+                'audit_certificate': {
+                    'total_events': len(audit_entries),
+                    'allowed_count': sum(1 for e in audit_entries if e.status == AuditStatus.ALLOWED),
+                    'denied_count': sum(1 for e in audit_entries if e.status == AuditStatus.DENIED),
+                    'generated_at': timezone.now().isoformat(),
+                    'generated_by': request.user.full_name,
+                },
+            }
+            return JsonResponse(payload, json_dumps_params={'indent': 2})
+
+        return render(request, self.template_name, {
+            'case': case,
+            'decision': decision,
+            'team_memberships': team_memberships,
+            'active_hypotheses': active_hypotheses,
+            'withdrawn_hypotheses': withdrawn_hypotheses,
+            'rankings': rankings,
+            'discussion_notes': discussion_notes,
+            'attachments': attachments,
+            'lab_results': lab_results,
+            'audit_entries': audit_entries,
+            'total_events': len(audit_entries),
+            'generated_at': timezone.now(),
             'is_case_owner': request.is_case_owner,
             'is_team_member': request.is_team_member,
         })
