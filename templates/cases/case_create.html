@@ -214,14 +214,28 @@
                 {% endif %}
             </div>
 
+            <!-- OVERARCHING SECTION HEADER: OBJECTIVE CLINICAL EVIDENCE -->
+            <div style="margin-top: 2.25rem; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--color-border);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--color-text-main); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>&#129658;</span> Clinical Findings & Diagnostic Evidence
+                        </h2>
+                        <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.25rem;">
+                            Decomposed telemetry, laboratory panels, and narrative exam observations for multi-specialist consultation.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ZONE A: BEDSIDE TELEMETRY VITALS STRIP -->
             <div class="intake-section">
                 <div class="intake-header">
                     <div>
                         <div class="intake-title">
-                            <span>&#128147;</span> Zone A: Bedside Physiological Vitals (FR2c)
+                            <span>&#128147;</span> Zone A: Bedside Physiological Vitals
                         </div>
-                        <div class="intake-subtitle">Discrete physiological parameters with automated abnormal threshold detection.</div>
+                        <div class="intake-subtitle">Record bedside physiological measurements to track patient stability and trigger automated abnormal threshold alerts.</div>
                     </div>
                 </div>
 
@@ -285,9 +299,9 @@
                 <div class="intake-header">
                     <div>
                         <div class="intake-title">
-                            <span>&#128300;</span> Zone B: Quantitative Laboratory Markers & Panels (FR2c)
+                            <span>&#128300;</span> Zone B: Quantitative Laboratory Tests & Panels
                         </div>
-                        <div class="intake-subtitle">Discrete laboratory indicators referenceable by specialists formulating hypotheses.</div>
+                        <div class="intake-subtitle">Record discrete biomarkers that admitted specialists can cite as evidence when formulating differential diagnostic hypotheses.</div>
                     </div>
                     <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.35rem 0.75rem;" onclick="addLabRow()">
                         + Add Custom Lab Test
@@ -332,9 +346,9 @@
                 <div class="intake-header">
                     <div>
                         <div class="intake-title">
-                            <span>&#128221;</span> Zone C: Physical Exam & Narrative Observations (FAULT-01) <span style="color: var(--color-error)">*</span>
+                            <span>&#128221;</span> Zone C: Physical Examination & Clinical Observations <span style="color: var(--color-error)">*</span>
                         </div>
-                        <div class="intake-subtitle">Bedside physical examination, organ systems, dermatological lesions, and qualitative impressions.</div>
+                        <div class="intake-subtitle">Document organ system assessments, dermatological lesions, and qualitative impressions from the bedside physical exam.</div>
                     </div>
                 </div>
 

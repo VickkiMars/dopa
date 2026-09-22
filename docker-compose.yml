@@ -1,0 +1,46 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dopa_web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=django-insecure-production-composite-key-clinical-dopa-demo
+      - ALLOWED_HOSTS=localhost,127.0.0.1,web
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+      - DATABASE_URL=postgres://dopa:dopa_secret_password@db:5432/dopa
+      - DB_SSL_REQUIRE=False
+      - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - dopa_media:/app/media
+      - dopa_attachments:/app/case_attachments
+
+  db:
+    image: postgres:15-alpine
+    container_name: dopa_db
+    restart: unless-stopped
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=dopa
+      - POSTGRES_USER=dopa
+      - POSTGRES_PASSWORD=dopa_secret_password
+    volumes:
+      - dopa_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dopa -d dopa"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  dopa_pgdata:
+  dopa_media:
+  dopa_attachments:

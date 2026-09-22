@@ -498,8 +498,11 @@
 
                 <!-- Structured Objective Findings (FR2c, FAULT-01) -->
                 <div class="detail-section">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                        <div class="detail-label" style="margin-bottom: 0;">Objective Clinical Findings (FR2c)</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding-bottom: 0.35rem; border-bottom: 1px solid var(--color-border-faint);">
+                        <div>
+                            <div class="detail-label" style="margin-bottom: 0; font-size: 0.8125rem; font-weight: 700;">Clinical Findings & Diagnostic Evidence</div>
+                            <div style="font-size: 0.6875rem; color: var(--color-text-muted);">Objective bedside measurements, laboratory markers, and physical exam findings.</div>
+                        </div>
                         {% if can_update_findings %}
                             <button type="button" onclick="document.getElementById('updateFindingsModal').style.display='flex'" class="btn-link" style="font-size: 0.75rem; font-weight: 600;">
                                 + Update Findings & Labs
@@ -509,8 +512,14 @@
 
                     <!-- Zone A: Bedside Telemetry Vitals Ribbon -->
                     {% if case.has_vitals %}
-                        <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-top: 0.35rem;">
-                            Bedside Vitals <span style="font-size: 0.625rem; font-weight: normal; text-transform: none;">(Click tile to cite)</span>:
+                        <div style="margin-top: 0.5rem; margin-bottom: 0.25rem;">
+                            <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); display: flex; justify-content: space-between; align-items: center;">
+                                <span>Zone A: Bedside Vitals</span>
+                                <span style="font-size: 0.625rem; font-weight: normal; text-transform: none; color: var(--color-text-muted);">(Click tile to cite)</span>
+                            </div>
+                            <div style="font-size: 0.6875rem; color: var(--color-text-muted); margin-bottom: 0.35rem;">
+                                Physiological telemetry recorded at bedside with automated abnormal threshold alerts.
+                            </div>
                         </div>
                         <div class="vitals-ribbon">
                             {% for v in case.vitals_list %}
@@ -528,8 +537,13 @@
 
                     <!-- Zone B: Quantitative Laboratory Results -->
                     {% if lab_results %}
-                        <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-top: 0.5rem;">
-                            Quantitative Laboratory Markers ({{ lab_results|length }}):
+                        <div style="margin-top: 0.75rem; margin-bottom: 0.25rem;">
+                            <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted);">
+                                Zone B: Quantitative Laboratory Markers ({{ lab_results|length }})
+                            </div>
+                            <div style="font-size: 0.6875rem; color: var(--color-text-muted); margin-bottom: 0.35rem;">
+                                Discrete laboratory biomarkers that specialists can cite to substantiate diagnostic hypotheses.
+                            </div>
                         </div>
                         <div style="overflow-x: auto; background: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.25rem 0.5rem; margin-top: 0.25rem; margin-bottom: 0.75rem;">
                             <table class="lab-display-table" style="margin: 0;">
@@ -571,11 +585,16 @@
                     {% endif %}
 
                     <!-- Zone C: Physical Exam & Narrative Observations -->
-                    <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-top: 0.35rem; display: flex; justify-content: space-between; align-items: center;">
-                        <span>Physical Exam Observations:</span>
-                        <button type="button" class="btn-link" style="font-size: 0.6875rem;" onclick="citeFinding('{{ case.findings|escapejs }}')">
-                            + Cite Exam
-                        </button>
+                    <div style="margin-top: 0.75rem; margin-bottom: 0.25rem;">
+                        <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); display: flex; justify-content: space-between; align-items: center;">
+                            <span>Zone C: Physical Exam Observations</span>
+                            <button type="button" class="btn-link" style="font-size: 0.6875rem;" onclick="citeFinding('{{ case.findings|escapejs }}')">
+                                + Cite Exam
+                            </button>
+                        </div>
+                        <div style="font-size: 0.6875rem; color: var(--color-text-muted); margin-bottom: 0.35rem;">
+                            Observational bedside examination notes, organ reviews, and clinical impressions.
+                        </div>
                     </div>
                     <div class="findings-inset" style="margin-top: 0.25rem;">{{ case.findings }}</div>
                 </div>
@@ -1058,8 +1077,8 @@
     <div style="background: white; border-radius: 12px; width: 95%; max-width: 650px; padding: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #E2E8F0; padding-bottom: 0.75rem;">
             <div>
-                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 700; color: #0F172A;">Update Clinical Evidence & Labs (FR2c)</h3>
-                <p style="margin: 0.2rem 0 0; font-size: 0.75rem; color: #64748B;">Revising vital signs or adding follow-up laboratory results preserves audit provenance.</p>
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 700; color: #0F172A;">Update Clinical Evidence & Labs</h3>
+                <p style="margin: 0.2rem 0 0; font-size: 0.75rem; color: #64748B;">Revising vital signs, adding follow-up labs, or updating physical examination notes preserves full audit provenance.</p>
             </div>
             <button type="button" onclick="document.getElementById('updateFindingsModal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #64748B;">&times;</button>
         </div>
@@ -1069,8 +1088,11 @@
             {{ findings_update_form.lab_data_json }}
 
             <div style="margin-bottom: 1rem;">
-                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 0.5rem;">
-                    Bedside Telemetry Vitals
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 0.2rem;">
+                    Zone A: Bedside Telemetry Vitals
+                </div>
+                <div style="font-size: 0.6875rem; color: #64748B; margin-bottom: 0.5rem;">
+                    Record bedside physiological measurements to track patient stability and trigger automated abnormal threshold alerts.
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.5rem;">
                     <div>
@@ -1102,11 +1124,14 @@
 
             <!-- Append Labs in Modal -->
             <div style="margin-bottom: 1rem; border-top: 1px solid #F1F5F9; padding-top: 0.75rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.2rem;">
                     <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569;">
-                        Append Laboratory Panel
+                        Zone B: Append Laboratory Panel
                     </div>
                     <button type="button" class="btn-link" style="font-size: 0.75rem;" onclick="addModalLabRow()">+ Add Row</button>
+                </div>
+                <div style="font-size: 0.6875rem; color: #64748B; margin-bottom: 0.5rem;">
+                    Record discrete biomarkers that admitted specialists can cite as evidence when formulating differential diagnostic hypotheses.
                 </div>
                 <div id="modalLabContainer" style="display: flex; flex-direction: column; gap: 0.4rem;">
                     <!-- Dynamic modal lab rows -->
@@ -1117,9 +1142,12 @@
             </div>
 
             <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.25rem;">
-                    Physical Examination & Narrative Observations *
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 0.2rem;">
+                    Zone C: Physical Examination & Clinical Observations *
                 </label>
+                <div style="font-size: 0.6875rem; color: #64748B; margin-bottom: 0.5rem;">
+                    Document organ system assessments, dermatological lesions, and qualitative impressions from the bedside physical exam.
+                </div>
                 {{ findings_update_form.findings }}
             </div>
 

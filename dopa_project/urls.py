@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
+from dopa_project.views import health_check
 
 urlpatterns = [
+    path('health/', health_check, name='health_check'),
     path('admin/', admin.site.urls),
     path('', lambda request: redirect('cases:dashboard')),
     path('', include('cases.urls')),
