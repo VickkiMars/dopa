@@ -24,6 +24,9 @@ All URLs use standard Django namespaced routing.
 | `/cases/<uuid:case_id>/ranking/reorder/` | `cases:ranking_reorder` | `POST` | `RankingReorderView` | `@login_required`, `@case_owner_required` |
 | `/cases/<uuid:case_id>/decision/record/` | `cases:decision_record` | `POST` | `DecisionRecordView` | `@login_required`, `@case_owner_required` |
 | `/cases/<uuid:case_id>/audit/` | `audit:trail_view` | `GET` | `AuditTrailView` | `@login_required`, `@case_access_required` |
+| `/cases/<uuid:case_id>/attachments/upload/` | `cases:attachment_upload` | `POST` | `CaseAttachmentUploadView` | `@login_required`, `@case_owner_required` |
+| `/cases/<uuid:case_id>/attachments/<uuid:attachment_id>/` | `cases:attachment_download` | `GET` | `CaseAttachmentDownloadView` | `@login_required`, `@case_access_required` |
+| `/cases/<uuid:case_id>/findings/update/` | `cases:findings_update` | `POST` | `CaseFindingsUpdateView` | `@login_required`, `@case_owner_required` |
 
 ---
 
@@ -49,11 +52,19 @@ All URLs use standard Django namespaced routing.
   "title": { "type": "string", "required": true, "max_length": 200, "strip": true },
   "clinical_summary": { "type": "string", "required": true, "min_length": 30, "max_length": 5000 },
   "history": { "type": "string", "required": true, "min_length": 30, "max_length": 5000 },
-  "findings": { "type": "string", "required": true, "min_length": 20, "max_length": 5000 }
+  "findings": { "type": "string", "required": true, "min_length": 20, "max_length": 5000 },
+  "temperature_c": { "type": "decimal", "required": false, "min": 25.0, "max": 45.0 },
+  "heart_rate_bpm": { "type": "integer", "required": false, "min": 20, "max": 300 },
+  "bp_systolic": { "type": "integer", "required": false, "min": 40, "max": 300 },
+  "bp_diastolic": { "type": "integer", "required": false, "min": 20, "max": 200 },
+  "respiratory_rate": { "type": "integer", "required": false, "min": 4, "max": 80 },
+  "oxygen_saturation": { "type": "integer", "required": false, "min": 50, "max": 100 },
+  "lab_data_json": { "type": "json_string", "required": false, "format": "[{test_name, value, unit, reference_range, flag}]" }
 }
 ```
 - **Validation Rules**:
-  - All four fields are mandatory (resolving FAULT-01).
+  - The four core clinical text fields are mandatory (resolving FAULT-01).
+  - Vitals must fall within plausible physiological limits if provided; `bp_systolic` must exceed `bp_diastolic`.
   - Submitting user must have role `PRIMARY_PHYSICIAN`. If a specialist attempts POST, intercept with `HTTP 403` and dispatch `ACCESS_DENIED` audit log.
 
 ### 2.3 Specialist Team Admission Form (`cases:team_admit`)
@@ -129,6 +140,9 @@ Every event logged to `audit_auditlog` adheres to the following strict taxonomy:
 | `DISCUSSION_POSTED` | Narrative note posted to thread | Any member | `collaboration_discussionnote`| `{ "note_length": 140 }` |
 | `RANK_UPDATED` | Differential ranking reordered | Primary Phys | `cases_diagnosisranking` | `{ "hypothesis_id": "...", "new_rank": 1 }` |
 | `DECISION_RECORDED` | Final decision submitted & case closed | Primary Phys | `cases_decision` | `{ "final_diagnosis": "...", "advisory_acknowledged": true }` |
+| `ATTACHMENT_UPLOADED`| Diagnostic media file uploaded | Primary Phys | `cases_caseattachment` | `{ "attachment_id": "...", "title": "..." }` |
+| `ATTACHMENT_ACCESSED`| Diagnostic media streamed | Member | `cases_caseattachment` | `{ "attachment_id": "...", "filename": "..." }` |
+| `FINDINGS_UPDATED` | Structured vitals or labs updated | Primary Phys | `cases_case` | `{ "updated_vitals": [...], "labs_added": 2 }` |
 | `ACCESS_DENIED` | Blocked authorization check (RBAC) | Any | Context Model | `{ "attempted_action": "...", "reason": "..." }` |
 
 ---

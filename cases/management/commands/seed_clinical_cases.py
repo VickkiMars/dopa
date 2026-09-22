@@ -1,10 +1,11 @@
+from decimal import Decimal
 import uuid
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from accounts.models import Role
-from cases.models import Case, CaseTeam, CaseStatus, DiagnosisRanking, Decision
+from cases.models import Case, CaseTeam, CaseStatus, DiagnosisRanking, Decision, CaseLabResult, LabFlag
 from collaboration.models import Hypothesis, HypothesisStatus, DiscussionNote
 from audit.models import AuditLog, AuditAction, AuditStatus
 
@@ -101,9 +102,31 @@ class Command(BaseCommand):
                         "ESR 85 mm/hr, CRP 120 mg/L, ANA negative, Rheumatoid Factor negative, blood cultures x 3 negative.\n"
                         "Imaging: Hepatosplenomegaly on abdominal ultrasound."
                     ),
+                    'temperature_c': Decimal('39.4'),
+                    'heart_rate_bpm': 108,
+                    'bp_systolic': 115,
+                    'bp_diastolic': 75,
+                    'respiratory_rate': 18,
+                    'oxygen_saturation': 98,
                     'status': CaseStatus.CLOSED
                 }
             )
+            case1.temperature_c = Decimal('39.4')
+            case1.heart_rate_bpm = 108
+            case1.bp_systolic = 115
+            case1.bp_diastolic = 75
+            case1.respiratory_rate = 18
+            case1.oxygen_saturation = 98
+            case1.save()
+
+            CaseLabResult.objects.filter(case=case1).delete()
+            CaseLabResult.objects.create(case=case1, test_name="Serum Ferritin", value="4200", unit="ng/mL", reference_range="15 - 200 ng/mL", flag=LabFlag.CRITICAL)
+            CaseLabResult.objects.create(case=case1, test_name="White Blood Cells (WBC)", value="18.5", unit="x10^9/L", reference_range="4.5 - 11.0 x10^9/L", flag=LabFlag.HIGH)
+            CaseLabResult.objects.create(case=case1, test_name="Erythrocyte Sed. Rate (ESR)", value="85", unit="mm/hr", reference_range="< 20 mm/hr", flag=LabFlag.HIGH)
+            CaseLabResult.objects.create(case=case1, test_name="C-Reactive Protein (CRP)", value="120", unit="mg/L", reference_range="< 5 mg/L", flag=LabFlag.HIGH)
+            CaseLabResult.objects.create(case=case1, test_name="Antinuclear Antibodies (ANA)", value="Negative", unit="", reference_range="Negative", flag=LabFlag.NORMAL)
+            CaseLabResult.objects.create(case=case1, test_name="Rheumatoid Factor (RF)", value="Negative", unit="", reference_range="Negative", flag=LabFlag.NORMAL)
+
             audit(AuditAction.CASE_CREATED, dr_bassey, case1, 'cases_case', case1.id, {'title': case1.title})
 
             # Admitted Specialists
@@ -176,9 +199,31 @@ class Command(BaseCommand):
                         "Labs: Hb 7.2 g/dL, MCV 64 fL (profound microcytosis), Ferritin 12 ng/mL (low), Serum Iron 20 ug/dL, Total Iron Binding Capacity 450 ug/dL. Stool occult blood positive x 2.\n"
                         "Diagnostics: Upper endoscopy unremarkable; initial colonoscopy revealed minor non-bleeding diverticula."
                     ),
+                    'temperature_c': Decimal('36.8'),
+                    'heart_rate_bpm': 96,
+                    'bp_systolic': 125,
+                    'bp_diastolic': 80,
+                    'respiratory_rate': 16,
+                    'oxygen_saturation': 97,
                     'status': CaseStatus.CLOSED
                 }
             )
+            case2.temperature_c = Decimal('36.8')
+            case2.heart_rate_bpm = 96
+            case2.bp_systolic = 125
+            case2.bp_diastolic = 80
+            case2.respiratory_rate = 16
+            case2.oxygen_saturation = 97
+            case2.save()
+
+            CaseLabResult.objects.filter(case=case2).delete()
+            CaseLabResult.objects.create(case=case2, test_name="Hemoglobin (Hb)", value="7.2", unit="g/dL", reference_range="13.5 - 17.5 g/dL", flag=LabFlag.CRITICAL)
+            CaseLabResult.objects.create(case=case2, test_name="Mean Corpuscular Volume (MCV)", value="64", unit="fL", reference_range="80 - 100 fL", flag=LabFlag.LOW)
+            CaseLabResult.objects.create(case=case2, test_name="Serum Ferritin", value="12", unit="ng/mL", reference_range="30 - 300 ng/mL", flag=LabFlag.LOW)
+            CaseLabResult.objects.create(case=case2, test_name="Serum Iron", value="20", unit="ug/dL", reference_range="60 - 170 ug/dL", flag=LabFlag.LOW)
+            CaseLabResult.objects.create(case=case2, test_name="Total Iron Binding Capacity (TIBC)", value="450", unit="ug/dL", reference_range="240 - 450 ug/dL", flag=LabFlag.HIGH)
+            CaseLabResult.objects.create(case=case2, test_name="Fecal Occult Blood", value="Positive", unit="", reference_range="Negative", flag=LabFlag.ABNORMAL)
+
             audit(AuditAction.CASE_CREATED, dr_adeyemi, case2, 'cases_case', case2.id, {'title': case2.title})
 
             # Admitted Specialists
@@ -244,9 +289,27 @@ class Command(BaseCommand):
                         "Neurological Exam: Cranial nerves intact, normal tone and reflexes. Hyperventilation during clinical exam reliably precipitates a 10-second staring spell.\n"
                         "Diagnostics: Resting routine 20-minute EEG captured during clinic visit."
                     ),
+                    'temperature_c': Decimal('36.6'),
+                    'heart_rate_bpm': 82,
+                    'bp_systolic': 100,
+                    'bp_diastolic': 65,
+                    'respiratory_rate': 16,
+                    'oxygen_saturation': 99,
                     'status': CaseStatus.CLOSED
                 }
             )
+            case3.temperature_c = Decimal('36.6')
+            case3.heart_rate_bpm = 82
+            case3.bp_systolic = 100
+            case3.bp_diastolic = 65
+            case3.respiratory_rate = 16
+            case3.oxygen_saturation = 99
+            case3.save()
+
+            CaseLabResult.objects.filter(case=case3).delete()
+            CaseLabResult.objects.create(case=case3, test_name="Fasting Blood Glucose", value="95", unit="mg/dL", reference_range="70 - 100 mg/dL", flag=LabFlag.NORMAL)
+            CaseLabResult.objects.create(case=case3, test_name="Serum Electrolytes (Na/K/Cl)", value="Normal limits", unit="", reference_range="Normal pediatric", flag=LabFlag.NORMAL)
+
             audit(AuditAction.CASE_CREATED, dr_danjuma, case3, 'cases_case', case3.id, {'title': case3.title})
 
             # Admitted Specialist

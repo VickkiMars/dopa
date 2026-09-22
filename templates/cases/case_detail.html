@@ -91,7 +91,64 @@
         </div>
 
         <div class="clinical-section">
-            <div class="section-heading">Structured Objective Findings</div>
+            <div class="section-heading">Objective Clinical Findings (FR2c)</div>
+
+            {% if case.has_vitals %}
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 0.35rem;">
+                    Bedside Physiological Vitals:
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem; margin-bottom: 1rem;">
+                    {% for v in case.vitals_list %}
+                        <div style="background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem 0.75rem;">
+                            <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted);">{{ v.name }}</div>
+                            <div style="font-size: 0.9375rem; font-weight: 700; color: var(--color-text-main); margin: 0.2rem 0;">{{ v.value }}</div>
+                            <span style="font-size: 0.6875rem; font-weight: 600; padding: 0.1rem 0.4rem; border-radius: var(--radius-pill); background: {% if v.flag == 'critical' %}#FEE2E2; color: #B91C1C;{% elif v.flag == 'warning' %}#FEF3C7; color: #B45309;{% else %}#ECFDF5; color: #047857;{% endif %}">
+                                {{ v.tag }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if lab_results %}
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 0.35rem;">
+                    Quantitative Laboratory Panels ({{ lab_results|length }}):
+                </div>
+                <div style="overflow-x: auto; background-color: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.5rem; margin-bottom: 1rem;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--color-border); text-align: left; font-size: 0.6875rem; text-transform: uppercase; color: var(--color-text-muted);">
+                                <th style="padding: 0.35rem 0.5rem;">Test Name</th>
+                                <th style="padding: 0.35rem 0.5rem;">Value</th>
+                                <th style="padding: 0.35rem 0.5rem;">Reference Interval</th>
+                                <th style="padding: 0.35rem 0.5rem;">Clinical Flag</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lab in lab_results %}
+                                <tr style="border-bottom: 1px solid var(--color-border-faint);">
+                                    <td style="padding: 0.4rem 0.5rem; font-weight: 600;">{{ lab.test_name }}</td>
+                                    <td style="padding: 0.4rem 0.5rem;">
+                                        <strong>{{ lab.value }}</strong> {% if lab.unit %}<span style="font-size: 0.75rem; color: var(--color-text-muted);">{{ lab.unit }}</span>{% endif %}
+                                    </td>
+                                    <td style="padding: 0.4rem 0.5rem; font-size: 0.75rem; color: var(--color-text-muted);">
+                                        {% if lab.reference_range %}{{ lab.reference_range }}{% else %}—{% endif %}
+                                    </td>
+                                    <td style="padding: 0.4rem 0.5rem;">
+                                        <span style="font-size: 0.6875rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: var(--radius-pill); background: {% if lab.flag == 'CRITICAL' %}#FEE2E2; color: #B91C1C;{% elif lab.flag == 'HIGH' or lab.flag == 'LOW' %}#FEF3C7; color: #B45309;{% else %}#ECFDF5; color: #047857;{% endif %}">
+                                            {{ lab.get_flag_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 0.35rem;">
+                Physical Examination & Narrative Observations:
+            </div>
             <div class="clinical-text" style="background-color: var(--color-surface-inset); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--color-border-faint);">
                 {{ case.findings }}
             </div>

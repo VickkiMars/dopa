@@ -12,8 +12,14 @@ from django.http import HttpResponseBadRequest, HttpResponseForbidden, FileRespo
 from audit.services import log_event
 from audit.models import AuditLog, AuditAction, AuditStatus
 from accounts.models import Role
-from .models import Case, CaseTeam, CaseStatus, Notification, DiagnosisRanking, Decision, CaseAttachment, AttachmentCategory
-from .forms import CaseCreateForm, TeamAdmitForm, RankingReorderForm, DecisionRecordForm, CaseAttachmentUploadForm
+from .models import (
+    Case, CaseTeam, CaseStatus, Notification, DiagnosisRanking, Decision,
+    CaseAttachment, AttachmentCategory, CaseLabResult, LabFlag
+)
+from .forms import (
+    CaseCreateForm, TeamAdmitForm, RankingReorderForm, DecisionRecordForm,
+    CaseAttachmentUploadForm, CaseFindingsUpdateForm, CaseLabResultForm
+)
 from .decorators import role_required, case_owner_required, case_access_required
 
 
@@ -77,6 +83,7 @@ class DashboardView(LoginRequiredMixin, View):
 class CaseCreateView(LoginRequiredMixin, View):
     """
     Case creation module restricted strictly to Primary Physicians (FR2, C-07, C-13, FT04, FT05).
+    Decomposes findings into discrete physiological vitals and quantitative lab panels (FR2c).
     """
     template_name = 'cases/case_create.html'
 
@@ -87,22 +94,24 @@ class CaseCreateView(LoginRequiredMixin, View):
     def post(self, request):
         form = CaseCreateForm(request.POST)
         if form.is_valid():
-            case = form.save(commit=False)
-            case.owner = request.user
-            case.status = CaseStatus.OPEN
-            case.save()
+            with transaction.atomic():
+                case = form.save(commit=False)
+                case.owner = request.user
+                case.status = CaseStatus.OPEN
+                case.save()
+                form.save_lab_results(case)
 
-            # Record CASE_CREATED in append-only audit trail
-            log_event(
-                action=AuditAction.CASE_CREATED,
-                actor=request.user,
-                case_id=case.id,
-                entity_type='cases_case',
-                entity_id=str(case.id),
-                request=request,
-                status=AuditStatus.ALLOWED,
-                details={'title': case.title}
-            )
+                # Record CASE_CREATED in append-only audit trail
+                log_event(
+                    action=AuditAction.CASE_CREATED,
+                    actor=request.user,
+                    case_id=case.id,
+                    entity_type='cases_case',
+                    entity_id=str(case.id),
+                    request=request,
+                    status=AuditStatus.ALLOWED,
+                    details={'title': case.title, 'has_vitals': case.has_vitals}
+                )
 
             messages.success(request, f"Clinical case '{case.title}' created. You may now admit advisory specialists to your team.")
             return redirect('cases:team_admit', case_id=case.id)
@@ -185,12 +194,14 @@ class CaseDetailView(LoginRequiredMixin, View):
         case = request.case
         team_members = case.team_memberships.select_related('specialist').all()
         attachments = case.attachments.select_related('uploaded_by').all()
+        lab_results = list(case.lab_results.all())
         return render(request, self.template_name, {
             'case': case,
             'is_case_owner': request.is_case_owner,
             'is_team_member': request.is_team_member,
             'team_members': team_members,
-            'attachments': attachments
+            'attachments': attachments,
+            'lab_results': lab_results,
         })
 
 
@@ -333,6 +344,9 @@ def get_workspace_context(case, user):
         'attachments': list(case.attachments.select_related('uploaded_by').order_by('uploaded_at')),
         'attachment_form': CaseAttachmentUploadForm(),
         'can_upload_attachments': (user.is_authenticated and is_owner and case.status not in [CaseStatus.DECIDED, CaseStatus.CLOSED]),
+        'lab_results': list(case.lab_results.all()),
+        'findings_update_form': CaseFindingsUpdateForm(instance=case),
+        'can_update_findings': (user.is_authenticated and is_owner and case.status not in [CaseStatus.DECIDED, CaseStatus.CLOSED]),
     }
 
 
@@ -601,5 +615,45 @@ class CaseAttachmentDownloadView(LoginRequiredMixin, View):
         filename = attachment.file.name.split('/')[-1]
         response['Content-Disposition'] = f'inline; filename="{filename}"'
         return response
+
+
+@method_decorator(case_owner_required, name='dispatch')
+class CaseFindingsUpdateView(LoginRequiredMixin, View):
+    """
+    Allows the Case Owner to update physiological vitals, physical examination findings,
+    and append structured laboratory panels during active consultation (FR2c, FAULT-01).
+    """
+    def post(self, request, case_id):
+        case = getattr(request, 'case', None) or get_object_or_404(Case, id=case_id)
+        if case.status in [CaseStatus.DECIDED, CaseStatus.CLOSED]:
+            messages.error(request, "Cannot modify clinical findings on a decided or closed case.")
+            return redirect('cases:workspace', case_id=case.id)
+
+        form = CaseFindingsUpdateForm(request.POST, instance=case)
+        if form.is_valid():
+            with transaction.atomic():
+                updated_case = form.save(commit=True)
+                form.save_lab_results(updated_case)
+
+                log_event(
+                    action=AuditAction.FINDINGS_UPDATED,
+                    actor=request.user,
+                    case_id=case.id,
+                    entity_type='cases_case',
+                    entity_id=str(case.id),
+                    request=request,
+                    status=AuditStatus.ALLOWED,
+                    details={
+                        'has_vitals': updated_case.has_vitals,
+                        'temperature_c': str(updated_case.temperature_c) if updated_case.temperature_c else None,
+                        'heart_rate_bpm': updated_case.heart_rate_bpm,
+                    }
+                )
+            messages.success(request, "Clinical findings and laboratory panels updated successfully.")
+        else:
+            first_err = next(iter(form.errors.values()))[0] if form.errors else "Invalid data."
+            messages.error(request, f"Error updating findings: {first_err}")
+
+        return redirect('cases:workspace', case_id=case.id)
 
 

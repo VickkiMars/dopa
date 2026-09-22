@@ -13,5 +13,6 @@ urlpatterns = [
     path('cases/<uuid:case_id>/audit/', views.AuditTrailView.as_view(), name='audit_trail'),
     path('cases/<uuid:case_id>/attachments/upload/', views.CaseAttachmentUploadView.as_view(), name='attachment_upload'),
     path('cases/<uuid:case_id>/attachments/<uuid:attachment_id>/', views.CaseAttachmentDownloadView.as_view(), name='attachment_download'),
+    path('cases/<uuid:case_id>/findings/update/', views.CaseFindingsUpdateView.as_view(), name='findings_update'),
     path('cases/<uuid:case_id>/', views.CaseDetailView.as_view(), name='case_detail'),
 ]

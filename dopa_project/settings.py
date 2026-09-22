@@ -136,3 +136,10 @@ LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'cases:dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
+import sys
+if 'test' in sys.argv:
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
+
+

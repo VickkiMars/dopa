@@ -3,7 +3,7 @@
   "model": "accounts.user",
   "pk": "28e3b90a-70ea-4f20-84a7-c0fd5b45560a",
   "fields": {
-    "password": "pbkdf2_sha256$600000$r1GGUeuhFnes72l0nRsDm9$JODNxS+zTPtJe+kpJb/uAPaYHeM6DPgmDO+PERriFm4=",
+    "password": "pbkdf2_sha256$600000$rPDhQLEaExBhlORoj5B8Xq$xYmr2ZJjsZkq2z1eP91J8hqqkHWz9rcCME5/NTThBVU=",
     "last_login": null,
     "is_superuser": false,
     "email": "dr.ibrahim@clinic.org",
@@ -20,7 +20,7 @@
   "model": "accounts.user",
   "pk": "3a7aad85-e7a0-4679-958e-6268be7b673b",
   "fields": {
-    "password": "pbkdf2_sha256$600000$ORQwtl50d3qvTrx3F4x6XY$+96ynieT+GP74LUd1vnH5WcuJUaAIIpJTIScIEiYCik=",
+    "password": "pbkdf2_sha256$600000$1EqaVocTbR7OzL38tqqfc4$sPhEuOpWh1cbTfX+IlLkdDDfk6sN0LqWkMilUipsZIw=",
     "last_login": null,
     "is_superuser": false,
     "email": "dr.taiwo@clinic.org",
@@ -37,7 +37,7 @@
   "model": "accounts.user",
   "pk": "446fffa7-5156-47dc-b21c-66fbe2e9dfb2",
   "fields": {
-    "password": "pbkdf2_sha256$600000$fTacHEBq5ATB8sDDHoI190$D+a78WJ5HRnBe5h2rvDGDcIqhflVCLZFQ0zqED0A8OE=",
+    "password": "pbkdf2_sha256$600000$wkT2eIbxDrL1rmJj1axIiQ$yV82aapXKoCsQD30Ob4lKt18gq30QjuMyUB83X+2T+A=",
     "last_login": null,
     "is_superuser": false,
     "email": "dr.okafor@clinic.org",
@@ -54,7 +54,7 @@
   "model": "accounts.user",
   "pk": "554c40ca-9006-4094-9936-8369ac9e2235",
   "fields": {
-    "password": "pbkdf2_sha256$600000$92jJneQkn6UpNcMRYAeP8I$8Cmlj6JysrLsPKAdsx11rTkkKNeYPgQUhMG+UaR+OSA=",
+    "password": "pbkdf2_sha256$600000$T2dUxRkNwuNlSo5PnCPX8i$phB2e/OI+sGWU8SdNmJZx0m4ZJph5qZ3ZGPeQi9SuzQ=",
     "last_login": null,
     "is_superuser": false,
     "email": "dr.danjuma@clinic.org",
@@ -71,7 +71,7 @@
   "model": "accounts.user",
   "pk": "5fed2e74-11f0-41f8-addc-89203c924931",
   "fields": {
-    "password": "pbkdf2_sha256$600000$GqBgsHIbM3JwTgq28NrWCa$erVXEhQmRNcAlZNxOWeHS7HbVegZ0GhR1sIBzLcJ/M4=",
+    "password": "pbkdf2_sha256$600000$41KHjwJbC44MgQNRzZCiG2$UKCmqw7avT78HmvIQrpu9dU2Brcy1CVyc2ebFc8ogxE=",
     "last_login": null,
     "is_superuser": false,
     "email": "dr.adeyemi@clinic.org",
@@ -88,7 +88,7 @@
   "model": "accounts.user",
   "pk": "820cdd5a-7edc-468a-80e3-507df7f960be",
   "fields": {
-    "password": "pbkdf2_sha256$600000$cplzZkmcrkwMd7i8JFTdMQ$izuXWZmA8rl68AqCQdhIGFUQeT+5/p9EUSlRsoASrBY=",
+    "password": "pbkdf2_sha256$600000$v3vGg6Ro35NkEplp2e60SZ$VQ+lfTLYtXOld1iPe9O5sEGnryddk4Pq6xI8WCzwHpM=",
     "last_login": null,
     "is_superuser": false,
     "email": "dr.nwosu@clinic.org",
@@ -105,7 +105,7 @@
   "model": "accounts.user",
   "pk": "96a1be3c-4006-410d-ac9e-300a2e784ad9",
   "fields": {
-    "password": "pbkdf2_sha256$600000$JcC4ScWwEs8L41QrgC7V11$s8v3ezIh25b55++qh0NFTRlXBwFxNF/Qmxc9xP0LorA=",
+    "password": "pbkdf2_sha256$600000$vEND0l7auJnyBYXpbDZ1NA$Gqt1SBG/feIg3hfABdCaJ6LFy7ul0RNcK9fEszFpVYU=",
     "last_login": null,
     "is_superuser": false,
     "email": "dr.bello@clinic.org",
@@ -120,9 +120,26 @@
 },
 {
   "model": "accounts.user",
+  "pk": "c88839ff-07bb-4d5e-a669-288249c5c1ce",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$wM7aBBziCQpuyyWkTz0UpT$AmiZZOTxIusKKDInuHpubSLaRW3kELs5AcileUxK/RU=",
+    "last_login": "2026-09-21T09:03:40.278Z",
+    "is_superuser": false,
+    "email": "victorumoreng@gmail.com",
+    "full_name": "Victor Umoren",
+    "role": "PRIMARY_PHYSICIAN",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2026-09-21T09:03:40.261Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
   "pk": "db800fb0-3934-4d60-a947-12dd9ce208bf",
   "fields": {
-    "password": "pbkdf2_sha256$600000$4enX3uZTvM6JIGA6EAbpk4$oZhW4h4tWHqxcuVSR+bOAmWXqmFvcj2/LH2nI8XBqoA=",
+    "password": "pbkdf2_sha256$600000$5XSs4aEQ3YuxcrpubM7KlK$lB2tREMXLKHbgHqwX7gOJLEFeDSbWXl+en4lmeHY2LI=",
     "last_login": null,
     "is_superuser": false,
     "email": "dr.bassey@clinic.org",
@@ -144,9 +161,15 @@
     "clinical_summary": "A 52-year-old male presents with profound fatigue, exertional dyspnoea, and pallor unresponsive to 6 months of oral iron supplementation.",
     "history": "Denies overt gastrointestinal bleeding, hematochezia, or melena. No family history of hemoglobinopathy.",
     "findings": "Vitals: HR 96 bpm, BP 125/80 mmHg.\nLabs: Hb 7.2 g/dL, MCV 64 fL (profound microcytosis), Ferritin 12 ng/mL (low), Serum Iron 20 ug/dL, Total Iron Binding Capacity 450 ug/dL. Stool occult blood positive x 2.\nDiagnostics: Upper endoscopy unremarkable; initial colonoscopy revealed minor non-bleeding diverticula.",
+    "temperature_c": "36.8",
+    "heart_rate_bpm": 96,
+    "bp_systolic": 125,
+    "bp_diastolic": 80,
+    "respiratory_rate": 16,
+    "oxygen_saturation": 97,
     "status": "CLOSED",
     "created_at": "2026-09-21T08:44:06.760Z",
-    "updated_at": "2026-09-21T08:44:06.760Z"
+    "updated_at": "2026-09-22T17:32:04.172Z"
   }
 },
 {
@@ -158,9 +181,15 @@
     "clinical_summary": "A 28-year-old female presents with daily quotidian fevers spiking up to 39.5°C over 4 weeks, symmetrical migratory arthralgia affecting wrists and knees, and an evanescent salmon-pink macular rash on the trunk appearing during fever spikes.",
     "history": "No prior autoimmune disease; no recent travel; no tick exposure; antibiotics had no effect.",
     "findings": "Vitals: Temp 39.4°C, HR 108 bpm, BP 115/75 mmHg.\nLabs: Leukocytosis (WBC 18.5 x 10^9/L, 88% neutrophils), Ferritin 4,200 ng/mL (dramatically elevated), ESR 85 mm/hr, CRP 120 mg/L, ANA negative, Rheumatoid Factor negative, blood cultures x 3 negative.\nImaging: Hepatosplenomegaly on abdominal ultrasound.",
+    "temperature_c": "39.4",
+    "heart_rate_bpm": 108,
+    "bp_systolic": 115,
+    "bp_diastolic": 75,
+    "respiratory_rate": 18,
+    "oxygen_saturation": 98,
     "status": "CLOSED",
     "created_at": "2026-09-21T08:44:06.707Z",
-    "updated_at": "2026-09-21T08:44:06.707Z"
+    "updated_at": "2026-09-22T17:32:04.126Z"
   }
 },
 {
@@ -172,9 +201,15 @@
     "clinical_summary": "An 8-year-old boy presents with daily brief episodes (5–15 seconds) of vacant staring and speech interruption noted by classroom teachers, occurring 10 to 20 times daily.",
     "history": "Normal developmental milestones; no aura; immediate recovery without post-ictal confusion.",
     "findings": "Vitals: Normal pediatric ranges.\nNeurological Exam: Cranial nerves intact, normal tone and reflexes. Hyperventilation during clinical exam reliably precipitates a 10-second staring spell.\nDiagnostics: Resting routine 20-minute EEG captured during clinic visit.",
+    "temperature_c": "36.6",
+    "heart_rate_bpm": 82,
+    "bp_systolic": 100,
+    "bp_diastolic": 65,
+    "respiratory_rate": 16,
+    "oxygen_saturation": 99,
     "status": "CLOSED",
     "created_at": "2026-09-21T08:44:06.800Z",
-    "updated_at": "2026-09-21T08:44:06.800Z"
+    "updated_at": "2026-09-22T17:32:04.200Z"
   }
 },
 {
@@ -229,98 +264,280 @@
 },
 {
   "model": "cases.diagnosisranking",
-  "pk": "00621920-203f-450a-b0ca-52a7f8c3df47",
-  "fields": {
-    "case": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
-    "hypothesis": "b274c6a4-56fc-4c9b-ab1d-3fff1c1631d1",
-    "rank_position": 2,
-    "updated_at": "2026-09-21T08:44:06.747Z"
-  }
-},
-{
-  "model": "cases.diagnosisranking",
-  "pk": "1b7d1895-2520-4038-bd09-57caf15535bb",
+  "pk": "14689358-5cec-43ec-aacd-76057715989a",
   "fields": {
     "case": "f326ab7c-280a-4a91-ad53-de912baa72ef",
     "hypothesis": "09791be2-caef-4b8f-b7f0-62bac5434169",
     "rank_position": 2,
-    "updated_at": "2026-09-21T08:44:06.816Z"
+    "updated_at": "2026-09-22T17:32:04.214Z"
   }
 },
 {
   "model": "cases.diagnosisranking",
-  "pk": "574986c8-86ac-45c3-8bde-de9286614b68",
-  "fields": {
-    "case": "f326ab7c-280a-4a91-ad53-de912baa72ef",
-    "hypothesis": "955875fa-3a70-4923-a664-c10c0b9acc02",
-    "rank_position": 1,
-    "updated_at": "2026-09-21T08:44:06.816Z"
-  }
-},
-{
-  "model": "cases.diagnosisranking",
-  "pk": "7ebcaf4c-30df-4e7b-ab27-0e59020b053f",
+  "pk": "3f2d92c9-7c37-41fc-8082-f27c0fd735e9",
   "fields": {
     "case": "334d0bae-6703-4a03-9f05-575401e60dd0",
     "hypothesis": "1393b3f4-509a-42c6-a441-20fc8b1a82a2",
     "rank_position": 2,
-    "updated_at": "2026-09-21T08:44:06.789Z"
+    "updated_at": "2026-09-22T17:32:04.191Z"
   }
 },
 {
   "model": "cases.diagnosisranking",
-  "pk": "85f8d6f4-212c-42c4-a17a-0e38051f3a9b",
-  "fields": {
-    "case": "334d0bae-6703-4a03-9f05-575401e60dd0",
-    "hypothesis": "78fe4b4b-3cc2-4699-bd4c-32cda1bcb254",
-    "rank_position": 1,
-    "updated_at": "2026-09-21T08:44:06.789Z"
-  }
-},
-{
-  "model": "cases.diagnosisranking",
-  "pk": "b3eee9e8-bd2c-4d9a-83cc-a31ad251dcbf",
+  "pk": "66e169c8-5a40-42b1-9202-b64cd3a00bbc",
   "fields": {
     "case": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
     "hypothesis": "894a806a-1eac-4ff4-88ca-74df08ef4258",
     "rank_position": 1,
-    "updated_at": "2026-09-21T08:44:06.746Z"
+    "updated_at": "2026-09-22T17:32:04.161Z"
   }
 },
 {
-  "model": "cases.decision",
-  "pk": "c0cb3b81-b4c1-4ea7-91ee-ad59a7a2f48f",
+  "model": "cases.diagnosisranking",
+  "pk": "85b21e3a-b583-43c0-9d2b-5fc90aa06639",
   "fields": {
     "case": "334d0bae-6703-4a03-9f05-575401e60dd0",
-    "decider": "5fed2e74-11f0-41f8-addc-89203c924931",
-    "final_diagnosis": "Occult gastrointestinal bleeding secondary to suspected small bowel angiodysplasia; proceed with video capsule endoscopy.",
-    "advisory_acknowledged": true,
-    "governance_statement": "I acknowledge that specialist hypotheses and differential rankings are advisory only. I retain sole clinical responsibility for the final diagnosis and subsequent management plan.",
-    "recorded_at": "2026-09-21T08:44:06.794Z"
+    "hypothesis": "78fe4b4b-3cc2-4699-bd4c-32cda1bcb254",
+    "rank_position": 1,
+    "updated_at": "2026-09-22T17:32:04.190Z"
   }
 },
 {
-  "model": "cases.decision",
-  "pk": "cc57a13a-8aab-4beb-a440-0db0c779c243",
+  "model": "cases.diagnosisranking",
+  "pk": "bf5fd7c0-d121-41e3-b2ec-01dd85144298",
   "fields": {
     "case": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
-    "decider": "db800fb0-3934-4d60-a947-12dd9ce208bf",
-    "final_diagnosis": "Adult-Onset Still's Disease (AOSD); initiate high-dose corticosteroids after infectious clearance.",
-    "advisory_acknowledged": true,
-    "governance_statement": "I acknowledge that specialist hypotheses and differential rankings are advisory only. I retain sole clinical responsibility for the final diagnosis and subsequent management plan.",
-    "recorded_at": "2026-09-21T08:44:06.751Z"
+    "hypothesis": "b274c6a4-56fc-4c9b-ab1d-3fff1c1631d1",
+    "rank_position": 2,
+    "updated_at": "2026-09-22T17:32:04.162Z"
+  }
+},
+{
+  "model": "cases.diagnosisranking",
+  "pk": "e001dde2-faee-4ce9-b160-dc0be67930d5",
+  "fields": {
+    "case": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "hypothesis": "955875fa-3a70-4923-a664-c10c0b9acc02",
+    "rank_position": 1,
+    "updated_at": "2026-09-22T17:32:04.214Z"
   }
 },
 {
   "model": "cases.decision",
-  "pk": "ccd55d30-2ce1-4585-be92-7e1bb1db947f",
+  "pk": "3641a3b1-39e5-4b25-8075-f9a616b66cd3",
   "fields": {
     "case": "f326ab7c-280a-4a91-ad53-de912baa72ef",
     "decider": "554c40ca-9006-4094-9936-8369ac9e2235",
     "final_diagnosis": "Childhood Absence Epilepsy confirmed; initiate first-line ethosuximide therapy with outpatient EEG confirmation.",
     "advisory_acknowledged": true,
     "governance_statement": "I acknowledge that specialist hypotheses and differential rankings are advisory only. I retain sole clinical responsibility for the final diagnosis and subsequent management plan.",
-    "recorded_at": "2026-09-21T08:44:06.819Z"
+    "recorded_at": "2026-09-22T17:32:04.217Z"
+  }
+},
+{
+  "model": "cases.decision",
+  "pk": "4877c79e-b4c8-45e8-b478-5e2ff61898df",
+  "fields": {
+    "case": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "decider": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "final_diagnosis": "Adult-Onset Still's Disease (AOSD); initiate high-dose corticosteroids after infectious clearance.",
+    "advisory_acknowledged": true,
+    "governance_statement": "I acknowledge that specialist hypotheses and differential rankings are advisory only. I retain sole clinical responsibility for the final diagnosis and subsequent management plan.",
+    "recorded_at": "2026-09-22T17:32:04.166Z"
+  }
+},
+{
+  "model": "cases.decision",
+  "pk": "934baa9a-1e8e-45fb-a665-95d6c79e198c",
+  "fields": {
+    "case": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "decider": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "final_diagnosis": "Occult gastrointestinal bleeding secondary to suspected small bowel angiodysplasia; proceed with video capsule endoscopy.",
+    "advisory_acknowledged": true,
+    "governance_statement": "I acknowledge that specialist hypotheses and differential rankings are advisory only. I retain sole clinical responsibility for the final diagnosis and subsequent management plan.",
+    "recorded_at": "2026-09-22T17:32:04.194Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "0be126ed-41e2-4d4f-8619-93be29d57e7e",
+  "fields": {
+    "case": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "test_name": "Fecal Occult Blood",
+    "value": "Positive",
+    "unit": "",
+    "reference_range": "Negative",
+    "flag": "ABNORMAL",
+    "created_at": "2026-09-22T17:32:04.176Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "2c4ebcf6-4f02-417e-9e49-f2b3e716ca78",
+  "fields": {
+    "case": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "test_name": "Hemoglobin (Hb)",
+    "value": "7.2",
+    "unit": "g/dL",
+    "reference_range": "13.5 - 17.5 g/dL",
+    "flag": "CRITICAL",
+    "created_at": "2026-09-22T17:32:04.174Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "3ef31231-0858-4407-93d4-e0208e0f4f44",
+  "fields": {
+    "case": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "test_name": "White Blood Cells (WBC)",
+    "value": "18.5",
+    "unit": "x10^9/L",
+    "reference_range": "4.5 - 11.0 x10^9/L",
+    "flag": "HIGH",
+    "created_at": "2026-09-22T17:32:04.132Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "5418324c-b0ed-4434-b0b6-6b069f26e65e",
+  "fields": {
+    "case": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "test_name": "Serum Electrolytes (Na/K/Cl)",
+    "value": "Normal limits",
+    "unit": "",
+    "reference_range": "Normal pediatric",
+    "flag": "NORMAL",
+    "created_at": "2026-09-22T17:32:04.203Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "889e7f73-1340-4d9e-a77a-019fd9d1eb24",
+  "fields": {
+    "case": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "test_name": "Total Iron Binding Capacity (TIBC)",
+    "value": "450",
+    "unit": "ug/dL",
+    "reference_range": "240 - 450 ug/dL",
+    "flag": "HIGH",
+    "created_at": "2026-09-22T17:32:04.176Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "89c295f8-f712-4ff3-9078-059e48c9752d",
+  "fields": {
+    "case": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "test_name": "Rheumatoid Factor (RF)",
+    "value": "Negative",
+    "unit": "",
+    "reference_range": "Negative",
+    "flag": "NORMAL",
+    "created_at": "2026-09-22T17:32:04.135Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "a6b16d8d-70cc-4782-870a-20635e566e36",
+  "fields": {
+    "case": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "test_name": "Serum Ferritin",
+    "value": "4200",
+    "unit": "ng/mL",
+    "reference_range": "15 - 200 ng/mL",
+    "flag": "CRITICAL",
+    "created_at": "2026-09-22T17:32:04.131Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "b719e0a2-f7a3-43c2-9702-c4fdcf5517de",
+  "fields": {
+    "case": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "test_name": "Mean Corpuscular Volume (MCV)",
+    "value": "64",
+    "unit": "fL",
+    "reference_range": "80 - 100 fL",
+    "flag": "LOW",
+    "created_at": "2026-09-22T17:32:04.174Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "c165649a-71ea-4f9b-b8b9-802dfac45572",
+  "fields": {
+    "case": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "test_name": "Antinuclear Antibodies (ANA)",
+    "value": "Negative",
+    "unit": "",
+    "reference_range": "Negative",
+    "flag": "NORMAL",
+    "created_at": "2026-09-22T17:32:04.135Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "c7c205c4-acee-4caf-999a-3b788620e382",
+  "fields": {
+    "case": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "test_name": "Fasting Blood Glucose",
+    "value": "95",
+    "unit": "mg/dL",
+    "reference_range": "70 - 100 mg/dL",
+    "flag": "NORMAL",
+    "created_at": "2026-09-22T17:32:04.202Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "d52eb5f9-d90f-42ec-8f3b-92375e3176c4",
+  "fields": {
+    "case": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "test_name": "Erythrocyte Sed. Rate (ESR)",
+    "value": "85",
+    "unit": "mm/hr",
+    "reference_range": "< 20 mm/hr",
+    "flag": "HIGH",
+    "created_at": "2026-09-22T17:32:04.133Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "d8fa759a-089d-4d6e-a81e-9bf56ad53fa9",
+  "fields": {
+    "case": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "test_name": "Serum Iron",
+    "value": "20",
+    "unit": "ug/dL",
+    "reference_range": "60 - 170 ug/dL",
+    "flag": "LOW",
+    "created_at": "2026-09-22T17:32:04.175Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "e504f33a-0b13-4b8c-928f-d52c0adc173e",
+  "fields": {
+    "case": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "test_name": "Serum Ferritin",
+    "value": "12",
+    "unit": "ng/mL",
+    "reference_range": "30 - 300 ng/mL",
+    "flag": "LOW",
+    "created_at": "2026-09-22T17:32:04.175Z"
+  }
+},
+{
+  "model": "cases.caselabresult",
+  "pk": "ed2f7713-1f26-4135-9657-4faa34edf0bd",
+  "fields": {
+    "case": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "test_name": "C-Reactive Protein (CRP)",
+    "value": "120",
+    "unit": "mg/L",
+    "reference_range": "< 5 mg/L",
+    "flag": "HIGH",
+    "created_at": "2026-09-22T17:32:04.134Z"
   }
 },
 {
@@ -460,6 +677,40 @@
 },
 {
   "model": "audit.auditlog",
+  "pk": "10d1062c-de4f-4a43-ac95-4faca28f7721",
+  "fields": {
+    "actor": "3a7aad85-e7a0-4679-958e-6268be7b673b",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "955875fa-3a70-4923-a664-c10c0b9acc02",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Childhood Absence Epilepsy (CAE)"
+    },
+    "timestamp": "2026-09-22T17:32:04.209Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "113fad8c-53b2-4f54-a4db-a25516a74a5b",
+  "fields": {
+    "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "action": "SPECIALIST_ADMITTED",
+    "entity_type": "cases_caseteam",
+    "entity_id": "",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "specialist_email": "dr.nwosu@clinic.org"
+    },
+    "timestamp": "2026-09-22T16:44:45.951Z"
+  }
+},
+{
+  "model": "audit.auditlog",
   "pk": "13b77efc-6b80-4687-a33c-358082e40e24",
   "fields": {
     "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
@@ -494,6 +745,58 @@
 },
 {
   "model": "audit.auditlog",
+  "pk": "1bbd017d-0494-458a-b8ba-a73948e22a36",
+  "fields": {
+    "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "action": "SPECIALIST_ADMITTED",
+    "entity_type": "cases_caseteam",
+    "entity_id": "",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "specialist_email": "dr.okafor@clinic.org"
+    },
+    "timestamp": "2026-09-22T17:32:04.146Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "2158698e-609a-4625-a27b-ac55d84733c4",
+  "fields": {
+    "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "action": "RANK_UPDATED",
+    "entity_type": "cases_diagnosisranking",
+    "entity_id": "66e169c8-5a40-42b1-9202-b64cd3a00bbc",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "new_rank": 1,
+      "direction": "UP"
+    },
+    "timestamp": "2026-09-22T17:32:04.164Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "2766cf88-628e-417d-81e6-565d2a0c56df",
+  "fields": {
+    "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "action": "CASE_CREATED",
+    "entity_type": "cases_case",
+    "entity_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "title": "Multi-system Presentation of Recurrent High Fever, Arthralgia, and Salmon-Colored Rash"
+    },
+    "timestamp": "2026-09-22T17:32:04.138Z"
+  }
+},
+{
+  "model": "audit.auditlog",
   "pk": "2c365d0a-53c8-4281-9081-8f09768baefc",
   "fields": {
     "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
@@ -507,6 +810,23 @@
       "specialist_email": "dr.nwosu@clinic.org"
     },
     "timestamp": "2026-09-21T08:44:06.774Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "2d6086de-2a30-486f-850d-dd7159b2499b",
+  "fields": {
+    "actor": "96a1be3c-4006-410d-ac9e-300a2e784ad9",
+    "action": "DISCUSSION_POSTED",
+    "entity_type": "collaboration_discussionnote",
+    "entity_id": "863fdd1f-82cb-4ce4-a59a-311cbb03c626",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "snippet": "Serum ferritin of 4,200 ng/mL is five times higher"
+    },
+    "timestamp": "2026-09-22T16:44:45.927Z"
   }
 },
 {
@@ -541,6 +861,58 @@
       "proposed_diagnosis": "Occult Small-Bowel Angiodysplasia / Vascular Ectasia"
     },
     "timestamp": "2026-09-21T08:44:06.781Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "38a60958-c072-45d8-9cab-fd30238516b6",
+  "fields": {
+    "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "action": "SPECIALIST_ADMITTED",
+    "entity_type": "cases_caseteam",
+    "entity_id": "",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "specialist_email": "dr.bello@clinic.org"
+    },
+    "timestamp": "2026-09-22T16:44:45.916Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "3dbb74ed-5d80-4084-89cb-a18ccc4ac97d",
+  "fields": {
+    "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "action": "DECISION_RECORDED",
+    "entity_type": "cases_decision",
+    "entity_id": "934baa9a-1e8e-45fb-a665-95d6c79e198c",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "final_diagnosis": "Occult gastrointestinal bleeding secondary to suspected small bowel angiodysplasia; proceed with video capsule endoscopy.",
+      "advisory_acknowledged": true
+    },
+    "timestamp": "2026-09-22T17:32:04.195Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "3de475be-09bf-4c5b-a018-8c9d5f48867b",
+  "fields": {
+    "actor": "96a1be3c-4006-410d-ac9e-300a2e784ad9",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "894a806a-1eac-4ff4-88ca-74df08ef4258",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Adult-Onset Still's Disease (AOSD)"
+    },
+    "timestamp": "2026-09-22T16:44:45.922Z"
   }
 },
 {
@@ -614,6 +986,60 @@
 },
 {
   "model": "audit.auditlog",
+  "pk": "5e4db336-a9e6-4262-bd93-3ae8ae901032",
+  "fields": {
+    "actor": "554c40ca-9006-4094-9936-8369ac9e2235",
+    "action": "DECISION_RECORDED",
+    "entity_type": "cases_decision",
+    "entity_id": "3641a3b1-39e5-4b25-8075-f9a616b66cd3",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "final_diagnosis": "Childhood Absence Epilepsy confirmed; initiate first-line ethosuximide therapy with outpatient EEG confirmation.",
+      "advisory_acknowledged": true
+    },
+    "timestamp": "2026-09-22T17:32:04.218Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "61313e3f-1775-4a6b-bfa7-ffc802d5da52",
+  "fields": {
+    "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "action": "RANK_UPDATED",
+    "entity_type": "cases_diagnosisranking",
+    "entity_id": "8a85b8bd-8ae4-477a-9df1-582114d606c0",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "new_rank": 1,
+      "direction": "UP"
+    },
+    "timestamp": "2026-09-22T16:44:45.959Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "6347b4b2-fa95-4b48-be8c-145d0332d1e1",
+  "fields": {
+    "actor": "554c40ca-9006-4094-9936-8369ac9e2235",
+    "action": "RANK_UPDATED",
+    "entity_type": "cases_diagnosisranking",
+    "entity_id": "e001dde2-faee-4ce9-b160-dc0be67930d5",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "new_rank": 1,
+      "direction": "UP"
+    },
+    "timestamp": "2026-09-22T17:32:04.216Z"
+  }
+},
+{
+  "model": "audit.auditlog",
   "pk": "64b5be40-d43c-45a5-b2c6-36589d236a44",
   "fields": {
     "actor": "554c40ca-9006-4094-9936-8369ac9e2235",
@@ -628,6 +1054,229 @@
       "advisory_acknowledged": true
     },
     "timestamp": "2026-09-21T08:44:06.821Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "68bda959-583f-466d-b9b1-160215806c18",
+  "fields": {
+    "actor": "446fffa7-5156-47dc-b21c-66fbe2e9dfb2",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "b274c6a4-56fc-4c9b-ab1d-3fff1c1631d1",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Systemic Lupus Erythematosus (SLE)"
+    },
+    "timestamp": "2026-09-22T16:44:45.924Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "692ba46e-1482-4889-ab8c-e31721a930d3",
+  "fields": {
+    "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "action": "SPECIALIST_ADMITTED",
+    "entity_type": "cases_caseteam",
+    "entity_id": "",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "specialist_email": "dr.ibrahim@clinic.org"
+    },
+    "timestamp": "2026-09-22T17:32:04.181Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "6c2a6907-e969-4179-a6c7-9775f39c66d0",
+  "fields": {
+    "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "action": "SPECIALIST_ADMITTED",
+    "entity_type": "cases_caseteam",
+    "entity_id": "",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "specialist_email": "dr.okafor@clinic.org"
+    },
+    "timestamp": "2026-09-22T16:44:45.918Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "75f3d5fb-a378-412f-955f-d611cee2910c",
+  "fields": {
+    "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "action": "CASE_CREATED",
+    "entity_type": "cases_case",
+    "entity_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "title": "Multi-system Presentation of Recurrent High Fever, Arthralgia, and Salmon-Colored Rash"
+    },
+    "timestamp": "2026-09-22T16:44:45.912Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "7605e9b3-5bd1-42cc-8f18-0eae21fb1907",
+  "fields": {
+    "actor": "c88839ff-07bb-4d5e-a669-288249c5c1ce",
+    "action": "LOGIN_SUCCESS",
+    "entity_type": "accounts_user",
+    "entity_id": "c88839ff-07bb-4d5e-a669-288249c5c1ce",
+    "case_id": null,
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "event": "user_registered",
+      "role": "PRIMARY_PHYSICIAN"
+    },
+    "timestamp": "2026-09-21T09:03:40.267Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "7bb3875c-7d8b-4aca-968a-ee205d00646b",
+  "fields": {
+    "actor": "554c40ca-9006-4094-9936-8369ac9e2235",
+    "action": "CASE_CREATED",
+    "entity_type": "cases_case",
+    "entity_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "title": "Episodic Staring and Unresponsiveness in an 8-Year-Old Child"
+    },
+    "timestamp": "2026-09-22T16:44:45.971Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "7d8f3f3e-1323-456e-a760-f74730486926",
+  "fields": {
+    "actor": "3a7aad85-e7a0-4679-958e-6268be7b673b",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "955875fa-3a70-4923-a664-c10c0b9acc02",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Childhood Absence Epilepsy (CAE)"
+    },
+    "timestamp": "2026-09-22T16:44:45.976Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "862aa9cf-956e-4f65-af1c-aff6040aff0f",
+  "fields": {
+    "actor": "96a1be3c-4006-410d-ac9e-300a2e784ad9",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "894a806a-1eac-4ff4-88ca-74df08ef4258",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Adult-Onset Still's Disease (AOSD)"
+    },
+    "timestamp": "2026-09-22T17:32:04.152Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "8724ff0c-eafd-4bfb-b012-bd5d84a1efdf",
+  "fields": {
+    "actor": "28e3b90a-70ea-4f20-84a7-c0fd5b45560a",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "78fe4b4b-3cc2-4699-bd4c-32cda1bcb254",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Occult Small-Bowel Angiodysplasia / Vascular Ectasia"
+    },
+    "timestamp": "2026-09-22T16:44:45.954Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "8b0712e9-a121-4fd9-8992-f1182b36d045",
+  "fields": {
+    "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "action": "CASE_CREATED",
+    "entity_type": "cases_case",
+    "entity_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "title": "Refractory Severe Microcytic Hypochromic Anaemia in a Middle-Aged Male"
+    },
+    "timestamp": "2026-09-22T16:44:45.945Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "8be13bed-9ceb-405e-aa18-fc93513e5032",
+  "fields": {
+    "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "action": "DECISION_RECORDED",
+    "entity_type": "cases_decision",
+    "entity_id": "39327cb1-59bc-4b4d-bec6-f6aaf4b0bd47",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "final_diagnosis": "Occult gastrointestinal bleeding secondary to suspected small bowel angiodysplasia; proceed with video capsule endoscopy.",
+      "advisory_acknowledged": true
+    },
+    "timestamp": "2026-09-22T16:44:45.962Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "8c66474c-72ff-4de6-ba6b-3ecc54961d44",
+  "fields": {
+    "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "action": "SPECIALIST_ADMITTED",
+    "entity_type": "cases_caseteam",
+    "entity_id": "",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "specialist_email": "dr.nwosu@clinic.org"
+    },
+    "timestamp": "2026-09-22T17:32:04.183Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "8c96a4e3-cb9e-4a6f-b596-2607ea010ccb",
+  "fields": {
+    "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "action": "SPECIALIST_ADMITTED",
+    "entity_type": "cases_caseteam",
+    "entity_id": "",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "specialist_email": "dr.bello@clinic.org"
+    },
+    "timestamp": "2026-09-22T17:32:04.143Z"
   }
 },
 {
@@ -649,6 +1298,76 @@
 },
 {
   "model": "audit.auditlog",
+  "pk": "8eeb2a26-ec34-4db3-84e4-6fdcb0883cd0",
+  "fields": {
+    "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "action": "DECISION_RECORDED",
+    "entity_type": "cases_decision",
+    "entity_id": "17e41816-0553-478b-a9ee-ebf9d0aaffc0",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "final_diagnosis": "Adult-Onset Still's Disease (AOSD); initiate high-dose corticosteroids after infectious clearance.",
+      "advisory_acknowledged": true
+    },
+    "timestamp": "2026-09-22T16:44:45.936Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "8f57f12f-c217-40b0-9c0e-30507f4bcc4f",
+  "fields": {
+    "actor": "554c40ca-9006-4094-9936-8369ac9e2235",
+    "action": "SPECIALIST_ADMITTED",
+    "entity_type": "cases_caseteam",
+    "entity_id": "",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "specialist_email": "dr.taiwo@clinic.org"
+    },
+    "timestamp": "2026-09-22T16:44:45.973Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "8fc71085-b064-45b8-9dd5-9173ec86ccec",
+  "fields": {
+    "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "action": "RANK_UPDATED",
+    "entity_type": "cases_diagnosisranking",
+    "entity_id": "85b21e3a-b583-43c0-9d2b-5fc90aa06639",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "new_rank": 1,
+      "direction": "UP"
+    },
+    "timestamp": "2026-09-22T17:32:04.192Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "a95f982d-9cff-4284-85cd-0f4f3945a94c",
+  "fields": {
+    "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "action": "CASE_CREATED",
+    "entity_type": "cases_case",
+    "entity_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "title": "Refractory Severe Microcytic Hypochromic Anaemia in a Middle-Aged Male"
+    },
+    "timestamp": "2026-09-22T17:32:04.178Z"
+  }
+},
+{
+  "model": "audit.auditlog",
   "pk": "b5e391de-d7c0-4c1e-b0c8-b1c0046ab354",
   "fields": {
     "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
@@ -666,6 +1385,76 @@
 },
 {
   "model": "audit.auditlog",
+  "pk": "b996aba2-ac2a-4406-bfa8-ce6b70ae4dd1",
+  "fields": {
+    "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "action": "DECISION_RECORDED",
+    "entity_type": "cases_decision",
+    "entity_id": "4877c79e-b4c8-45e8-b478-5e2ff61898df",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "final_diagnosis": "Adult-Onset Still's Disease (AOSD); initiate high-dose corticosteroids after infectious clearance.",
+      "advisory_acknowledged": true
+    },
+    "timestamp": "2026-09-22T17:32:04.168Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "bca8d803-3145-40a0-8fb9-bcf56933672d",
+  "fields": {
+    "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
+    "action": "RANK_UPDATED",
+    "entity_type": "cases_diagnosisranking",
+    "entity_id": "7f386e66-c60a-4471-af28-4c94aa3e8c32",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "new_rank": 1,
+      "direction": "UP"
+    },
+    "timestamp": "2026-09-22T16:44:45.932Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "beee8857-3a64-477e-ae60-4e216f5615ac",
+  "fields": {
+    "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
+    "action": "SPECIALIST_ADMITTED",
+    "entity_type": "cases_caseteam",
+    "entity_id": "",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "specialist_email": "dr.ibrahim@clinic.org"
+    },
+    "timestamp": "2026-09-22T16:44:45.948Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "c1ce8dfd-c3b1-4172-8f50-59d92a3725ae",
+  "fields": {
+    "actor": "554c40ca-9006-4094-9936-8369ac9e2235",
+    "action": "SPECIALIST_ADMITTED",
+    "entity_type": "cases_caseteam",
+    "entity_id": "",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "specialist_email": "dr.taiwo@clinic.org"
+    },
+    "timestamp": "2026-09-22T17:32:04.206Z"
+  }
+},
+{
+  "model": "audit.auditlog",
   "pk": "c4859e45-d258-43c0-8381-acd4e8a7e8da",
   "fields": {
     "actor": "96a1be3c-4006-410d-ac9e-300a2e784ad9",
@@ -679,6 +1468,41 @@
       "proposed_diagnosis": "Adult-Onset Still's Disease (AOSD)"
     },
     "timestamp": "2026-09-21T08:44:06.732Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "cba3663c-709b-4b49-b951-ece65182e0d4",
+  "fields": {
+    "actor": "3a7aad85-e7a0-4679-958e-6268be7b673b",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "09791be2-caef-4b8f-b7f0-62bac5434169",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Behavioral Inattention / Absence Mimic (Stereotypies)"
+    },
+    "timestamp": "2026-09-22T17:32:04.212Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "cf16ca46-505b-4ec9-8e5a-5400351d95d4",
+  "fields": {
+    "actor": "554c40ca-9006-4094-9936-8369ac9e2235",
+    "action": "DECISION_RECORDED",
+    "entity_type": "cases_decision",
+    "entity_id": "e8bad6ed-95ad-46c3-969f-dca164527092",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "final_diagnosis": "Childhood Absence Epilepsy confirmed; initiate first-line ethosuximide therapy with outpatient EEG confirmation.",
+      "advisory_acknowledged": true
+    },
+    "timestamp": "2026-09-22T16:44:45.984Z"
   }
 },
 {
@@ -718,6 +1542,23 @@
 },
 {
   "model": "audit.auditlog",
+  "pk": "d4bc01af-ca60-42e2-beda-16fb4010f97e",
+  "fields": {
+    "actor": "3a7aad85-e7a0-4679-958e-6268be7b673b",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "09791be2-caef-4b8f-b7f0-62bac5434169",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Behavioral Inattention / Absence Mimic (Stereotypies)"
+    },
+    "timestamp": "2026-09-22T16:44:45.978Z"
+  }
+},
+{
+  "model": "audit.auditlog",
   "pk": "d5d1c373-c5d3-4fb5-a28b-c33e5658dc6a",
   "fields": {
     "actor": "5fed2e74-11f0-41f8-addc-89203c924931",
@@ -736,6 +1577,74 @@
 },
 {
   "model": "audit.auditlog",
+  "pk": "d8ecffb3-f419-4b6b-9ab3-8c60a424d57d",
+  "fields": {
+    "actor": "28e3b90a-70ea-4f20-84a7-c0fd5b45560a",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "78fe4b4b-3cc2-4699-bd4c-32cda1bcb254",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Occult Small-Bowel Angiodysplasia / Vascular Ectasia"
+    },
+    "timestamp": "2026-09-22T17:32:04.186Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "db06454e-15b3-4bd7-8c94-b5abe1a6ff20",
+  "fields": {
+    "actor": "554c40ca-9006-4094-9936-8369ac9e2235",
+    "action": "CASE_CREATED",
+    "entity_type": "cases_case",
+    "entity_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "title": "Episodic Staring and Unresponsiveness in an 8-Year-Old Child"
+    },
+    "timestamp": "2026-09-22T17:32:04.204Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "df16e994-38a0-4d54-8490-037eec51ab5c",
+  "fields": {
+    "actor": "96a1be3c-4006-410d-ac9e-300a2e784ad9",
+    "action": "DISCUSSION_POSTED",
+    "entity_type": "collaboration_discussionnote",
+    "entity_id": "863fdd1f-82cb-4ce4-a59a-311cbb03c626",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "snippet": "Serum ferritin of 4,200 ng/mL is five times higher"
+    },
+    "timestamp": "2026-09-22T17:32:04.158Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "e3b471f2-b772-4638-94fe-4a4b41a27343",
+  "fields": {
+    "actor": "820cdd5a-7edc-468a-80e3-507df7f960be",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "1393b3f4-509a-42c6-a441-20fc8b1a82a2",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Celiac Disease with Duodenal Malabsorption"
+    },
+    "timestamp": "2026-09-22T17:32:04.189Z"
+  }
+},
+{
+  "model": "audit.auditlog",
   "pk": "e9f70283-f7c2-40bd-b8a4-83f45ed3e43e",
   "fields": {
     "actor": "db800fb0-3934-4d60-a947-12dd9ce208bf",
@@ -750,6 +1659,23 @@
       "advisory_acknowledged": true
     },
     "timestamp": "2026-09-21T08:44:06.755Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "ed6d1e69-e682-4c28-a7b5-4f35026c5ce5",
+  "fields": {
+    "actor": "446fffa7-5156-47dc-b21c-66fbe2e9dfb2",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "b274c6a4-56fc-4c9b-ab1d-3fff1c1631d1",
+    "case_id": "9a1a7fe3-e363-4581-8e91-1c2393d2f829",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Systemic Lupus Erythematosus (SLE)"
+    },
+    "timestamp": "2026-09-22T17:32:04.155Z"
   }
 },
 {
@@ -784,6 +1710,41 @@
       "specialist_email": "dr.ibrahim@clinic.org"
     },
     "timestamp": "2026-09-21T08:44:06.767Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "ff126864-36cd-4506-8eaf-680cc94a8d44",
+  "fields": {
+    "actor": "820cdd5a-7edc-468a-80e3-507df7f960be",
+    "action": "HYPOTHESIS_SUBMITTED",
+    "entity_type": "collaboration_hypothesis",
+    "entity_id": "1393b3f4-509a-42c6-a441-20fc8b1a82a2",
+    "case_id": "334d0bae-6703-4a03-9f05-575401e60dd0",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "proposed_diagnosis": "Celiac Disease with Duodenal Malabsorption"
+    },
+    "timestamp": "2026-09-22T16:44:45.956Z"
+  }
+},
+{
+  "model": "audit.auditlog",
+  "pk": "fffbefae-8e14-4706-a361-5d5cd59018d8",
+  "fields": {
+    "actor": "554c40ca-9006-4094-9936-8369ac9e2235",
+    "action": "RANK_UPDATED",
+    "entity_type": "cases_diagnosisranking",
+    "entity_id": "26abc9b3-217a-4ca6-bc2f-015ce6660fa3",
+    "case_id": "f326ab7c-280a-4a91-ad53-de912baa72ef",
+    "ip_address": "127.0.0.1",
+    "status": "ALLOWED",
+    "details": {
+      "new_rank": 1,
+      "direction": "UP"
+    },
+    "timestamp": "2026-09-22T16:44:45.981Z"
   }
 }
 ]

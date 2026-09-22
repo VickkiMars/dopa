@@ -1,7 +1,9 @@
+import json
+from decimal import Decimal
 from django import forms
 from django.core.exceptions import ValidationError
 from accounts.models import User, Role
-from .models import Case, CaseTeam, CaseAttachment, AttachmentCategory
+from .models import Case, CaseTeam, CaseAttachment, AttachmentCategory, CaseLabResult, LabFlag
 
 
 class CaseCreateForm(forms.ModelForm):
@@ -38,16 +40,264 @@ class CaseCreateForm(forms.ModelForm):
         min_length=20,
         max_length=5000,
         widget=forms.Textarea(attrs={
-            'placeholder': '### Vital Signs:\nTemp: 38.8C, HR: 95, BP: 120/80\n\n### Laboratory Markers:\nWBC: 14.5, CRP: 45, ESR: 60\n\n### Imaging & Pathology:\nChest CT shows...',
+            'placeholder': 'General appearance, skin lesions, abdominal exam, cardiovascular / respiratory auscultation, and clinical impressions...',
             'class': 'form-input',
-            'rows': 6
+            'rows': 5
         }),
-        help_text="Structured physical examination, vitals, lab markers, and imaging findings (FAULT-01)."
+        help_text="Physical examination and narrative bedside observations (FAULT-01)."
+    )
+
+    # Discrete Physiological Vital Signs (FR2c)
+    temperature_c = forms.DecimalField(
+        required=False,
+        max_digits=4,
+        decimal_places=1,
+        min_value=Decimal('25.0'),
+        max_value=Decimal('45.0'),
+        widget=forms.NumberInput(attrs={
+            'placeholder': '38.5',
+            'class': 'form-input vital-field',
+            'step': '0.1',
+        }),
+        help_text="°C (25.0 - 45.0)"
+    )
+    heart_rate_bpm = forms.IntegerField(
+        required=False,
+        min_value=20,
+        max_value=300,
+        widget=forms.NumberInput(attrs={
+            'placeholder': '72',
+            'class': 'form-input vital-field',
+        }),
+        help_text="bpm (20 - 300)"
+    )
+    bp_systolic = forms.IntegerField(
+        required=False,
+        min_value=40,
+        max_value=300,
+        widget=forms.NumberInput(attrs={
+            'placeholder': '120',
+            'class': 'form-input vital-field',
+        }),
+        help_text="Systolic (mmHg)"
+    )
+    bp_diastolic = forms.IntegerField(
+        required=False,
+        min_value=20,
+        max_value=200,
+        widget=forms.NumberInput(attrs={
+            'placeholder': '80',
+            'class': 'form-input vital-field',
+        }),
+        help_text="Diastolic (mmHg)"
+    )
+    respiratory_rate = forms.IntegerField(
+        required=False,
+        min_value=4,
+        max_value=80,
+        widget=forms.NumberInput(attrs={
+            'placeholder': '16',
+            'class': 'form-input vital-field',
+        }),
+        help_text="breaths/min (4 - 80)"
+    )
+    oxygen_saturation = forms.IntegerField(
+        required=False,
+        min_value=50,
+        max_value=100,
+        widget=forms.NumberInput(attrs={
+            'placeholder': '98',
+            'class': 'form-input vital-field',
+        }),
+        help_text="% SpO2 (50 - 100)"
+    )
+    lab_data_json = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
     )
 
     class Meta:
         model = Case
-        fields = ['title', 'clinical_summary', 'history', 'findings']
+        fields = [
+            'title', 'clinical_summary', 'history', 'findings',
+            'temperature_c', 'heart_rate_bpm', 'bp_systolic', 'bp_diastolic',
+            'respiratory_rate', 'oxygen_saturation'
+        ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        sys_val = cleaned_data.get('bp_systolic')
+        dia_val = cleaned_data.get('bp_diastolic')
+        if sys_val is not None and dia_val is not None and sys_val <= dia_val:
+            self.add_error('bp_systolic', 'Systolic BP must be strictly greater than Diastolic BP.')
+
+        lab_data_raw = cleaned_data.get('lab_data_json')
+        if lab_data_raw:
+            try:
+                parsed = json.loads(lab_data_raw)
+                if not isinstance(parsed, list):
+                    self.add_error('lab_data_json', 'Invalid structured lab data format.')
+            except Exception:
+                self.add_error('lab_data_json', 'Malformed JSON in lab data payload.')
+        return cleaned_data
+
+    def save_lab_results(self, case):
+        if getattr(self, '_labs_saved', False):
+            return 0
+        lab_data_raw = self.cleaned_data.get('lab_data_json')
+        created_count = 0
+        if lab_data_raw:
+            try:
+                items = json.loads(lab_data_raw)
+                for item in items:
+                    t_name = str(item.get('test_name', '')).strip()
+                    val = str(item.get('value', '')).strip()
+                    if t_name and val:
+                        flag_val = item.get('flag', LabFlag.NORMAL)
+                        if flag_val not in LabFlag.values:
+                            flag_val = LabFlag.NORMAL
+                        CaseLabResult.objects.create(
+                            case=case,
+                            test_name=t_name[:120],
+                            value=val[:60],
+                            unit=str(item.get('unit', ''))[:40].strip(),
+                            reference_range=str(item.get('reference_range', ''))[:80].strip(),
+                            flag=flag_val
+                        )
+                        created_count += 1
+            except Exception:
+                pass
+        self._labs_saved = True
+        return created_count
+
+    def save(self, commit=True):
+        case = super().save(commit=commit)
+        if commit:
+            self.save_lab_results(case)
+        return case
+
+
+class CaseFindingsUpdateForm(forms.ModelForm):
+    """
+    Case Owner update form for revising vitals, exam findings, and appending labs during consultation.
+    """
+    temperature_c = forms.DecimalField(
+        required=False,
+        max_digits=4,
+        decimal_places=1,
+        min_value=Decimal('25.0'),
+        max_value=Decimal('45.0'),
+        widget=forms.NumberInput(attrs={'class': 'form-input vital-field', 'step': '0.1', 'placeholder': '38.5'}),
+        help_text="°C"
+    )
+    heart_rate_bpm = forms.IntegerField(
+        required=False,
+        min_value=20,
+        max_value=300,
+        widget=forms.NumberInput(attrs={'class': 'form-input vital-field', 'placeholder': '72'}),
+        help_text="bpm"
+    )
+    bp_systolic = forms.IntegerField(
+        required=False,
+        min_value=40,
+        max_value=300,
+        widget=forms.NumberInput(attrs={'class': 'form-input vital-field', 'placeholder': '120'}),
+        help_text="mmHg"
+    )
+    bp_diastolic = forms.IntegerField(
+        required=False,
+        min_value=20,
+        max_value=200,
+        widget=forms.NumberInput(attrs={'class': 'form-input vital-field', 'placeholder': '80'}),
+        help_text="mmHg"
+    )
+    respiratory_rate = forms.IntegerField(
+        required=False,
+        min_value=4,
+        max_value=80,
+        widget=forms.NumberInput(attrs={'class': 'form-input vital-field', 'placeholder': '16'}),
+        help_text="breaths/min"
+    )
+    oxygen_saturation = forms.IntegerField(
+        required=False,
+        min_value=50,
+        max_value=100,
+        widget=forms.NumberInput(attrs={'class': 'form-input vital-field', 'placeholder': '98'}),
+        help_text="% SpO2"
+    )
+    findings = forms.CharField(
+        min_length=20,
+        max_length=5000,
+        widget=forms.Textarea(attrs={'class': 'form-input', 'rows': 5}),
+        help_text="Physical examination and narrative bedside observations."
+    )
+    lab_data_json = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+
+    class Meta:
+        model = Case
+        fields = [
+            'temperature_c', 'heart_rate_bpm', 'bp_systolic', 'bp_diastolic',
+            'respiratory_rate', 'oxygen_saturation', 'findings'
+        ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        sys_val = cleaned_data.get('bp_systolic')
+        dia_val = cleaned_data.get('bp_diastolic')
+        if sys_val is not None and dia_val is not None and sys_val <= dia_val:
+            self.add_error('bp_systolic', 'Systolic BP must be strictly greater than Diastolic BP.')
+        return cleaned_data
+
+    def save_lab_results(self, case):
+        if getattr(self, '_labs_saved', False):
+            return 0
+        lab_data_raw = self.cleaned_data.get('lab_data_json')
+        created_count = 0
+        if lab_data_raw:
+            try:
+                items = json.loads(lab_data_raw)
+                for item in items:
+                    t_name = str(item.get('test_name', '')).strip()
+                    val = str(item.get('value', '')).strip()
+                    if t_name and val:
+                        flag_val = item.get('flag', LabFlag.NORMAL)
+                        if flag_val not in LabFlag.values:
+                            flag_val = LabFlag.NORMAL
+                        CaseLabResult.objects.create(
+                            case=case,
+                            test_name=t_name[:120],
+                            value=val[:60],
+                            unit=str(item.get('unit', ''))[:40].strip(),
+                            reference_range=str(item.get('reference_range', ''))[:80].strip(),
+                            flag=flag_val
+                        )
+                        created_count += 1
+            except Exception:
+                pass
+        self._labs_saved = True
+        return created_count
+
+    def save(self, commit=True):
+        case = super().save(commit=commit)
+        if commit:
+            self.save_lab_results(case)
+        return case
+
+
+class CaseLabResultForm(forms.ModelForm):
+    class Meta:
+        model = CaseLabResult
+        fields = ['test_name', 'value', 'unit', 'reference_range', 'flag']
+        widgets = {
+            'test_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. Serum Ferritin'}),
+            'value': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. 4200'}),
+            'unit': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. ng/mL'}),
+            'reference_range': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. 15 - 200 ng/mL'}),
+            'flag': forms.Select(attrs={'class': 'form-input'}),
+        }
 
 
 class TeamAdmitForm(forms.Form):

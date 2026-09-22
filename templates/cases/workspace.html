@@ -150,6 +150,130 @@
         font-size: 0.75rem;
     }
 
+    /* Vitals Telemetry Ribbon (FR2c) */
+    .vitals-ribbon {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.35rem;
+        margin-bottom: 0.75rem;
+    }
+    .vital-tile {
+        background: var(--color-surface-inset);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .vital-tile:hover {
+        border-color: var(--color-primary);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .vital-tile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.625rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+    }
+    .vital-tile-val {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--color-text-main);
+        margin: 0.25rem 0;
+    }
+    .vital-tag-pill {
+        display: inline-block;
+        font-size: 0.625rem;
+        font-weight: 600;
+        padding: 0.1rem 0.35rem;
+        border-radius: var(--radius-pill);
+        align-self: flex-start;
+    }
+    .vital-tag-normal { background: #ECFDF5; color: #047857; }
+    .vital-tag-warning { background: #FEF3C7; color: #B45309; }
+    .vital-tag-critical { background: #FEE2E2; color: #B91C1C; font-weight: 700; }
+
+    /* Quantitative Lab Cards & Table */
+    .lab-display-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.75rem;
+        margin-top: 0.35rem;
+        margin-bottom: 0.75rem;
+    }
+    .lab-display-table th {
+        font-size: 0.625rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+        padding: 0.35rem 0.5rem;
+        border-bottom: 1px solid var(--color-border);
+        text-align: left;
+    }
+    .lab-display-table td {
+        padding: 0.4rem 0.5rem;
+        border-bottom: 1px solid var(--color-border-faint);
+        vertical-align: middle;
+    }
+    .flag-badge {
+        font-size: 0.625rem;
+        font-weight: 600;
+        padding: 0.15rem 0.45rem;
+        border-radius: var(--radius-pill);
+        display: inline-block;
+    }
+    .flag-NORMAL { background: #ECFDF5; color: #047857; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .flag-HIGH { background: #FEF3C7; color: #B45309; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .flag-LOW { background: #EFF6FF; color: #1D4ED8; border: 1px solid rgba(37, 99, 235, 0.2); }
+    .flag-CRITICAL { background: #FEE2E2; color: #B91C1C; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .flag-ABNORMAL { background: #F3E8FF; color: #7E22CE; border: 1px solid rgba(147, 51, 234, 0.2); }
+
+    .cite-badge-btn {
+        background: none;
+        border: 1px dashed var(--color-border);
+        color: var(--color-text-muted);
+        font-size: 0.6875rem;
+        padding: 0.15rem 0.4rem;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .cite-badge-btn:hover {
+        background: var(--color-primary-wash);
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+    .toast-container {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 10000;
+        pointer-events: none;
+    }
+    .toast-msg {
+        background: #0F172A;
+        color: white;
+        font-size: 0.8125rem;
+        padding: 0.625rem 1rem;
+        border-radius: 8px;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+        margin-top: 0.5rem;
+        animation: fadeInOut 2.5s forwards ease-in-out;
+    }
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateY(10px); }
+        15% { opacity: 1; transform: translateY(0); }
+        80% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-10px); }
+    }
+
     /* Discussion Thread */
     .note-feed {
         display: flex;
@@ -369,9 +493,88 @@
                     <div class="detail-body">{{ case.history }}</div>
                 </div>
 
+                <!-- Structured Objective Findings (FR2c, FAULT-01) -->
                 <div class="detail-section">
-                    <div class="detail-label">Structured Objective Findings</div>
-                    <div class="findings-inset">{{ case.findings }}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <div class="detail-label" style="margin-bottom: 0;">Objective Clinical Findings (FR2c)</div>
+                        {% if can_update_findings %}
+                            <button type="button" onclick="document.getElementById('updateFindingsModal').style.display='flex'" class="btn-link" style="font-size: 0.75rem; font-weight: 600;">
+                                + Update Findings & Labs
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Zone A: Bedside Telemetry Vitals Ribbon -->
+                    {% if case.has_vitals %}
+                        <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-top: 0.35rem;">
+                            Bedside Vitals <span style="font-size: 0.625rem; font-weight: normal; text-transform: none;">(Click tile to cite)</span>:
+                        </div>
+                        <div class="vitals-ribbon">
+                            {% for v in case.vitals_list %}
+                                <div class="vital-tile" onclick="citeFinding('{{ v.citation|escapejs }}')" title="Click to cite into hypothesis evidence">
+                                    <div class="vital-tile-header">
+                                        <span>{{ v.name }}</span>
+                                        <span class="cite-badge-btn" style="padding: 0 0.2rem; font-size: 0.6rem;">+Cite</span>
+                                    </div>
+                                    <div class="vital-tile-val">{{ v.value }}</div>
+                                    <span class="vital-tag-pill vital-tag-{{ v.flag }}">{{ v.tag }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Zone B: Quantitative Laboratory Results -->
+                    {% if lab_results %}
+                        <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-top: 0.5rem;">
+                            Quantitative Laboratory Markers ({{ lab_results|length }}):
+                        </div>
+                        <div style="overflow-x: auto; background: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.25rem 0.5rem; margin-top: 0.25rem; margin-bottom: 0.75rem;">
+                            <table class="lab-display-table" style="margin: 0;">
+                                <thead>
+                                    <tr>
+                                        <th>Test Name</th>
+                                        <th>Value</th>
+                                        <th>Ref. Interval</th>
+                                        <th>Flag</th>
+                                        <th style="text-align: right;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for lab in lab_results %}
+                                        <tr>
+                                            <td style="font-weight: 600; color: var(--color-text-main);">{{ lab.test_name }}</td>
+                                            <td>
+                                                <strong style="color: {% if lab.flag == 'CRITICAL' %}#B91C1C{% elif lab.flag == 'HIGH' or lab.flag == 'LOW' %}#B45309{% else %}inherit{% endif %};">
+                                                    {{ lab.value }}
+                                                </strong>
+                                                {% if lab.unit %}<span style="font-size: 0.6875rem; color: var(--color-text-muted);">{{ lab.unit }}</span>{% endif %}
+                                            </td>
+                                            <td style="font-size: 0.6875rem; color: var(--color-text-muted);">
+                                                {% if lab.reference_range %}{{ lab.reference_range }}{% else %}—{% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="flag-badge flag-{{ lab.flag }}">{{ lab.get_flag_display }}</span>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <button type="button" class="cite-badge-btn" onclick="citeFinding('{{ lab.citation_text|escapejs }}')" title="Cite this lab in hypothesis evidence">
+                                                    + Cite
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    <!-- Zone C: Physical Exam & Narrative Observations -->
+                    <div style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-top: 0.35rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Physical Exam Observations:</span>
+                        <button type="button" class="btn-link" style="font-size: 0.6875rem;" onclick="citeFinding('{{ case.findings|escapejs }}')">
+                            + Cite Exam
+                        </button>
+                    </div>
+                    <div class="findings-inset" style="margin-top: 0.25rem;">{{ case.findings }}</div>
                 </div>
 
                 <!-- Diagnostic Media & Attachments (FR2b, NFR9) -->
@@ -845,4 +1048,182 @@
     </div>
 </div>
 {% endif %}
+
+{% if can_update_findings %}
+<!-- Update Findings & Labs Modal (FR2c) -->
+<div id="updateFindingsModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px); overflow-y: auto; padding: 1.5rem 0.5rem;">
+    <div style="background: white; border-radius: 12px; width: 95%; max-width: 650px; padding: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #E2E8F0; padding-bottom: 0.75rem;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.125rem; font-weight: 700; color: #0F172A;">Update Clinical Evidence & Labs (FR2c)</h3>
+                <p style="margin: 0.2rem 0 0; font-size: 0.75rem; color: #64748B;">Revising vital signs or adding follow-up laboratory results preserves audit provenance.</p>
+            </div>
+            <button type="button" onclick="document.getElementById('updateFindingsModal').style.display='none'" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #64748B;">&times;</button>
+        </div>
+
+        <form method="post" action="{% url 'cases:findings_update' case_id=case.id %}" id="findingsUpdateForm">
+            {% csrf_token %}
+            {{ findings_update_form.lab_data_json }}
+
+            <div style="margin-bottom: 1rem;">
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 0.5rem;">
+                    Bedside Telemetry Vitals
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.5rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 600; color: #64748B;">Temp (°C)</label>
+                        {{ findings_update_form.temperature_c }}
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 600; color: #64748B;">Heart Rate (bpm)</label>
+                        {{ findings_update_form.heart_rate_bpm }}
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 600; color: #64748B;">BP (Sys / Dia)</label>
+                        <div style="display: flex; align-items: center; gap: 0.2rem;">
+                            {{ findings_update_form.bp_systolic }}
+                            <span>/</span>
+                            {{ findings_update_form.bp_diastolic }}
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 600; color: #64748B;">Resp Rate (/min)</label>
+                        {{ findings_update_form.respiratory_rate }}
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.6875rem; font-weight: 600; color: #64748B;">SpO2 (%)</label>
+                        {{ findings_update_form.oxygen_saturation }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Append Labs in Modal -->
+            <div style="margin-bottom: 1rem; border-top: 1px solid #F1F5F9; padding-top: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #475569;">
+                        Append Laboratory Panel
+                    </div>
+                    <button type="button" class="btn-link" style="font-size: 0.75rem;" onclick="addModalLabRow()">+ Add Row</button>
+                </div>
+                <div id="modalLabContainer" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    <!-- Dynamic modal lab rows -->
+                </div>
+                <div id="modalNoLabsNotice" style="font-size: 0.6875rem; color: #94A3B8; text-align: center; padding: 0.5rem;">
+                    Click "+ Add Row" to append new laboratory or diagnostic test results.
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.25rem;">
+                    Physical Examination & Narrative Observations *
+                </label>
+                {{ findings_update_form.findings }}
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1px solid #E2E8F0; padding-top: 0.75rem;">
+                <button type="button" onclick="document.getElementById('updateFindingsModal').style.display='none'" class="btn btn-secondary" style="font-size: 0.8125rem;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="font-size: 0.8125rem;">Save Findings Updates</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    function citeFinding(text) {
+        const evidenceField = document.getElementById('id_supporting_evidence');
+        if (evidenceField) {
+            const currentVal = evidenceField.value.trim();
+            const formatted = text.startsWith('•') ? text : '• ' + text;
+            if (currentVal.length > 0) {
+                evidenceField.value = currentVal + '\n' + formatted;
+            } else {
+                evidenceField.value = formatted;
+            }
+            evidenceField.focus();
+            showToast("Added to Supporting Clinical Evidence!");
+        } else {
+            // Fallback for copy to clipboard
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast("Copied to clipboard: " + text.slice(0, 30) + "...");
+                });
+            } else {
+                showToast("Evidence: " + text.slice(0, 30) + "...");
+            }
+        }
+    }
+
+    function showToast(msg) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast-msg';
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 2500);
+    }
+
+    // Modal Lab Row Management
+    const modalLabRows = [];
+
+    function addModalLabRow() {
+        modalLabRows.push({ test_name: '', value: '', unit: '', reference_range: '', flag: 'NORMAL' });
+        renderModalLabRows();
+    }
+
+    function renderModalLabRows() {
+        const container = document.getElementById('modalLabContainer');
+        const notice = document.getElementById('modalNoLabsNotice');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (modalLabRows.length === 0) {
+            if (notice) notice.style.display = 'block';
+            return;
+        }
+        if (notice) notice.style.display = 'none';
+
+        modalLabRows.forEach((row, idx) => {
+            const div = document.createElement('div');
+            div.style.cssText = 'display: flex; gap: 0.35rem; align-items: center;';
+            div.innerHTML = `
+                <input type="text" placeholder="Test Name" value="${row.test_name}" style="flex: 2; font-size: 0.75rem; padding: 0.3rem;" oninput="modalLabRows[${idx}].test_name=this.value; serializeModalLabs();" required>
+                <input type="text" placeholder="Value" value="${row.value}" style="flex: 1.2; font-size: 0.75rem; padding: 0.3rem;" oninput="modalLabRows[${idx}].value=this.value; serializeModalLabs();" required>
+                <input type="text" placeholder="Unit" value="${row.unit}" style="flex: 1; font-size: 0.75rem; padding: 0.3rem;" oninput="modalLabRows[${idx}].unit=this.value; serializeModalLabs();">
+                <select style="flex: 1.2; font-size: 0.75rem; padding: 0.3rem;" onchange="modalLabRows[${idx}].flag=this.value; serializeModalLabs();">
+                    <option value="NORMAL" ${row.flag==='NORMAL'?'selected':''}>Normal</option>
+                    <option value="HIGH" ${row.flag==='HIGH'?'selected':''}>High ↑</option>
+                    <option value="LOW" ${row.flag==='LOW'?'selected':''}>Low ↓</option>
+                    <option value="CRITICAL" ${row.flag==='CRITICAL'?'selected':''}>Critical ⚠️</option>
+                    <option value="ABNORMAL" ${row.flag==='ABNORMAL'?'selected':''}>Abnormal</option>
+                </select>
+                <button type="button" onclick="modalLabRows.splice(${idx}, 1); renderModalLabRows(); serializeModalLabs();" style="background: none; border: none; color: #EF4444; font-size: 1rem; cursor: pointer;">&times;</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function serializeModalLabs() {
+        const valid = modalLabRows.filter(r => r.test_name.trim() !== '' && r.value.trim() !== '');
+        const hidden = document.querySelector('#findingsUpdateForm input[name="lab_data_json"]');
+        if (hidden) {
+            hidden.value = JSON.stringify(valid);
+        }
+    }
+
+    const updateForm = document.getElementById('findingsUpdateForm');
+    if (updateForm) {
+        updateForm.addEventListener('submit', function() {
+            serializeModalLabs();
+        });
+    }
+</script>
 {% endblock %}
+
