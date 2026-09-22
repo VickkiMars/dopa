@@ -26,6 +26,7 @@ All 11 functional tests from Table 4.2 of the project thesis are formally automa
 | **FT13** | Diagnostic media secure streaming (FR2d) | Specialist in `CaseTeam` | GET `/cases/<case_id>/attachments/<attachment_id>/`. | HTTP 200 OK with binary stream and verified MIME header. | File streams inline; unadmitted users receive HTTP 403 Forbidden; Audit: `ATTACHMENT_ACCESSED`. |
 | **FT14** | Structured clinical findings & vitals decomposition (FR2c) | Case Owner or Admitted Specialist | POST vitals and structured lab panel; verify workspace rendering and evidence citations. | HTTP 302 redirect / HTTP 200 OK; vitals ribbon & lab table rendered in Pane 1. | `Case` vitals persisted; `CaseLabResult` rows created; click-to-cite action formats evidence into Pane 2; Audit: `FINDINGS_UPDATED`. |
 | **FT15** | Clinical consultation report & audit dossier export | Case Owner or Admitted Specialist | GET `/cases/<case_id>/report/` (HTML & JSON formats). | HTTP 200 OK; renders comprehensive printable dossier; JSON returns full clinical payload. | Unadmitted users receive HTTP 403 Forbidden; Audit: `REPORT_GENERATED`. |
+| **FT16** | Multi-Factor Authentication (MFA / TOTP) with scratch recovery codes (GAP-02) | Primary Physician or enrolled Specialist | POST valid TOTP token or single-use recovery code to `/accounts/mfa/verify/` after password entry. | HTTP 302 redirect to dashboard; session authenticated; warning if recovery code used. | `MFADevice.last_used_at` updated; recovery code marked `is_used=True`; Audit: `MFA_VERIFIED` or `MFA_RECOVERY_USED`. |
 
 ---
 

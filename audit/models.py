@@ -20,6 +20,11 @@ class AuditAction(models.TextChoices):
     FINDINGS_UPDATED = 'FINDINGS_UPDATED', 'Findings Updated'
     REPORT_GENERATED = 'REPORT_GENERATED', 'Report Generated'
     ACCESS_DENIED = 'ACCESS_DENIED', 'Access Denied'
+    MFA_SETUP = 'MFA_SETUP', 'MFA Setup'
+    MFA_VERIFIED = 'MFA_VERIFIED', 'MFA Verified'
+    MFA_FAILED = 'MFA_FAILED', 'MFA Failed'
+    MFA_RECOVERY_USED = 'MFA_RECOVERY_USED', 'MFA Recovery Code Used'
+    MFA_DISABLED = 'MFA_DISABLED', 'MFA Disabled'
 
 
 class AuditStatus(models.TextChoices):

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Two-Factor Verification — DOPA Platform{% endblock %}
+
+{% block extra_head %}
+<style>
+    .auth-wrapper {
+        max-width: 440px;
+        margin: 3.5rem auto;
+    }
+    .token-input {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: 0.35em;
+        text-align: center;
+        height: 52px;
+    }
+    .recovery-input {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 1.125rem;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-align: center;
+        text-transform: uppercase;
+        height: 50px;
+    }
+    .toggle-link {
+        font-size: 0.8125rem;
+        color: var(--color-primary);
+        cursor: pointer;
+        text-decoration: underline;
+        font-weight: 500;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div class="brand-emblem" style="margin: 0 auto 1rem auto; width: 44px; height: 44px; font-size: 20px; background: linear-gradient(135deg, var(--color-primary-sky) 0%, var(--color-primary) 100%);">
+                🔒
+            </div>
+            <h1 style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 0.375rem;">
+                Security Verification
+            </h1>
+            <p style="font-size: 0.875rem; color: var(--color-text-sub);" id="verifySubtitle">
+                Enter the 6-digit code from your authenticator app
+            </p>
+        </div>
+
+        {% if error_message %}
+            <div class="alert alert-error" style="margin-bottom: 1.25rem;">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
+        <form method="post" id="mfaForm" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="mode" id="authMode" value="{{ initial_mode|default:'totp' }}">
+
+            <!-- TOTP Section -->
+            <div id="totpSection" {% if initial_mode == 'recovery' %}style="display: none;"{% endif %}>
+                <div class="form-group" style="margin-bottom: 1.75rem;">
+                    <label for="id_totp_code" class="form-label" style="text-align: center; display: block;">
+                        Authenticator Code
+                    </label>
+                    <input type="text"
+                           id="id_totp_code"
+                           name="totp_code"
+                           class="form-input token-input"
+                           maxlength="6"
+                           pattern="[0-9]{6}"
+                           inputmode="numeric"
+                           placeholder="000000"
+                           {% if initial_mode != 'recovery' %}autofocus{% endif %}
+                           autocomplete="one-time-code">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; height: 44px; font-size: 0.9375rem;">
+                    Verify & Sign In
+                </button>
+
+                <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border-faint);">
+                    <button type="button" class="toggle-link" onclick="switchToRecovery()">
+                        Lost your device? Use a scratch recovery code
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recovery Code Section -->
+            <div id="recoverySection" {% if initial_mode != 'recovery' %}style="display: none;"{% endif %}>
+                <div class="form-group" style="margin-bottom: 1.75rem;">
+                    <label for="id_recovery_code" class="form-label" style="text-align: center; display: block;">
+                        Scratch Recovery Code
+                    </label>
+                    <input type="text"
+                           id="id_recovery_code"
+                           name="recovery_code"
+                           class="form-input recovery-input"
+                           maxlength="12"
+                           placeholder="XXXX-XXXX"
+                           {% if initial_mode == 'recovery' %}autofocus{% endif %}
+                           autocomplete="off">
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted); text-align: center; margin-top: 0.375rem;">
+                        Enter one of your single-use 8-character backup codes
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; height: 44px; font-size: 0.9375rem;">
+                    Verify Recovery Code
+                </button>
+
+                <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border-faint);">
+                    <button type="button" class="toggle-link" onclick="switchToTotp()">
+                        Return to authenticator app code
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; font-size: 0.8125rem; color: var(--color-text-sub);">
+            <a href="{% url 'accounts:login' %}" class="btn-link">← Cancel and return to sign in</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchToRecovery() {
+        document.getElementById('totpSection').style.display = 'none';
+        document.getElementById('recoverySection').style.display = 'block';
+        document.getElementById('authMode').value = 'recovery';
+        document.getElementById('verifySubtitle').textContent = 'Enter one of your single-use backup recovery codes';
+        const recInput = document.getElementById('id_recovery_code');
+        recInput.focus();
+    }
+
+    function switchToTotp() {
+        document.getElementById('recoverySection').style.display = 'none';
+        document.getElementById('totpSection').style.display = 'block';
+        document.getElementById('authMode').value = 'totp';
+        document.getElementById('verifySubtitle').textContent = 'Enter the 6-digit code from your authenticator app';
+        const totpInput = document.getElementById('id_totp_code');
+        totpInput.focus();
+    }
+</script>
+{% endblock %}

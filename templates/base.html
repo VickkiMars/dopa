@@ -257,6 +257,9 @@
                 <span class="role-badge">
                     ● {{ request.user.get_role_display }}
                 </span>
+                <a href="{% url 'accounts:mfa_settings' %}" class="btn btn-secondary" style="padding: 0.375rem 0.625rem; font-size: 0.8125rem;" title="Account Security & MFA">
+                    🛡️ Security
+                </a>
                 <span style="font-size: 0.875rem; font-weight: 500; color: var(--color-text-main);">
                     {{ request.user.full_name }}
                 </span>

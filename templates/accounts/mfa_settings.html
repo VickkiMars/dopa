@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Security & MFA — DOPA Platform{% endblock %}
+
+{% block extra_head %}
+<style>
+    .settings-wrapper {
+        max-width: 760px;
+        margin: 2rem auto;
+    }
+    .security-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-card);
+        padding: 2rem;
+        box-shadow: var(--shadow-card);
+        margin-bottom: 1.5rem;
+    }
+    .status-badge-active {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        background: var(--color-success-bg);
+        color: var(--color-success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-pill);
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+    .status-badge-inactive {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        background: #FEF3C7;
+        color: #D97706;
+        border: 1px solid rgba(217, 119, 6, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-pill);
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+    .settings-action-box {
+        background: var(--color-surface-inset);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin-top: 1.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-wrapper">
+    <div style="margin-bottom: 1.75rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 0.375rem;">
+            Account Security & Authentication
+        </h1>
+        <p style="font-size: 0.9375rem; color: var(--color-text-sub);">
+            Cryptographic authentication controls for {{ user.full_name }} ({{ user.get_role_display }})
+        </p>
+    </div>
+
+    <!-- MFA Status Card -->
+    <div class="security-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem;">
+                    Two-Factor Authentication (TOTP)
+                </h2>
+                <p style="font-size: 0.875rem; color: var(--color-text-sub);">
+                    Requires a 6-digit code from Google Authenticator, Microsoft Authenticator, or Apple Passwords upon login.
+                </p>
+            </div>
+            <div>
+                {% if user.has_mfa_enabled %}
+                    <span class="status-badge-active">● Active</span>
+                {% else %}
+                    <span class="status-badge-inactive">○ Not Configured</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if user.has_mfa_enabled %}
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="background: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1rem;">
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600; text-transform: uppercase;">
+                        MFA Device Setup Date
+                    </div>
+                    <div style="font-size: 0.9375rem; font-weight: 600; margin-top: 0.25rem;">
+                        {{ user.mfa_device.created_at|date:"Y-m-d H:i" }} UTC
+                    </div>
+                </div>
+                <div style="background: var(--color-surface-inset); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1rem;">
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600; text-transform: uppercase;">
+                        Available Recovery Codes
+                    </div>
+                    <div style="font-size: 0.9375rem; font-weight: 600; margin-top: 0.25rem; color: {% if available_codes_count < 3 %}var(--color-error){% else %}var(--color-success){% endif %};">
+                        {{ available_codes_count }} of {{ total_codes_count }} remaining
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regenerate Recovery Codes -->
+            <div class="settings-action-box">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 0.9375rem; font-weight: 600;">Scratch Recovery Codes</div>
+                        <div style="font-size: 0.8125rem; color: var(--color-text-sub);">
+                            Generate a fresh set of 8 recovery codes. Previous unused codes will be invalidated.
+                        </div>
+                    </div>
+                    <a href="{% url 'accounts:mfa_setup' %}" class="btn btn-secondary" style="font-size: 0.8125rem;">
+                        Re-configure MFA & Codes
+                    </a>
+                </div>
+            </div>
+
+            <!-- Disable MFA (Specialists only) -->
+            {% if user.is_specialist %}
+                <div class="settings-action-box" style="border-color: rgba(239, 68, 68, 0.2); background: #FEF2F2;">
+                    <div style="margin-bottom: 0.75rem;">
+                        <div style="font-size: 0.9375rem; font-weight: 600; color: var(--color-error);">Disable Two-Factor Authentication</div>
+                        <div style="font-size: 0.8125rem; color: var(--color-text-sub);">
+                            As a specialist, you may voluntarily disable MFA. You will be required to confirm your password.
+                        </div>
+                    </div>
+                    <form method="post" action="{% url 'accounts:mfa_settings' %}" style="display: flex; gap: 0.75rem; align-items: flex-end;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="disable">
+                        <div style="flex: 1;">
+                            <label for="id_password" class="form-label" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Confirm Password</label>
+                            <input type="password" id="id_password" name="password" class="form-input" required placeholder="Enter current password">
+                        </div>
+                        <div style="width: 140px;">
+                            <label for="id_totp" class="form-label" style="font-size: 0.75rem; margin-bottom: 0.25rem;">TOTP / Code</label>
+                            <input type="text" id="id_totp" name="totp_token" class="form-input" required placeholder="6 digits">
+                        </div>
+                        <button type="submit" class="btn btn-danger" style="height: 38px; font-size: 0.8125rem; white-space: nowrap;">
+                            Disable MFA
+                        </button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="alert alert-info" style="margin-top: 1.25rem; font-size: 0.8125rem;">
+                    🔒 <strong>Enforced Role:</strong> As a Primary Physician holding case ownership and final diagnosis authority, Multi-Factor Authentication is permanently enforced and cannot be disabled.
+                </div>
+            {% endif %}
+
+        {% else %}
+            <!-- Unenrolled State -->
+            <div class="alert alert-warning" style="margin-bottom: 1.25rem;">
+                Your account is currently protected only by a password. Setting up an authenticator app adds an essential layer of security for clinical patient data.
+            </div>
+
+            <a href="{% url 'accounts:mfa_setup' %}" class="btn btn-primary">
+                Configure Two-Factor Authentication
+            </a>
+        {% endif %}
+    </div>
+
+    <div>
+        <a href="{% url 'cases:dashboard' %}" class="btn btn-secondary">
+            ← Return to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

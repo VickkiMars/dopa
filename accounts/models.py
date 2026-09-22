@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.core.exceptions import ValidationError
 
@@ -70,6 +71,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_specialist(self):
         return self.role == Role.SPECIALIST
 
+    @property
+    def has_mfa_enabled(self):
+        return hasattr(self, 'mfa_device') and self.mfa_device.is_confirmed
+
+    @property
+    def requires_mfa(self):
+        return self.role == Role.PRIMARY_PHYSICIAN
+
     def clean(self):
         super().clean()
         if self.pk:
@@ -81,3 +90,52 @@ class User(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+class MFADevice(models.Model):
+    """
+    Time-Based One-Time Password (TOTP) Authenticator device (RFC 6238).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='mfa_device'
+    )
+    secret_key = models.CharField(max_length=64)
+    is_confirmed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'MFA Device'
+        verbose_name_plural = 'MFA Devices'
+
+    def __str__(self):
+        status = "Active" if self.is_confirmed else "Pending Confirmation"
+        return f"MFA Device for {self.user.email} ({status})"
+
+
+class MFARecoveryCode(models.Model):
+    """
+    Single-use scratch recovery code. Stored as a salted PBKDF2 hash.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    device = models.ForeignKey(
+        MFADevice,
+        on_delete=models.CASCADE,
+        related_name='recovery_codes'
+    )
+    code_hash = models.CharField(max_length=255)
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'MFA Recovery Code'
+        verbose_name_plural = 'MFA Recovery Codes'
+        ordering = ['created_at']
+
+    def __str__(self):
+        status = "Consumed" if self.is_used else "Available"
+        return f"Recovery Code ({status}) for {self.device.user.email}"

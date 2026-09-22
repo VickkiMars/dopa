@@ -112,7 +112,7 @@ class AuthenticationAndSessionSecurityTests(TestCase):
         self.user = User.objects.create_user(
             email='dr.bello@hospital.org',
             full_name='Dr. Amina Bello',
-            role=Role.PRIMARY_PHYSICIAN,
+            role=Role.SPECIALIST,
             password='ValidPassword123!'
         )
 
