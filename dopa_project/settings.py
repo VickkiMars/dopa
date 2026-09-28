@@ -26,12 +26,14 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-#jv4vc5x%cbn=cp*@cn$j2m^bl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if host.strip()]
+ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,.vercel.app').split(',') if host.strip()]
 
-# CSRF Trusted Origins for Cloud PaaS (Render, Supabase, Custom Domains)
+# CSRF Trusted Origins for Cloud PaaS (Vercel, Render, Supabase, Custom Domains)
 csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
 if csrf_origins:
     CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',') if origin.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app']
 
 # Reverse Proxy & SSL (Render, AWS, Nginx)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

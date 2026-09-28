@@ -1,7 +1,9 @@
 # ==============================================================================
-# DOPA Clinical Platform - Production Dockerfile
+# DOPA Clinical Platform - Vercel Container Deployment
+# Target: Vercel Dockerfile Deployment (Hobby & Pro)
 # Base: Python 3.12 Slim Linux Container
 # Runtime: Gunicorn WSGI Server + WhiteNoise Static Pipeline
+# Port: Listens dynamically on $PORT (defaults to 80 for Vercel)
 # ==============================================================================
 
 FROM python:3.12-slim
@@ -9,10 +11,10 @@ FROM python:3.12-slim
 # Prevent Python from writing .pyc files and enable unbuffered logging
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PORT=8000 \
+    PORT=80 \
     DJANGO_SETTINGS_MODULE=dopa_project.settings
 
-# Install system dependencies (curl for container healthcheck probe, libpq5 for PostgreSQL)
+# Install system dependencies (curl for healthcheck, libpq5 for PostgreSQL)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libpq5 \
@@ -45,13 +47,14 @@ RUN python manage.py collectstatic --noinput
 # Switch to non-root clinical service user
 USER dopa
 
-EXPOSE 8000
+# Vercel defaults HTTP traffic to port 80
+EXPOSE 80
 
-# Automated container healthcheck probing the /health/ endpoint
+# Container healthcheck probing the /health/ endpoint
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-8000}/health/ || exit 1
+    CMD curl -f http://localhost:${PORT:-80}/health/ || exit 1
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-# Production Gunicorn worker execution dynamically bound to $PORT
-CMD ["sh", "-c", "exec gunicorn dopa_project.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 3 --threads 2 --timeout 120"]
+# Production Gunicorn worker execution binding dynamically to $PORT (defaults to 80)
+CMD ["sh", "-c", "exec gunicorn dopa_project.wsgi:application --bind 0.0.0.0:${PORT:-80} --workers 2 --threads 2 --timeout 120"]
