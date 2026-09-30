@@ -36,7 +36,9 @@
                 </p>
                 <form method="post" action="{% url 'accounts:demo_login' %}" id="demo-login-form">
                     {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+                    {% if request.GET.next and not '/accounts/' in request.GET.next %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                    {% endif %}
                     <div class="row g-2">
                         <div class="col-12 col-sm-7">
                             <button type="submit" name="role" value="PRIMARY_PHYSICIAN" id="btn-demo-primary" class="btn btn-primary w-100 py-2 btn-sm fw-semibold shadow-sm d-flex align-items-center justify-content-center">

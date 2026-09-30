@@ -586,12 +586,33 @@ class DemoLoginView(View):
                 password='DemoPassword123!'
             )
 
-        # Clear any pending MFA challenges
+        # Ensure user is active
+        if not user.is_active:
+            user.is_active = True
+            user.save(update_fields=['is_active'])
+
+        # Auto-seed synthetic clinical scenarios if database has no cases
+        from cases.models import Case
+        if Case.objects.count() == 0:
+            from django.core.management import call_command
+            try:
+                call_command('seed_clinical_cases')
+                re_user = User.objects.filter(email=user.email, role=role_param, is_active=True).first()
+                if re_user:
+                    user = re_user
+            except Exception:
+                pass
+
+        # Clear any pending MFA challenges and auth session residue
         request.session.pop('mfa_pending_user_id', None)
         request.session.pop('mfa_setup_user_id', None)
+        request.session.pop('mfa_next_url', None)
 
-        # Authenticate session
-        login(request, user)
+        # Explicitly bind backend and authenticate session
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        request.session.modified = True
+        request.session.save()
 
         ip = get_client_ip(request)
         log_event(
@@ -615,8 +636,17 @@ class DemoLoginView(View):
             f"⚡ Demo Mode: Signed in as {user.full_name} ({user.get_role_display()}). Registration and MFA checks bypassed."
         )
 
-        next_url = request.GET.get('next') or request.POST.get('next')
-        if next_url and next_url.startswith('/'):
-            return redirect(next_url)
+        # Sanitize next_url to ensure it never redirects back to login/auth pages
+        raw_next = (request.POST.get('next') or request.GET.get('next') or '').strip()
+        if (
+            raw_next
+            and raw_next.startswith('/')
+            and not raw_next.startswith('//')
+            and not raw_next.startswith('/accounts/')
+            and raw_next != '/'
+        ):
+            return redirect(raw_next)
+
         return redirect('cases:dashboard')
+
 

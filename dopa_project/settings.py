@@ -163,9 +163,9 @@ SESSION_COOKIE_AGE = 1800  # 30 minutes idle session expiry
 SESSION_SAVE_EVERY_REQUEST = True  # Rolling window
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'True' if SECURE_SSL_REDIRECT else 'False').lower() in ('true', '1')
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'True' if SECURE_SSL_REDIRECT else 'False').lower() in ('true', '1')
 
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'cases:dashboard'

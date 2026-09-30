@@ -109,7 +109,6 @@ class DemoAccountLoginTests(TestCase):
         response = self.client.post(self.demo_login_url, {'role': Role.PRIMARY_PHYSICIAN})
         self.assertRedirects(response, reverse('cases:dashboard'))
 
-        self.assertEqual(User.objects.count(), 1)
-        created_user = User.objects.first()
-        self.assertEqual(created_user.role, Role.PRIMARY_PHYSICIAN)
-        self.assertEqual(self.client.session['_auth_user_id'], str(created_user.id))
+        self.assertGreaterEqual(User.objects.count(), 1)
+        logged_in_user = User.objects.get(id=self.client.session['_auth_user_id'])
+        self.assertEqual(logged_in_user.role, Role.PRIMARY_PHYSICIAN)
