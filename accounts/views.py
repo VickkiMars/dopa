@@ -526,3 +526,97 @@ class PasswordResetConfirmView(BasePasswordResetConfirmView):
 
 class PasswordResetCompleteView(BasePasswordResetCompleteView):
     template_name = 'accounts/password_reset_complete.html'
+
+
+class DemoLoginView(View):
+    """
+    Bypasses standard registration and credential entry to immediately log in as a demo clinician.
+    Supports both Primary Physician and Specialist roles with pre-seeded clinical cases.
+    """
+    def get(self, request):
+        return self._login_demo(request)
+
+    def post(self, request):
+        return self._login_demo(request)
+
+    def _login_demo(self, request):
+        role_param = (request.POST.get('role') or request.GET.get('role') or Role.PRIMARY_PHYSICIAN).strip().upper()
+        if role_param not in Role.values:
+            role_param = Role.PRIMARY_PHYSICIAN
+
+        user = None
+        # Preferred demo accounts with pre-seeded cases and collaboration records
+        if role_param == Role.PRIMARY_PHYSICIAN:
+            preferred_emails = [
+                'dr.adeyemi@clinic.org',
+                'dr.danjuma@clinic.org',
+                'dr.bassey@clinic.org',
+                'demo.physician@dopa.clinic'
+            ]
+        else:
+            preferred_emails = [
+                'dr.ibrahim@clinic.org',
+                'dr.okafor@clinic.org',
+                'dr.bello@clinic.org',
+                'demo.specialist@dopa.clinic'
+            ]
+
+        for email in preferred_emails:
+            user = User.objects.filter(email=email, role=role_param, is_active=True).first()
+            if user:
+                break
+
+        # Fallback to any active user matching the role
+        if not user:
+            user = User.objects.filter(role=role_param, is_active=True).first()
+
+        # If no user exists at all, auto-provision a demo clinician account
+        if not user:
+            if role_param == Role.PRIMARY_PHYSICIAN:
+                email = 'demo.physician@dopa.clinic'
+                full_name = 'Dr. Alex Morgan (Demo Primary Physician)'
+            else:
+                email = 'demo.specialist@dopa.clinic'
+                full_name = 'Dr. Sarah Chen (Demo Specialist)'
+
+            user = User.objects.create_user(
+                email=email,
+                full_name=full_name,
+                role=role_param,
+                password='DemoPassword123!'
+            )
+
+        # Clear any pending MFA challenges
+        request.session.pop('mfa_pending_user_id', None)
+        request.session.pop('mfa_setup_user_id', None)
+
+        # Authenticate session
+        login(request, user)
+
+        ip = get_client_ip(request)
+        log_event(
+            action=AuditAction.LOGIN_SUCCESS,
+            actor=user,
+            entity_type='accounts_user',
+            entity_id=str(user.id),
+            ip_address=ip,
+            status=AuditStatus.ALLOWED,
+            details={
+                'event': 'demo_login_bypass',
+                'role': user.role,
+                'demo': True,
+                'bypassed_registration': True,
+                'bypassed_mfa': True
+            }
+        )
+
+        messages.success(
+            request,
+            f"⚡ Demo Mode: Signed in as {user.full_name} ({user.get_role_display()}). Registration and MFA checks bypassed."
+        )
+
+        next_url = request.GET.get('next') or request.POST.get('next')
+        if next_url and next_url.startswith('/'):
+            return redirect(next_url)
+        return redirect('cases:dashboard')
+

@@ -38,6 +38,16 @@
                 </p>
             </div>
 
+            <div class="alert alert-info d-flex align-items-center justify-content-between mb-4 py-2 px-3 small border-0 shadow-sm" style="background-color: #E7F1FF; color: #084298;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-lightning-charge-fill me-2 fs-6 text-primary"></i>
+                    <span>Just evaluating? Skip the registration form entirely.</span>
+                </div>
+                <a href="{% url 'accounts:demo_login' %}" class="btn btn-sm btn-primary ms-3 text-nowrap fw-semibold">
+                    Instant Demo Login
+                </a>
+            </div>
+
             <form method="post" novalidate>
                 {% csrf_token %}
 
